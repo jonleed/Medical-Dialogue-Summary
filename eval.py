@@ -1,8 +1,12 @@
-from transformers import BartTokenizer, BartTokenizer ,BartForConditionalGeneration
+from flask import Flask, render_template, request, jsonify
+
+from transformers import BartTokenizer, BartTokenizer, BartForConditionalGeneration, GenerationConfig
 # import kagglehub
 import pandas as pd
-import re
 import numpy as np
+import torch
+
+app = Flask(__name__)  
 
 # Load data
 from datasets import Dataset
@@ -17,7 +21,6 @@ PATH_TO_MODEL = "mdlam/clinical-note-model"
 model = BartForConditionalGeneration.from_pretrained(PATH_TO_MODEL)
 tokenizer = BartTokenizer.from_pretrained(PATH_TO_MODEL)
 
-from transformers import GenerationConfig
 
 # Define your generation config once
 generation_config = GenerationConfig(
@@ -80,4 +83,18 @@ def main():
         print(example["section_header"])
         print(note)
         break
-main()
+
+# Route for homepage
+@app.route('/')
+def index():
+    return render_template('index.html', test_data=Test_data)
+
+# API endpoint to generate notes
+@app.route('/generate', methods=['POST'])
+def generate():
+    dialogue = request.json['dialogue']
+    note = generate_note(dialogue)
+    return jsonify({'note': note})
+
+if __name__ == '__main__':
+    app.run(debug=True)

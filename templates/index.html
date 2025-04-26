@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Clinical Note Generator</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        button { padding: 5px 10px; background-color: #28a745; color: white; border: none; cursor: pointer; }
+        .note-output { margin-top: 20px; background: #f9f9f9; padding: 10px; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+
+    <h1>Clinical Note Generator</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Section Header</th>
+                <th>Dialogue</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for idx, row in test_data.iterrows() %}
+            <tr>
+                <td>{{ row['section_header'] }}</td>
+                <td>{{ row['dialogue'] }}</td>
+                <td><button onclick="generateNote(`{{ row['dialogue'] | replace('`', '\\`') }}`)">Generate Note</button></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div id="note" class="note-output"></div>
+
+    <script>
+        async function generateNote(dialogue) {
+            const response = await fetch('/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ dialogue: dialogue })
+            });
+            const data = await response.json();
+            document.getElementById('note').innerHTML = `<strong>Generated Note:</strong><br>${data.note}`;
+        }
+    </script>
+
+</body>
+</html>

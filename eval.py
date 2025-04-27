@@ -45,7 +45,7 @@ generation_config = GenerationConfig(
     repetition_penalty=2.4,
     no_repeat_ngram_size=2,
     num_beams=1,
-    max_length=128  # You can adjust this
+    max_length=128  
 )
 
 # Function to generate notes from dialogue
@@ -66,30 +66,12 @@ def generate_note(dialogue):
 
     return tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-# Example usage
-def main():
-    # List of section headers necessary
-    options = ["CC", "GENHX", "PASTMEDICALHX", "DIAGNOSIS", "PLAN"]
-
-    """for example in test_dataset:
-        if example['section_header'] in options:
-            note = generate_note(example['dialogue'])  # Access the 'dialogue' column
-            print(example['section_header'])
-            print(note)  # Or store the note for later use
-            # print(example['dialogue'])
-    """
-    for example in test_dataset:
-        note = generate_note(example['dialogue'])  # Access the 'dialogue' column
-        print(example["section_header"])
-        print(note)
-        break
-
 # Route for homepage
 @app.route('/')
 def index():
     return render_template('index.html', test_data=Test_data)
 
-# API endpoint to generate notes
+# API endpoint to generate summaries
 @app.route('/generate', methods=['POST'])
 def generate():
     dialogue = request.json['dialogue']

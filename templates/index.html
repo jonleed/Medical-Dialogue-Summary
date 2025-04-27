@@ -2,25 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Clinical Note Generator</title>
+    <title>Clinical Note Summarizer</title>
     <!-- TailwindCSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '#1f2937',  // Dark gray background
+              secondary: '#374151', // Slightly lighter gray
+              accent: '#10b981',    // Muted green
+              muted: '#9ca3af',     // Muted text
+            }
+          }
+        }
+      }
+    </script>
 </head>
-<body class="bg-gray-50 min-h-screen p-6">
+<body class="bg-primary text-muted min-h-screen p-6">
 
     <div class="max-w-7xl mx-auto">
-        <h1 class="text-3xl font-bold mb-8 text-center text-blue-700">Clinical Note Summary Generator</h1>
+        <h1 class="text-3xl font-bold mb-8 text-center text-accent">Clinical Note Summarizer</h1>
 
-        <div class="overflow-y-auto max-h-[600px] shadow rounded-lg">
-            <table class="min-w-full bg-white border border-gray-200">
-                <thead class="bg-blue-600 text-white">
+        <div class="overflow-y-auto max-h-[600px] shadow rounded-lg border border-secondary">
+            <table class="min-w-full bg-secondary">
+                <thead class="bg-gray-700 text-gray-300">
                     <tr>
                         <th class="py-3 px-4 text-left">Section Header</th>
                         <th class="py-3 px-4 text-left">Dialogue</th>
                         <th class="py-3 px-4 text-center">Action</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200">
+                <tbody class="divide-y divide-gray-600">
                     {% for idx, row in test_data.iterrows() %}
                     <tr>
                         <td class="py-3 px-4">{{ row['section_header'] }}</td>
@@ -28,7 +42,7 @@
                         <td class="py-3 px-4 text-center">
                             <button
                                 onclick="generateNote(`{{ row['dialogue'] | replace('`', '\\`') }}`)"
-                                class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg"
+                                class="bg-accent hover:bg-green-600 text-primary font-semibold py-2 px-4 rounded-lg"
                             >
                                 Summarize
                             </button>
@@ -39,9 +53,9 @@
             </table>
         </div>
 
-        <div id="note" class="mt-8 p-6 bg-white shadow rounded-lg hidden">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Generated Summary:</h2>
-            <p id="note-text" class="text-gray-700"></p>
+        <div id="note" class="mt-8 p-6 bg-secondary shadow rounded-lg hidden">
+            <h2 class="text-2xl font-bold text-accent mb-4">Generated Summary:</h2>
+            <p id="note-text" class="text-muted"></p>
         </div>
     </div>
 

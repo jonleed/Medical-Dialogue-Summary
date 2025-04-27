@@ -3,38 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <title>Clinical Note Generator</title>
-    <style>
-        body { font-family: Arial; padding: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        button { padding: 5px 10px; background-color: #28a745; color: white; border: none; cursor: pointer; }
-        .note-output { margin-top: 20px; background: #f9f9f9; padding: 10px; border: 1px solid #ddd; }
-    </style>
+    <!-- TailwindCSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gray-50 min-h-screen p-6">
 
-    <h1>Clinical Note Generator</h1>
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8 text-center text-blue-700">Clinical Note Summary Generator</h1>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Section Header</th>
-                <th>Dialogue</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for idx, row in test_data.iterrows() %}
-            <tr>
-                <td>{{ row['section_header'] }}</td>
-                <td>{{ row['dialogue'] }}</td>
-                <td><button onclick="generateNote(`{{ row['dialogue'] | replace('`', '\\`') }}`)">Generate Note</button></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        <div class="overflow-y-auto max-h-[600px] shadow rounded-lg">
+            <table class="min-w-full bg-white border border-gray-200">
+                <thead class="bg-blue-600 text-white">
+                    <tr>
+                        <th class="py-3 px-4 text-left">Section Header</th>
+                        <th class="py-3 px-4 text-left">Dialogue</th>
+                        <th class="py-3 px-4 text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for idx, row in test_data.iterrows() %}
+                    <tr>
+                        <td class="py-3 px-4">{{ row['section_header'] }}</td>
+                        <td class="py-3 px-4">{{ row['dialogue'] }}</td>
+                        <td class="py-3 px-4 text-center">
+                            <button
+                                onclick="generateNote(`{{ row['dialogue'] | replace('`', '\\`') }}`)"
+                                class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg"
+                            >
+                                Summarize
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-    <div id="note" class="note-output"></div>
+        <div id="note" class="mt-8 p-6 bg-white shadow rounded-lg hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Generated Summary:</h2>
+            <p id="note-text" class="text-gray-700"></p>
+        </div>
+    </div>
 
     <script>
         async function generateNote(dialogue) {
@@ -44,7 +53,10 @@
                 body: JSON.stringify({ dialogue: dialogue })
             });
             const data = await response.json();
-            document.getElementById('note').innerHTML = `<strong>Generated Note:</strong><br>${data.note}`;
+
+            document.getElementById('note').classList.remove('hidden');
+            document.getElementById('note-text').innerText = data.note;
+            window.scrollTo({ top: document.getElementById('note').offsetTop, behavior: 'smooth' });
         }
     </script>
 

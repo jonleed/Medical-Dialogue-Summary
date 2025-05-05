@@ -38,11 +38,11 @@
                 <tbody class="divide-y divide-gray-600">
                     {% for idx, row in test_data.iterrows() %}
                     <tr>
-                        <td class="py-3 px-4">{{ row['section_header'] }}</td>
+                        <td>{{ section_map.get(row['section_header'], row['section_header']) }}</td>
                         <td class="py-3 px-4">{{ row['dialogue'] }}</td>
                         <td class="py-3 px-4 text-center">
                             <button
-                                onclick="generateNote(`{{ row['dialogue'] | replace('`', '\\`') }}`)"
+                                onclick="generateNote(`{{ row['dialogue'] | replace('`', '\\`') }}`, `{{ row['section_header'] }}`)"
                                 class="bg-accent hover:bg-orange-600 text-primary font-semibold py-2 px-4 rounded-lg"
                             >
                                 Summarize
@@ -61,11 +61,14 @@
     </div>
 
     <script>
-        async function generateNote(dialogue) {
+        async function generateNote(dialogue, section_header) {
             const response = await fetch('/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ dialogue: dialogue })
+                body: JSON.stringify({ 
+                    dialogue: dialogue,
+                    section_header: section_header
+                 })
             });
             const data = await response.json();
 

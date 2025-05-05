@@ -88,8 +88,7 @@ def generate():
         return jsonify({'error': 'Missing dialogue or section_header'}), 400
     
     section_full_name = SECTION_NAME_MAP.get(section_header.upper(), section_header)
-    note = generate_note(dialogue, section_full_name)
-    print(note)
+    note = generate_note(dialogue, section_full_name)   
     return jsonify({'note': note})
 
 if __name__ == '__main__':

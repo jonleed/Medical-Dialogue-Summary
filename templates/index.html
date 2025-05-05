@@ -10,10 +10,11 @@
         theme: {
           extend: {
             colors: {
-              primary: '#1f2937',  // Dark gray background
-              secondary: '#374151', // Slightly lighter gray
-              accent: '#10b981',    // Muted green
-              muted: '#9ca3af',     // Muted text
+              primary: '#b6e3f1ff',  // background
+              secondary: '#e3f4fa', // table background
+              accent: '#e2583e',    // buttons
+              muted: '#9ca3af',     // text
+              header: '#006f8f',
             }
           }
         }
@@ -27,7 +28,7 @@
 
         <div class="overflow-y-auto max-h-[600px] shadow rounded-lg border border-secondary">
             <table class="min-w-full bg-secondary">
-                <thead class="bg-gray-700 text-gray-300">
+                <thead class="bg-header text-gray-300">
                     <tr>
                         <th class="py-3 px-4 text-left">Section Header</th>
                         <th class="py-3 px-4 text-left">Dialogue</th>
@@ -42,7 +43,7 @@
                         <td class="py-3 px-4 text-center">
                             <button
                                 onclick="generateNote(`{{ row['dialogue'] | replace('`', '\\`') }}`)"
-                                class="bg-accent hover:bg-green-600 text-primary font-semibold py-2 px-4 rounded-lg"
+                                class="bg-accent hover:bg-orange-600 text-primary font-semibold py-2 px-4 rounded-lg"
                             >
                                 Summarize
                             </button>

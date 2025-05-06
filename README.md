@@ -5,7 +5,10 @@ To train the model yourself, run the notebook file. If you want to upload the mo
 
 ## Local Usage - Flask App
 ### To run the application:
-- First run the following command in your directiory [!git clone https://github.com/abachaa/MTS-Dialog.git] 
+- First run the following command in your directiory:
+ ```bash
+!git clone https://github.com/abachaa/MTS-Dialog.git
+```
 - Go to [HuggingFace](https://huggingface.co/), get login/session key and keep it ready (needed to load the model) 
 - Create a python virtual environment:
 ```bash
@@ -21,5 +24,7 @@ To train the model yourself, run the notebook file. If you want to upload the mo
 ```
 - When protmpted, paste your HuggingFace Hub login/session key
 - Enter 'n' for git credential
+    - (You may be asked twice)
+- You are now running the app locally. On your browser, go to [http://127.0.0.1:5000/]
 ### Now Scroll through the table and click the summarize button to summarize each dialogue instance!
 

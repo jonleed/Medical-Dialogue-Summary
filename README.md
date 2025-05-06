@@ -3,7 +3,7 @@ Welcome to our Project for Deep Learning and Advanced AI. Our project displays a
 ## Local Usage
 ### To run the application:
 - First run the following command in your directiory [!git clone https://github.com/abachaa/MTS-Dialog.git] 
-- Go to [HuggingFace](https://huggingface.co/) and get login/session key in order to load the Flask App localy
+- Go to [HuggingFace](https://huggingface.co/), get login/session key and keep it ready (needed to load the model) 
 - Create a python venv and install the requirements: 
  ```bash
     pip install -r requirements.txt
@@ -17,5 +17,8 @@ Welcome to our Project for Deep Learning and Advanced AI. Our project displays a
  ```bash
     python ./eval.py
 ```
-- select 'n' for git credential
+- When protmpted, paste your HuggingFace Hub login/session key
+- Enter 'n' for git credential
+
+### Now Scroll through the table and click the summarize button to summarize each dialogue instance!
 

@@ -13,8 +13,9 @@
               primary: '#b6e3f1ff',  // background
               secondary: '#e3f4fa', // table background
               accent: '#e2583e',    // buttons
+              title: '#006f8f',     // title
               muted: '#9ca3af',     // text
-              header: '#006f8f',
+              header: '#006f8f',    // table column header 
             }
           }
         }
@@ -24,7 +25,7 @@
 <body class="bg-primary text-muted min-h-screen p-6">
 
     <div class="max-w-7xl mx-auto">
-        <h1 class="text-3xl font-bold mb-8 text-center text-accent">Clinical Note Summarizer</h1>
+        <h1 class="text-3xl font-bold mb-8 text-center text-title">Clinical Note Summarizer</h1>
 
         <div class="overflow-y-auto max-h-[600px] shadow rounded-lg border border-secondary">
             <table class="min-w-full bg-secondary">
@@ -35,7 +36,7 @@
                         <th class="py-3 px-4 text-center">Action</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-600">
+                <tbody class="divide-y divide-gray-600 text-black">
                     {% for idx, row in test_data.iterrows() %}
                     <tr>
                         <td>{{ section_map.get(row['section_header'], row['section_header']) }}</td>
@@ -56,7 +57,7 @@
 
         <div id="note" class="mt-8 p-6 bg-secondary shadow rounded-lg hidden">
             <h2 class="text-2xl font-bold text-accent mb-4">Generated Summary:</h2>
-            <p id="note-text" class="text-muted"></p>
+            <p id="note-text" class="text-black"></p>
         </div>
     </div>
 

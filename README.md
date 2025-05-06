@@ -5,11 +5,7 @@ Welcome to our Project for Deep Learning and Advanced AI. Our project displays a
 - First run the following command in your directiory [!git clone https://github.com/abachaa/MTS-Dialog.git] 
 - Go to [HuggingFace](https://huggingface.co/), get login/session key and keep it ready (needed to load the model) 
 - Create a python virtual environment:
-- Activate the venv:
- ```bash
-    ./venv/Scripts/Activate
-```
-Install the requirements: 
+- Activate the venv and install the requirements: 
  ```bash
     pip install -r requirements.txt
 ```

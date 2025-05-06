@@ -1,6 +1,9 @@
 # Medical-Dialogue-Summary
 Welcome to our Project for Deep Learning and Advanced AI. Our project displays a quick use case demo of our trained model through a local FLask application. Our app loads the MTS-Dialog Dataset as well as our pre-trained medical summarization model through HuggingFace Hub.
-## Local Usage
+## Notebook File
+To train the model yourself, run the notebook file. If you want to upload the model to your own account, edit the MODEL_PATH variable to your own repository Path. If done, additionally edit the path in the "eval.py" file to pull from your new repository.
+
+## Local Usage - Flask App
 ### To run the application:
 - First run the following command in your directiory [!git clone https://github.com/abachaa/MTS-Dialog.git] 
 - Go to [HuggingFace](https://huggingface.co/), get login/session key and keep it ready (needed to load the model) 

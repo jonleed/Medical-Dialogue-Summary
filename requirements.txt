@@ -1,0 +1,7 @@
+Flask
+transformers
+pandas
+numpy
+torch
+datasets
+huggingface_hub

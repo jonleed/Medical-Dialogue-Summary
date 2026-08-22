@@ -88,6 +88,8 @@
         const PAGE_SIZE = 10;
         let page = 0;
         let query = "";
+        const TRUNCATE_LEN = 320;
+        const expandedRows = new Set();
 
         const body = document.getElementById('table-body');
         const prevBtn = document.getElementById('prev-page');
@@ -116,18 +118,28 @@
             const start = page * PAGE_SIZE;
             const slice = rows.slice(start, start + PAGE_SIZE);
 
-            body.innerHTML = slice.map((r, i) => `
+            body.innerHTML = slice.map((r, i) => {
+                const idx = start + i;
+                const isLong = r.dialogue.length > TRUNCATE_LEN;
+                const expanded = expandedRows.has(idx);
+                const text = !isLong || expanded
+                    ? esc(r.dialogue)
+                    : esc(r.dialogue.slice(0, TRUNCATE_LEN)) + '\u2026';
+                const toggle = isLong
+                    ? `<a href="#" class="expand-btn text-title underline text-sm whitespace-nowrap" data-idx="${idx}">${expanded ? 'Show less' : 'Show more'}</a>`
+                    : '';
+                return `
                 <tr>
                     <td class="py-3 px-4 align-top whitespace-nowrap">${esc(r.sectionLabel)}</td>
-                    <td class="py-3 px-4">${esc(r.dialogue.length > 320 ? r.dialogue.slice(0, 320) + '\u2026' : r.dialogue)}</td>
+                    <td class="py-3 px-4">${text}${toggle ? ' ' + toggle : ''}</td>
                     <td class="py-3 px-4 align-top text-center">
-                        <button data-idx="${start + i}"
+                        <button data-idx="${idx}"
                             class="summarize-btn bg-accent hover:bg-orange-600 text-primary font-semibold py-2 px-4 rounded-lg disabled:opacity-50">
                             Summarize
                         </button>
                     </td>
-                </tr>
-            `).join('');
+                </tr>`;
+            }).join('');
 
             pageInfo.textContent = `Page ${page + 1} of ${pages}`;
             rowCount.textContent = `${rows.length} dialogues`;
@@ -164,6 +176,14 @@
         }
 
         body.addEventListener('click', e => {
+            const exp = e.target.closest('.expand-btn');
+            if (exp) {
+                e.preventDefault();
+                const idx = parseInt(exp.dataset.idx, 10);
+                expandedRows.has(idx) ? expandedRows.delete(idx) : expandedRows.add(idx);
+                render();
+                return;
+            }
             const btn = e.target.closest('.summarize-btn');
             if (btn) generateNote(parseInt(btn.dataset.idx, 10), btn);
         });

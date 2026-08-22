@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clinical Note Summarizer</title>
     <!-- TailwindCSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -15,7 +16,7 @@
               accent: '#e2583e',    // buttons
               title: '#006f8f',     // title
               muted: '#9ca3af',     // text
-              header: '#006f8f',    // table column header 
+              header: '#006f8f'     // table column header
             }
           }
         }
@@ -25,57 +26,178 @@
 <body class="bg-primary text-muted min-h-screen p-6">
 
     <div class="max-w-7xl mx-auto">
-        <h1 class="text-3xl font-bold mb-8 text-center text-title">Clinical Note Summarizer</h1>
+        <h1 class="text-3xl font-bold mb-2 text-center text-title">Clinical Note Summarizer</h1>
+        <p class="text-center mb-6 text-sm">LoRA fine-tuned BART-base &middot; MTS-Dialog test set &middot;
+            <a class="underline" href="https://huggingface.co/jonleed/clinical-note-bart-lora" target="_blank" rel="noopener">model on Hugging Face</a>
+        </p>
+
+        <div class="flex flex-wrap items-center gap-3 mb-3">
+            <input id="search" type="text" placeholder="Search dialogues&hellip;"
+                   class="w-full md:w-96 px-4 py-2 rounded-lg border border-secondary bg-white text-black placeholder-gray-400 focus:outline-none focus:border-header">
+            <span id="row-count" class="text-sm"></span>
+        </div>
 
         <div class="overflow-y-auto max-h-[600px] shadow rounded-lg border border-secondary">
             <table class="min-w-full bg-secondary">
-                <thead class="bg-header text-gray-300">
+                <thead class="bg-header text-gray-300 sticky top-0">
                     <tr>
                         <th class="py-3 px-4 text-left">Section Header</th>
                         <th class="py-3 px-4 text-left">Dialogue</th>
                         <th class="py-3 px-4 text-center">Action</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-600 text-black">
-                    {% for idx, row in test_data.iterrows() %}
-                    <tr>
-                        <td>{{ section_map.get(row['section_header'], row['section_header']) }}</td>
-                        <td class="py-3 px-4">{{ row['dialogue'] }}</td>
-                        <td class="py-3 px-4 text-center">
-                            <button
-                                onclick="generateNote(`{{ row['dialogue'] | replace('`', '\\`') }}`, `{{ row['section_header'] }}`)"
-                                class="bg-accent hover:bg-orange-600 text-primary font-semibold py-2 px-4 rounded-lg"
-                            >
-                                Summarize
-                            </button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
+                <tbody id="table-body" class="divide-y divide-gray-300 text-black"></tbody>
             </table>
         </div>
 
+        <div class="flex items-center justify-between mt-3">
+            <button id="prev-page"
+                    class="bg-white hover:bg-secondary text-title font-semibold py-1.5 px-4 rounded-lg border border-secondary disabled:opacity-40">
+                &larr; Prev
+            </button>
+            <span id="page-info" class="text-sm"></span>
+            <button id="next-page"
+                    class="bg-white hover:bg-secondary text-title font-semibold py-1.5 px-4 rounded-lg border border-secondary disabled:opacity-40">
+                Next &rarr;
+            </button>
+        </div>
+
         <div id="note" class="mt-8 p-6 bg-secondary shadow rounded-lg hidden">
-            <h2 class="text-2xl font-bold text-accent mb-4">Generated Summary:</h2>
-            <p id="note-text" class="text-black"></p>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-bold text-accent">Generated Summary:</h2>
+                <button id="copy-btn"
+                        class="hidden bg-white hover:bg-primary text-title text-sm font-semibold py-1.5 px-3 rounded-lg border border-secondary">
+                    Copy
+                </button>
+            </div>
+            <p id="note-text" class="text-black whitespace-pre-wrap"></p>
         </div>
     </div>
 
     <script>
-        async function generateNote(dialogue, section_header) {
-            const response = await fetch('/generate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    dialogue: dialogue,
-                    section_header: section_header
-                 })
-            });
-            const data = await response.json();
+        const ROWS = [
+            {% for idx, row in test_data.iterrows() %}
+            {
+                section: "{{ row['section_header'] | e }}",
+                sectionLabel: "{{ section_map.get(row['section_header'], row['section_header']) | e }}",
+                dialogue: {{ row['dialogue'] | tojson }}
+            },
+            {% endfor %}
+        ];
+
+        const PAGE_SIZE = 10;
+        let page = 0;
+        let query = "";
+
+        const body = document.getElementById('table-body');
+        const prevBtn = document.getElementById('prev-page');
+        const nextBtn = document.getElementById('next-page');
+        const pageInfo = document.getElementById('page-info');
+        const rowCount = document.getElementById('row-count');
+
+        function filteredRows() {
+            if (!query) return ROWS;
+            const q = query.toLowerCase();
+            return ROWS.filter(r =>
+                r.dialogue.toLowerCase().includes(q) || r.sectionLabel.toLowerCase().includes(q)
+            );
+        }
+
+        function esc(s) {
+            const d = document.createElement('div');
+            d.textContent = s;
+            return d.innerHTML;
+        }
+
+        function render() {
+            const rows = filteredRows();
+            const pages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+            page = Math.min(page, pages - 1);
+            const start = page * PAGE_SIZE;
+            const slice = rows.slice(start, start + PAGE_SIZE);
+
+            body.innerHTML = slice.map((r, i) => `
+                <tr>
+                    <td class="py-3 px-4 align-top whitespace-nowrap">${esc(r.sectionLabel)}</td>
+                    <td class="py-3 px-4">${esc(r.dialogue.length > 320 ? r.dialogue.slice(0, 320) + '\u2026' : r.dialogue)}</td>
+                    <td class="py-3 px-4 align-top text-center">
+                        <button data-idx="${start + i}"
+                            class="summarize-btn bg-accent hover:bg-orange-600 text-primary font-semibold py-2 px-4 rounded-lg disabled:opacity-50">
+                            Summarize
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+
+            pageInfo.textContent = `Page ${page + 1} of ${pages}`;
+            rowCount.textContent = `${rows.length} dialogues`;
+            prevBtn.disabled = page === 0;
+            nextBtn.disabled = page >= pages - 1;
+        }
+
+        async function generateNote(idx, btn) {
+            const row = ROWS[idx];
+            const original = btn ? btn.textContent : '';
+            if (btn) { btn.disabled = true; btn.textContent = 'Summarizing\u2026'; }
 
             document.getElementById('note').classList.remove('hidden');
-            document.getElementById('note-text').innerText = data.note;
-            window.scrollTo({ top: document.getElementById('note').offsetTop, behavior: 'smooth' });
+            document.getElementById('copy-btn').classList.add('hidden');
+            document.getElementById('note-text').innerHTML =
+                '<span class="inline-block w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin align-middle mr-2"></span>Generating summary\u2026';
+            document.getElementById('note').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ dialogue: row.dialogue, section_header: row.section })
+                });
+                const data = await response.json();
+                document.getElementById('note-text').textContent =
+                    data.note || ('Error: ' + (data.error || 'empty response'));
+                if (data.note) document.getElementById('copy-btn').classList.remove('hidden');
+            } catch (err) {
+                document.getElementById('note-text').textContent = 'Error: ' + err.message;
+            } finally {
+                if (btn) { btn.disabled = false; btn.textContent = original; }
+            }
+        }
+
+        body.addEventListener('click', e => {
+            const btn = e.target.closest('.summarize-btn');
+            if (btn) generateNote(parseInt(btn.dataset.idx, 10), btn);
+        });
+        document.getElementById('search').addEventListener('input', e => {
+            query = e.target.value.trim();
+            page = 0;
+            render();
+        });
+        prevBtn.addEventListener('click', () => { page--; render(); });
+        nextBtn.addEventListener('click', () => { page++; render(); });
+
+        document.getElementById('copy-btn').addEventListener('click', async () => {
+            await navigator.clipboard.writeText(document.getElementById('note-text').textContent);
+            const btn = document.getElementById('copy-btn');
+            btn.textContent = 'Copied!';
+            setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+        });
+
+        render();
+
+        const demoIdx = new URLSearchParams(window.location.search).get('demo');
+        if (demoIdx !== null && demoIdx !== '') {
+            window.addEventListener('load', () => {
+                const idx = Math.min(parseInt(demoIdx, 10), ROWS.length - 1);
+                const target = document.querySelector(`.summarize-btn[data-idx="${idx}"]`);
+                if (target) {
+                    if (Math.floor(idx / PAGE_SIZE) !== 0) {
+                        page = Math.floor(idx / PAGE_SIZE);
+                        render();
+                    }
+                    const btn = document.querySelector(`.summarize-btn[data-idx="${idx}"]`);
+                    if (btn) generateNote(idx, btn);
+                }
+            });
         }
     </script>
 

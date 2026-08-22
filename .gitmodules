@@ -1,0 +1,3 @@
+[submodule "MTS-Dialog"]
+	path = MTS-Dialog
+	url = https://github.com/abachaa/MTS-Dialog.git

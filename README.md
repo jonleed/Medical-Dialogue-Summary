@@ -44,10 +44,12 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
 python eval.py
-# → http://127.0.0.1:5000
+# → http://127.0.0.1:5001
 ```
 
-Browse the dialogue table (search + pagination), hit **Summarize**, get a clinical note. The adapter downloads automatically from Hugging Face Hub on first use.
+Browse the dialogue table (search + pagination, expand long dialogues), hit **Summarize**, get a clinical note. The adapter downloads automatically from Hugging Face Hub on first use.
+
+> macOS note: AirPlay Receiver occupies port 5000 by default, so the app uses 5001. Override with `PORT=<port>`.
 
 ### Configuration
 

@@ -9,7 +9,6 @@ from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, GenerationConfig
 
 BASE_MODEL_ID = os.environ.get("BASE_MODEL_ID", "facebook/bart-base")
 ADAPTER_MODEL_ID = os.environ.get("ADAPTER_MODEL_ID", "jonleed/clinical-note-bart-lora")
-ORIGINAL_ADAPTER_ID = "mdlam/clinical-note-model"
 HF_TOKEN = os.environ.get("HF_TOKEN")
 
 DATASET_CSV = "./MTS-Dialog/Main-Dataset/MTS-Dialog-TestSet-1-MEDIQA-Chat-2023.csv"
@@ -29,12 +28,12 @@ def load_model():
     try:
         peft_model = PeftModel.from_pretrained(base, ADAPTER_MODEL_ID, token=HF_TOKEN)
     except Exception:
-        app.logger.warning(
-            "Could not load adapter %s, falling back to original %s",
+        app.logger.exception(
+            "Could not load adapter %s - refusing to fall back to a different model "
+            "so served outputs keep matching the evaluation harness",
             ADAPTER_MODEL_ID,
-            ORIGINAL_ADAPTER_ID,
         )
-        peft_model = PeftModel.from_pretrained(base, ORIGINAL_ADAPTER_ID, token=HF_TOKEN)
+        raise
     model = peft_model.merge_and_unload()
     model.eval()
 
@@ -61,10 +60,7 @@ SECTION_NAME_MAP = {
 }
 
 generation_config = GenerationConfig(
-    temperature=0.9,
-    top_k=50,
-    top_p=0.95,
-    do_sample=True,
+    do_sample=False,
     repetition_penalty=2.0,
     no_repeat_ngram_size=4,
     num_beams=4,

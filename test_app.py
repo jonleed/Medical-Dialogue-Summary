@@ -20,3 +20,7 @@ def test_decode_matches_eval_protocol():
     assert gc.num_beams == 4
     assert gc.repetition_penalty == 2.0
     assert gc.no_repeat_ngram_size == 4
+
+
+def test_input_length_matches_training():
+    assert app_module.INPUT_MAX_LENGTH == 512

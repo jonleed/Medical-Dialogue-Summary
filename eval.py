@@ -11,6 +11,8 @@ BASE_MODEL_ID = os.environ.get("BASE_MODEL_ID", "facebook/bart-base")
 ADAPTER_MODEL_ID = os.environ.get("ADAPTER_MODEL_ID", "jonleed/clinical-note-bart-lora")
 HF_TOKEN = os.environ.get("HF_TOKEN")
 
+INPUT_MAX_LENGTH = 512
+
 DATASET_CSV = "./MTS-Dialog/Main-Dataset/MTS-Dialog-TestSet-1-MEDIQA-Chat-2023.csv"
 
 app = Flask(__name__)
@@ -74,7 +76,7 @@ def generate_note(dialogue, section_header):
 
     inputs = tokenizer(
         prompt,
-        max_length=128,
+        max_length=INPUT_MAX_LENGTH,
         padding='max_length',
         truncation=True,
         return_tensors="pt"

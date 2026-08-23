@@ -1,0 +1,414 @@
+{
+  "app": "note",
+  "n": 100,
+  "seed": 42,
+  "decode": "beam4_deterministic",
+  "metrics": {
+    "rouge1": 0.5045965857218805,
+    "rouge2": 0.29178571849499674,
+    "rougeL": 0.4383877116291496,
+    "rougeLsum": 0.4380639970166652
+  },
+  "predictions": [
+    {
+      "reference": "chief complaint: Diarrhea, vomiting, and abdominal pain.",
+      "prediction": "chief complaint: diarrhea and abdominal pain."
+    },
+    {
+      "reference": "medications: None.",
+      "prediction": "medications: None."
+    },
+    {
+      "reference": "past medical history: Hypertension, depression, and osteoporosis.",
+      "prediction": "past medical history: Significant for hypertension, depression, and osteoporosis."
+    },
+    {
+      "reference": "history of present illness: 32 weeks gestation to a G4 mother and weighed 4#11oz. He was placed in an incubator for 3 weeks. He was jaundiced, but there was no report that he required treatment.",
+      "prediction": "history of present illness: The patient was born at 30 weeks gestation, weighing 4 pounds and 11 ounces.  He was placed in incubator for three weeks.  He had jaundice but they didn't give any treatment for it."
+    },
+    {
+      "reference": "review of systems: The remaining ROS is unremarkable.",
+      "prediction": "review of systems: Normal."
+    },
+    {
+      "reference": "educational courses: The patient did request a pain shot and the patient was given Dilaudid of 4 mg IM without any adverse reaction.",
+      "prediction": "educational courses: Dilaudid of 4 mg I M."
+    },
+    {
+      "reference": "social history: Family history is remarkable for heart disease, cerebrovascular disease, diabetes, and hypertension.",
+      "prediction": "social history: The patient states that her family has some sort of heart problem.  She has high blood pressure and blood sugar.  She thinks it starts with cerebrovascular disease.  She does have a history of cerebroviascular disease."
+    },
+    {
+      "reference": "history of present illness: This is a 58-year-old white female suffering increasing right knee pain for number of years prior to surgical intervention.  She was completely refractory to conservative outpatient therapy.  She had undergone two knee arthroscopies in the years preceding this.  They were performed by myself.  She ultimately failed this treatment and developed a collapsing-type valgus degenerative osteoarthritis with complete collapse and ware of the lateral compartment and degenerative changes noted to the femoral sulcus that were proved live.  Medial compartment had minor changes present.  There was no contracture of the lateral collateral ligament, but instead mild laxity on both sides.  There was no significant flexion contracture preoperatively.",
+      "prediction": "history of present illness: The patient is a 58-year-old white male who presents with right knee pain.  He has done two arthroscopies on this knee.  He states that it has been bothering him for years and he has handled conservative treatment.  He does have some improvement in his antiinflammatories, rest, and changes in activity.  There is no improvement in his right knee.  His MRI images show collapsing type valgus degenerative osteoarthritis, complete collapse and wear of the lateral compartment and degenerative changes noted to the femoral sulcus.  In summary, he has a significant amount of arthritis in his left knee."
+    },
+    {
+      "reference": "history of present illness: The patient comes in today because of feeling lightheaded and difficulty keeping his balance.  He denies this as a spinning sensation that he had had in the past with vertigo.  He just describes as feeling very lightheaded.  It usually occurs with position changes such as when he stands up from the sitting position or stands up from a lying position.  It tends to ease when he sits down again, but does not totally resolve for another 15 to 30 minutes and he feels shaky and weak all over.  Lorazepam did not help this sensation.  His blood pressure has been up lately and his dose of metoprolol was increased.  They feel these symptoms have gotten worse since metoprolol was increased.",
+      "prediction": "history of present illness: The patient states that she has a lot of lightheadedness and vertigo.  She has had vertigo before with lorazepam, but it did not help with the sensation.  Her blood pressure was up so they increased her dose of metoprolol for it.  They think all these symptoms are because of the increased dose."
+    },
+    {
+      "reference": "history of present illness: The patient is a 26-year-old female, referred to Physical Therapy for low back pain.  The patient has a history of traumatic injury to low back.  The patient stated initial injury occurred eight years ago, when she fell at a ABC Store.  The patient stated she received physical therapy, one to two visits and received modality treatment only, specifically electrical stimulation and heat pack per patient recollection.  The patient stated that she has had continuous low-back pain at varying degrees for the past eight years since that fall.  The patient gave birth in August 2008 and since the childbirth, has experienced low back pain.  The patient also states that she fell four to five days ago, while mopping her floor.  The patient stated that she landed on her tailbone and symptoms have increased since that fall.  The patient stated that her initial physician examination with Dr. X was on 01/10/09, and has a followup appointment on 02/10/09.",
+      "prediction": "history of present illness: The patient is a 26-year-old female who presents with low back pain.  She was referred to PTA once or twice, and they only did electrical stimulation, heat, and electrical stimulation.  She states that she fell four or five days ago while mopping the floor.  She has had lower back pain since giving birth.  She reports that she fell 4 or 5 days ago on her tailbone and landed on her lower back.  She denies any falls.  She does not have any other doctors for this issue.  She saw Dr. X on 01/10/9 and she has a follow up appointment scheduled for February 10/9."
+    },
+    {
+      "reference": "history of present illness: The patient is keeping a food journal that she brought in.  She is counting calorie points, which ranged 26 to 30 per day.  She is exercising pretty regularly.  She attends Overeaters Anonymous and her sponsor is helping her and told her to get some ideas on how to plan snacks to prevent hypoglycemia.  The patient requests information on diabetic exchanges.  She said she is feeling better since she has lost weight.",
+      "prediction": "history of present illness: The patient is a 26-year-old female who has been exercising regularly.  She is also going to Overeaters Anonymous.  She states that her sponsor is helping her think about snacks that can help with her high blood sugar.  She does have some information on diabetic exchanges."
+    },
+    {
+      "reference": "labs: All labs within normal limits with the exception of Sodium 133, Creatinine 0.2, TSH 0.004, Free T4 19.3 EKG showed sinus tachycardia with a rate of 122.  Urine pregnancy test was negative.",
+      "prediction": "lab labs: Normal for the most part.  She has abnormal levels of Sodium and Creatinine which are related to her kidneys.  Her thyroid levels are not normal as well.  She had a negative pregnancy test."
+    },
+    {
+      "reference": "assessment: 1.  Serous otitis. 2.  Atopic dermatitis.",
+      "prediction": "assessment: 1.  Atopic dermatitis. 2.  Serous Otitis. 3.  Eczema history."
+    },
+    {
+      "reference": "history of present illness: This is a Workers' Compensation injury.  This patient, a 41 year-old male, was at a coffee shop, where he works as a cook, and hot oil splashed onto his arm, burning from the elbow to the wrist on the medial aspect.  He has had it cooled, and presents with his friend to the Emergency Department for care.",
+      "prediction": "history of present illness: The patient is a 40-year-old male who works in a coffee shop.  He was cooking and the hot oil splashed onto his arm.  He tried to let it cool down, but the pain was unbearable.  He asked his friend to take him to the emergency department.  The patient's hand was burned from the elbow to the wrist.  He requested that he be taken to the emergency room.  He did not know how the oil splashed on his arm."
+    },
+    {
+      "reference": "social history: Denies the use of alcohol or tobacco.",
+      "prediction": "social history: Denies tobacco or alcohol use."
+    },
+    {
+      "reference": "disposition: To home with his son.",
+      "prediction": "disposition: Home with son."
+    },
+    {
+      "reference": "social history: ETOH abuse (quit '92), 30pk-yr Cigarettes (quit '92)",
+      "prediction": "social history: He used to smoke and drink.  He quit in the 90s."
+    },
+    {
+      "reference": "medications: loratadine beclomethasone nasal fluticasone/salmeterol inhaled Montelukast cephalexin hydrocodone",
+      "prediction": "medications: Loratadine Beclomethasone Nasal Fluticasone and Salmeterol Inhaled Montelukast Cephalexin Hydrocode."
+    },
+    {
+      "reference": "past medical history: Essentially unchanged from her visit of 04/15/2005.",
+      "prediction": "past medical history: Noncontributory."
+    },
+    {
+      "reference": "history of present illness: The patient returns today for a followup.  She was recently in the hospital and was found to be septic from nephrolithiasis.  This was all treated.  She did require a stent in the left ureter.  Dr. XYZ took care of this.  She had a stone, which was treated with lithotripsy.  She is now back here for followup.  I had written out all of her medications with their dose and schedule on a progress sheet.  I had given her instructions regarding follow up here and follow with Dr. F.  Unfortunately, that piece of paper was lost.  Somehow between the hospital and home she lost it and has not been able to find it.  She has no followup appointment with Dr. F.  The day after she was dismissed, her nephew called me stating that the prescriptions were lost, instructions were lost, etc.  Later she apparently found the prescriptions and they were filled.  She tells me she is taking the antibiotic, which I believe was Levaquin and she has one more to take.  She had no clue as to seeing Dr. XYZ again.  She says she is still not feeling very well and",
+      "prediction": "history of present illness: The patient is here for followup today.  She had a lot of back pain and less of urine output.  She used to have burning sensation whenever she used to go to the bathroom.  She went to the doctor, and they said it is kidney stones.  She thought something was wrong, but then she started having fever.  Then she went to the hospital and they said that it was infection.  They said that it all began with my kidney stones in her ureter.  They did operate on me to remove all those stones.  I feel better now.  She states that everything related to them and all the things that I have to do has been written down between the hospital and the home.  It had instructions to follow up here and also to follow up with Doctor F.  She does not have any appointment with Dr. F."
+    },
+    {
+      "reference": "history of present illness: This is a 53-year-old man, who presented to emergency room with multiple complaints including pain from his hernia, some question of blood in his stool, nausea, and vomiting, and also left lower extremity pain.  At the time of my exam, he states that his left lower extremity pain has improved considerably.  He apparently had more significant paresthesias in the past and now he feels that the paresthesias have improved considerably.  He does have a history of multiple medical problems including atrial fibrillation, he is on Coumadin, which is currently subtherapeutic, multiple CVAs in the past, peripheral vascular disease, and congestive heart failure.  He has multiple chronic history of previous ischemia of his large bowel in the past.",
+      "prediction": "history of present illness: The patient is a 50-year-old male complaining of pain from his hernia.  He also complains of pain in his lower extremity.  He has had some significant tingling and numbness in the past, but now it has improved a great deal.  He states that he has had more significant tingles and numbness than in the past.  He does have a history of multiple bowel ischemia.  He is taking Coumadin for his atrial fibrillation.  His wife says that it's not optimal for his condition but he is still taking it."
+    },
+    {
+      "reference": "history of present illness: This 17-year-old male was fighting with some other kids in Juvenile Hall when he felt some pain in his left elbow, causing sudden pain.  He also has pain in his left ankle, but he is able to walk normally.  He has had previous pain in his left knee.  He denies any passing out, any neck pain at this time even though he did get hit in the head. He has no chest or abdominal pain.  Apparently, no knives or guns were involved.",
+      "prediction": "history of present illness: The patient is a 17-year-old male who was involved in a fight at juvie.  He states that he sustained some pain in his left elbow during the fight.  He denies any knee pain.  He denied any chest or abdominal pain."
+    },
+    {
+      "reference": "social history: His father died of colon and thyroid cancers at age 52. One brother died of stomach cancer at age 53 and one brother committed suicide. Five other siblings are all healthy. Negative for coronary heart disease, hypertension, diabetes, or kidney disease.",
+      "prediction": "social history: His father died from color cancer and thyroid cancer.  He has seven siblings who are healthy.  One brother died from stomach cancer when he was 50 years old, another brother committed suicide when he was 53 years old."
+    },
+    {
+      "reference": "medications: Include those on admission combined with IV Flagyl 500 mg every 8 hours and Levaquin 500 mg daily.",
+      "prediction": "medications: Flagyl intra venously 5-8 hours, Levaquin 5-100 mg daily."
+    },
+    {
+      "reference": "review of systems: HEENT: See has had headaches, and some dizziness. She denies any vision changes. CARDIAC: She denies any chest pain or palpitations. RESPIRATORY: She denies any shortness of breath. GI: She has had persistent nausea and vomiting. She denies diarrhea, melena or hematemesis. NEUROLOGICAL: She denies any neurological deficits. All other systems were reviewed and were negative unless otherwise mentioned in HPI.",
+      "prediction": "review of systems: The patient has been complaining of headaches for two days now.  No nausea or vomiting with the headaches.  No dizziness.  No chest pains or irregular heart beat.  No numbness or tingling on any part of the body."
+    },
+    {
+      "reference": "educational courses: The patient was seen in the urgent care and examined.  At this time, her photophobia and nausea make migraine highly likely.  She is well appearing and we'll try Tylenol with codeine for her pain.  One day off school and follow up with her primary doctor.",
+      "prediction": "educational courses: Tylenol with codeine for migraine."
+    },
+    {
+      "reference": "social history: The patient denies smoking cigarettes.  The patient does drink alcohol and also uses illicit drugs.",
+      "prediction": "social history: Denies tobacco, alcohol, or recreational drug use."
+    },
+    {
+      "reference": "review of systems: The patient prior to today has been very well without any signs or symptoms of viral illness, but yesterday he began to experience symptoms of nausea, had an episode of vomiting last night. Has low appetite. There were no fevers, chills, or malaise. No headache. No congestion or cold. No coughing. He had no sore throat. There was no chest pain or troubled breathing. He did have abdominal symptoms as described above but no abdominal pain. There were no urinary symptoms. No darkening of the skin or eyes. He had no yellowing or darkening of the urine. He had no rash to the skin. There was no local infection at the side of the fingerstick. All other systems were negative.",
+      "prediction": "review of systems: He has no fever, chills, or weakness.  He has no chest pain or trouble breathing.  He does not complain of stomach issues prior.  He is not eating either.  No changes in his skin color."
+    },
+    {
+      "reference": "social history: lives with parents and attends mainstream 5th grade classes.",
+      "prediction": "social history: The patient lives at home with his parents.  He is in Firth grade.  No special education classes."
+    },
+    {
+      "reference": ": She does not bleed.  She has both ovaries, as well as her uterus and cervix.  She is on no hormonal therapy.",
+      "prediction": "history of Present Illness: The patient has been missing periods and is not sexually active.  She does not have ovaries, uterus, and cervix still.  She denies any type of hormonal therapies."
+    },
+    {
+      "reference": "medications: No medications other than recent amoxicillin.",
+      "prediction": "medications: Amoxicillin."
+    },
+    {
+      "reference": "assessment: Substance abuse.",
+      "prediction": "assessment: Substance abuse."
+    },
+    {
+      "reference": "review of systems: Please see history of present illness. Psychiatric:  She has had some suicidal thoughts, but no plans.  She denies being suicidal at the current time. Cardiopulmonary:  She has not had any chest pain or shortness of breath. GI:  Denies any nausea or vomiting. Neurological:  No numbness, weakness or tingling.",
+      "prediction": "review of systems: The patient states that she has no suicidal thoughts.  She denies any other symptoms, such as chest pain or shortness of breath, numbness, weakness, or tingling."
+    },
+    {
+      "reference": "social history: Mother died at the age of 59 due to stomach cancer and father died at the age of 91 years old.",
+      "prediction": "social history: Mother died at age 91. Father died at age 90."
+    },
+    {
+      "reference": "medications: His only medications are Ziac and Remeron.",
+      "prediction": "medications: Remeron for depression and Ziac for high blood pressure."
+    },
+    {
+      "reference": "social history: He immigrated to this country in 1984, although he lists himself as having a green card still at this time.  He states he lives on his own.  He is a single male with no history of marriage or children and that he had high school education.  His recreational drug use in the chart indicates that he has had a history of methamphetamines.  The patient denies this at this time.  He also denies current alcohol use.  He does smoke.  He is unable to tell me of any PCP.  He is in counseling service with his case manager being XYZ.",
+      "prediction": "social history: The patient was born in Manila, Philippines.  He is a green card holder.  He lives by himself.  He has no children.  He graduated from high school.  He does not smoke or drink alcohol.  He used to use Meth.  His case manager is making him go to counselling."
+    },
+    {
+      "reference": "review of systems: The patient denies fever, chills, sweats, ear pain, URI symptoms, cough, dyspnea, chest pain, vomiting, diarrhea, abdominal pain, melena, hematochezia, urinary symptoms, headache, neck pain, back pain, weakness or paresthesias in extremities.",
+      "prediction": "review of systems: There is no fever, chills, cough, or chest pain.  No chest pain or breathlessness.  The patient has no chest issues."
+    },
+    {
+      "reference": "past surgeries: Cholecystectomy without complication",
+      "prediction": "past surgeries: Noncontributory."
+    },
+    {
+      "reference": "disposition: To home.",
+      "prediction": "disposition: She is ready for home."
+    },
+    {
+      "reference": "medications: Include Cipro and Flagyl.",
+      "prediction": "medications: Cipro and Flagyl."
+    },
+    {
+      "reference": "history of present illness: A 49-year-old female with history of atopic dermatitis comes to the clinic with complaint of left otalgia and headache.  Symptoms started approximately three weeks ago and she was having difficulty hearing, although that has greatly improved.  She is having some left-sided sinus pressure and actually went to the dentist because her teeth were hurting; however, the teeth were okay.  She continues to have some left-sided jaw pain.  Denies any headache, fever, cough, or sore throat.  She had used Cutivate cream in the past for the atopic dermatitis with good results and is needing a refill of that.  She has also had problems with sinusitis in the past and chronic left-sided headache.",
+      "prediction": "history of present illness: The patient is a 49-year-old female who presents to the dentist with chronic left sided headache.  She states that she has been having ear pain for some time now, but she still wants to get it checked.  She has had some difficulty hearing and has also had some pressure on the left side of her sinus causing tooth pain.  She went to her dentist yesterday, but her teeth are fine.  She does not have any fever, cough, sore throat, or cold like symptoms.  She is currently using Cutivate for her eczema.  She says she needs a refill for it."
+    },
+    {
+      "reference": "chief complaint: Confusion and hallucinations.",
+      "prediction": "chief complaint: Noncontributory."
+    },
+    {
+      "reference": "chief complaint: The patient does not have any chief complaint.",
+      "prediction": "chief complaint: No complaints."
+    },
+    {
+      "reference": "procedures: Permanent pacemaker placement after temporary internal pacemaker.",
+      "prediction": "procedures: permanent pacemaker removal."
+    },
+    {
+      "reference": "plan: 1. Take medications regularly. 2. PT, OT, speech therapist to evaluate and treat at Siskin Rehab Hospital. 3. Continue Cipro for an additional two days for his UTI.",
+      "prediction": "plan: Physical therapy, occupational therapy and speech therapy.  Cipro for an additional two days only."
+    },
+    {
+      "reference": "social history: Noncontributory.",
+      "prediction": "social history: None."
+    },
+    {
+      "reference": "review of systems: Otherwise negative.",
+      "prediction": "review of systems: All systems are fine."
+    },
+    {
+      "reference": "social history: Noncontributory.",
+      "prediction": "social history: Otherwise unremarkable."
+    },
+    {
+      "reference": "history of present illness: The patient is a 19-year-old male who was involved in a fight approximately an hour prior to his ED presentation.  He punched a guy few times on the face, might be the mouth and then punched a drinking glass, breaking it and lacerating his right hand.  He has three lacerations on his right hand.  His wound was cleaned out thoroughly with tap water, and one of the navy corpsman tried to use Superglue and gauze to repair it.  However, it continues to bleed and he is here for evaluation.",
+      "prediction": "history of present illness: The patient is a 19-year-old male who was in a fight with some people.  He said he punched a guy in face and then he got a good punch in the mouth.  Then he punched another guy in the face and spilled all the drink.  He saw three cuts in his right hand.  He came here in Emergency.  He had a wound that looked clean and looked like somebody tried to fix it.  There was a navy corpsman who cleaned my cut with tap water and tried to close it up with gauze and superglue.  He did not stop bleeding.  He called for help and here I am in emergency."
+    },
+    {
+      "reference": ": 1.  Bipolar disorder. 2.  Iron deficiency anemia. 3.  Anxiety disorder. 4.  History of tubal ligation.",
+      "prediction": "history of Present Illness: The patient is a frequent flyer.  She suffers from bipolar disorder and anxiety.  She is not on iron supplements.  She has had tubes ligated."
+    },
+    {
+      "reference": "history of present illness: This is a 52-year-old gentleman with a long history of heroin abuse, who keeps relapsing, presents once again, trying to get off the heroin, last use shortly prior to arrival including cocaine.  The patient does have a history of alcohol abuse, but mostly he is concerned about the heroin abuse.",
+      "prediction": "history of present illness: The patient is a 52-year-old female who states that she has been using heroin.  She states that she used to abuse alcohol, but now she is switching to drugs.  She denies any illicit drug use."
+    },
+    {
+      "reference": "social history: He denies tobacco or alcohol.  He has what sounds like a data entry computer job.",
+      "prediction": "social history: She is a data operator for an IT company.  She does not smoke or drink."
+    },
+    {
+      "reference": "history of present illness: This is a 51-year-old right hand dominant female with a longstanding history of pain as well as locking sensation to her right thumb.  She was actually able to spontaneously trigger the thumb.  She was diagnosed with stenosing tendinosis and wishes to proceed with release of A1 pulley.  All risks and benefits of the surgery was discussed with her at length.  She was in agreement with the above treatment plan.",
+      "prediction": "history of present illness: This is a 50-year-old female presenting with stenosing tendinosis, which is trigger finger.  The patient states that her right thumb just locks up, and she can't move it anymore.  She states that she feels like her thumb just moves out of nowhere.  She does not have any left hand movement at all.  She has seen someone about this before.  She also has had some recent visits to the hospital where she was diagnosed with stenosed tendinosis.  She was given an A-1 pulley as well as other risks and benefits of the surgery."
+    },
+    {
+      "reference": "history of present illness: He is a 29-year-old white male who is a patient of Dr. XYZ and he comes in today complaining that he was stung by a Yellow Jacket Wasp yesterday and now has a lot of swelling in his right hand and right arm.  He says that he has been stung by wasps before and had similar reactions.  He just said that he wanted to catch it early before he has too bad of a severe reaction like he has had in the past.  He has had a lot of swelling, but no anaphylaxis-type reactions in the past; no shortness of breath or difficultly with his throat feeling like it is going to close up or anything like that in the past; no racing heart beat or anxiety feeling, just a lot of localized swelling where the sting occurs.",
+      "prediction": "history of present illness: The patient is a 19-year-old white female who came in today because she was stung by a huge Yellow Jacket Wasp yesterday.  She has been stung since her early twenties.  She does not have any severe reactions to it.  She states that she has had some swelling in the areas where she is stung.  She denies any anaphylaxis type reactions.  She claims that she has never felt shortness of breath or throat closing up before.  She denied any anxiety or fast heart beat after stung."
+    },
+    {
+      "reference": "review of systems: Patient is hard of hearing.  She also has vision problems.  Denies headache syndrome.  Presently, denies chest pain or shortness of breath.  She denies abdominal pain.  Presently, she has left hip pain and left shoulder pain.  No urinary frequency or dysuria.  No skin lesions.  She does have swelling to both lower extremities for the last several weeks.  She denies endocrinopathies.  Psychiatric issues include chronic depression.",
+      "prediction": "review of systems: The patient complains of left hip pain and shoulder pain.  He denies any other aches and pains.  He has no right hip pain or shoulder pain, but he does have chronic depression.  He is also complaining of some vision and hearing problems."
+    },
+    {
+      "reference": "social history: The patient has a history of inhalation on intravenous drug abuse.  She is currently on methadone maintenance.  She is being followed in Psychiatry for depression and substance abuse issues.  She lives with a room-mate.",
+      "prediction": "social history: She is on methadone maintenance.  She lives with a roommate."
+    },
+    {
+      "reference": "history of present illness: The patient is a 62-year-old African-American male with a significant past medical history of diabetes, hypertension, previous stroke in 2002 with minimal residual right-sided weakness as well as two MIs, status post pacemaker insertion who first presented with numbness in his lower extremities in 2001.  He states that since that time these symptoms have been progressive and now involving his legs above his knees as well as his hands.  More recently, he describes a burning sensation along with numbness.  This has become a particular problem and of all the problems he has he feels that pain is his primary concern.  Over the last six months, he has noticed that he cannot feel hot objects in his hands and that objects slip out of his hands.  He denies any weakness per se, just clumsiness and decreased sensation.  He has also been complaining of brief muscle jerks, which occur in both hands and his shoulders.  This has been a fairly longstanding problem, and again has become more prevalent recently.  He does not have any tremor.  He denies any neck pain.  He walks with the aid of a walker because of unsteadiness with gait. Recently, he has tried gabap",
+      "prediction": "history of present illness: The patient is a 62-year-old African American who presents to us today for weakness and numbness in her legs.  She has diabetes, high blood pressure, hypertension, and had a stroke in the year 2,000 and two heart attacks.  She also has a pacemaker.  She states that she came to us in two thousand and one when she had weakness on her right side after that.  For the last six months, she has not felt anything hot in her hands.  She does not have any tremors.  Her neck pain has been more than before.  She uses a walker because she does not feel safe walking.  She tried different medicines but only oxycodone helped a little. It did give her sometimes around three hours of relief. Gabapentin did not work at all."
+    },
+    {
+      "reference": "past surgeries: Unknown.",
+      "prediction": "past surgeries: Unknown."
+    },
+    {
+      "reference": "assessment: 1.  Multiple problems including left leg swelling. 2.  History of leukocytosis. 3.  Joint pain involving the left shoulder, probably impingement syndrome. 4.  Low back pain, chronic with obesity. 5.  Obesity. 6.  Frequency with urination. 7.  Tobacco abuse.",
+      "prediction": "assessment: Positive for white blood cell count.  No history of high white blood cells.  Negative for impingement syndrome.  The patient states that she has been having a lot of pain over the past several days.  It is mainly her left shoulder and lower back.  She has had problems with her lower back the last time she was here.  Unfortunately, she forgot to make an appointment with the orthopedist.  Her left shoulder pain seems to be due to impingement Syndrome.  She states that she does not have any other urinary symptoms.  However, she has been eating pretty bad lately.  She also has been peeing a lot more these days.  She wants to get some urine sample for today's visit to see if she has an infection."
+    },
+    {
+      "reference": "history of present illness: The patient is a 57-year-old female being seen today for evaluation of pain and symptoms related to a recurrent bunion deformity in bilateral feet, right greater than left.  The patient states she is having increasing symptoms of pain and discomfort associated with recurrence of bunion deformity on the right foot and pain localized to the second toe and MTP joint of the right foot as well.  The patient had prior surgery performed approximately 13 years ago.  She states that since the time of the original surgery the deformity has slowly recurred, and she has noticed progressive deformity in the lesser toes at the second and third toes of the left foot and involving the second toe of the right foot.  The patient is employed on her feet as a hospital employee and states that she does wear a functional orthotic which does provide some relief of forefoot pain although not complete.",
+      "prediction": "history of present illness: The patient is a 57-year-old female who presents to the hospital today for surgery on her right foot.  She had bunion removal 13 years ago.  Since that time, she has had some pain in the second toe and MTP joint.  She states that she has some deformity in the second and third toes of the left foot as well.  She does not work in the hospital.  She has been on her feet all day every day for work.  She denies supports, orthotics, or any kind of orthotics.  She also states that she does not wear orthotics."
+    },
+    {
+      "reference": "past surgeries: He has not had any previous surgery.",
+      "prediction": "past surgeries: None."
+    },
+    {
+      "reference": "assessment: Chronic atrial fibrillation, the patient has been restarted back on aspirin 81 mg at the time of discharge.  Aspirin should be continued with Nexium 40 mg once daily in order to prevent any future occurrence of upper GI bleed.  If the patient has any occurrence of upper GI bleed such as coffee-ground emesis or melena then aspirin should be discontinued.",
+      "prediction": "assessment: Afib is under control.  She would like to continue taking Nexium 40 mg once a day in order to reduce the risk of an upper G I bleed."
+    },
+    {
+      "reference": "social history: Non-contributory",
+      "prediction": "social history: Noncontributory."
+    },
+    {
+      "reference": "review of systems: No headaches. No visual, hearing, or swallowing difficulties. No changes in bowel or urinary habits.",
+      "prediction": "review of systems: The patient has no hearing loss, visual impairment, blurred vision, headache, or migraine.  He denies any pain while urinating or change in frequency."
+    },
+    {
+      "reference": "review of systems: PSYCHIATRIC: See psychiatric evaluation.",
+      "prediction": "review of systems: Review of systems is positive."
+    },
+    {
+      "reference": "history of present illness: Back pain after a fall.",
+      "prediction": "history of present illness: The patient is complaining of back pain."
+    },
+    {
+      "reference": "plan: Daily applications of Acticoat, pressure relief, at least getting out of the chair for half of the time, at least eight hours out of the chair, and we will see her in one week.",
+      "prediction": "plan: Acticoat dressing daily and 8 hours out of the chair for pressure relief."
+    },
+    {
+      "reference": "allergies: None.",
+      "prediction": "allergies: None."
+    },
+    {
+      "reference": "past surgeries: Significant for his trauma surgery.",
+      "prediction": "past surgeries: Significant."
+    },
+    {
+      "reference": ": EKG shows sinus tachycardia, no acute ST changes.",
+      "prediction": "history of Present Illness: The patient has a history of sinus tachycardia."
+    },
+    {
+      "reference": "past surgeries: None.",
+      "prediction": "past surgeries: None."
+    },
+    {
+      "reference": "social history: The patient has been a smoker since the age of 10.  So, he was smoking 2-3 packs per day.  Since being started on Chantix, he says he has cut it down to half a pack per day.  He does not abuse alcohol.",
+      "prediction": "social history: He is a nonsmoker.  He smokes 2 to 3 packs per day.  He has been smoking since he was 10 years old."
+    },
+    {
+      "reference": "allergies: She has hay fever, eczema, sinus, and hives.  She has no melanoma or skin cancers or psoriasis.  Her mother had oral cancer.  The patient is a nonsmoker.  No blood tests.  Had some sunburn in the past.  She is on benzoyl peroxide and Daypro.",
+      "prediction": "allergies: She has hay fever, eczema, sinus problems, hives.  No history of melanoma, skin cancer, psoriasis or psoriasis.  Her mother had mouth cancer.  She denies any history of tobacco use.  She is taking benzoyl peroxide and Daypro."
+    },
+    {
+      "reference": "social history: Denies history of Tobacco/ETOH/illicit drug use.",
+      "prediction": "social history: Noncontributory."
+    },
+    {
+      "reference": ": Up-to-date.",
+      "prediction": "history of Present Illness: Noncontributory."
+    },
+    {
+      "reference": "past surgeries: Back surgery, shoulder surgery, and appendicectomy.",
+      "prediction": "past surgeries: Surgery 3-4 years ago, appendix removed."
+    },
+    {
+      "reference": "social history: Not obtainable.",
+      "prediction": "social history: Noncontributory."
+    },
+    {
+      "reference": "social history: Father died at age 85 of \"old age,\" mother died at age 89 of \"old age.\"  Brother died at age 92 of old age, 2 brothers died in their 70s of Parkinson disease.  Son is at age 58 and has a history of hypertension, hypercholesterolemia, rheumatoid arthritis, and glaucoma.",
+      "prediction": "social history: The patient is a 50-year-old female with glaucoma, high cholesterol, high blood pressure, and R A.  Her father died in his mid-80s from Parkinson disease.  Her mother died in her mid-90s from Alzheimer's disease."
+    },
+    {
+      "reference": ": Reviewed.  There are no changes, otherwise.",
+      "prediction": "history of Present Illness: The patient reviewed his past medical history and family and social history."
+    },
+    {
+      "reference": "history of present illness: Ms. ABC returns today for followup regarding her cervical spinal stenosis.  I have last seen her on 06/19/07.  Her symptoms of right greater than left upper extremity pain, weakness, paresthesias had been worsening after an incident on 06/04/07, when she thought she had exacerbated her conditions while lifting several objects. I referred her to obtain a cervical spine MRI. She returns today stating that she continues to have right upper extremity pain, paresthesias, weakness, which she believes radiates from her neck.  She had some physical therapy, which has been helping with the neck pain.  The right hand weakness continues.  She states she has a difficult time opening jars, and doors, and often drops items from her right greater than left upper extremity.  She states she have several occasions when she is sleeping at night, she has had sharp shooting radicular pain and weakness down her left upper extremity and she feels that these symptoms somewhat scare her. She has been undergoing nonoperative management by Dr. X and feels this has been helping her neck pain, but not the upper extremity symptoms. She denies any bowel and bladder dysfunction.  No lower back pain, no",
+      "prediction": "history of present illness: The patient is a 29-year-old female with cervical spinal stenosis.  She was seen by Dr. X on 19/19/18.  She had an incident on the fourth of June, when she lifted many objects and experienced paresthesia, weakness, and pain in her upper extremities on the right side more than the left since then.  She has been referred for a cervical spine M R I.  She states that she continues to have all those things.  Her right hand is still weak.  She feels it is difficult at times to open jars and open doors.  She does not have any problems with opening jars or open doors but she does have some issues with her neck pain.  She also has a sharp shooting pain and weakness in her left side of upper extremities.  She denies any problems with walking or stability.  She reports that sometimes when she is sleeping in the night, she feels this sharp shooting pain from her left side and she feels scared after that."
+    },
+    {
+      "reference": "allergies: She has hay fever, eczema, sinus, and hives.  She has no melanoma or skin cancers or psoriasis.  Her mother had oral cancer.  The patient is a nonsmoker.  No blood tests.  Had some sunburn in the past.  She is on benzoyl peroxide and Daypro.",
+      "prediction": "allergies: The patient states that she has hay fever, eczema, sinus problems, and hives.  She denies any type of cancer in her mouth.  She does not have melanoma or skin cancers or psoriasis."
+    },
+    {
+      "reference": "social history: unknown.",
+      "prediction": "social history: Noncontributory."
+    },
+    {
+      "reference": "plan: Activity is as tolerated.  Diet is as tolerated.",
+      "prediction": "plan: Exercise at home."
+    },
+    {
+      "reference": "past medical history: Negative.  Generally very healthy.",
+      "prediction": "past medical history: Noncontributory."
+    },
+    {
+      "reference": "review of systems: As mentioned denies any oropharyngeal swelling.  No lip or tongue swelling.  No wheezing or shortness of breath.  No headache.  No nausea.  Notes itchy rash, especially on his torso and upper arms.",
+      "prediction": "review of systems: The patient has a rash on his upper arms and torso that started about a day or two ago.  He thought it would go away on its own."
+    },
+    {
+      "reference": "social history: Ms. A had difficulty providing information on familial medical history.  She reported that her mother died three to four years ago from lung cancer.  Her father has gout and blood clots.  Siblings have reportedly been treated for asthma and GI tumors.  She was unsure of familial history of other conditions such as hypertension, high cholesterol, stroke, etc.",
+      "prediction": "social history: Mother died about three years ago.  Her father had gout.  She also has blood clots.  She does not remember her mother talking much about her own health problems.  Her brother has asthma and uses an inhaler.  Her sister has some sort of tumors removed from her stomach or something.  She is not sure if she remembers any of her family having issues with high blood pressure, high cholesterol and someone had a stroke."
+    },
+    {
+      "reference": "past surgeries: The patient's only surgery is the aforementioned left knee arthroplasty and bilateral cataract surgery, otherwise negative.",
+      "prediction": "past surgeries: Cataract surgery on both eyes and knee replacement surgery on left knee."
+    },
+    {
+      "reference": "history of present illness: She was born, normal spontaneous vaginal delivery at Woman's weighing 7 pounds 3 ounces.  No complications.  Prevented, she passed her hearing screen at birth.",
+      "prediction": "history of present illness: The patient is a 26-year-old female who was born normal and cesarian at Women's Hospital.  She weighed 7 pounds 3 ounces.  She cleared all her screening tests."
+    },
+    {
+      "reference": "medications: Accutane.",
+      "prediction": "medications: Accutane."
+    },
+    {
+      "reference": "allergies: There is no known drug intolerance in the past.",
+      "prediction": "allergies: None."
+    },
+    {
+      "reference": "exam: CHEST: The chest examination is unremarkable.",
+      "prediction": "physical exam: Noncontributory."
+    },
+    {
+      "reference": "social history: There was no history of hypertension, coronary artery disease, stroke, cancer or diabetes.",
+      "prediction": "social history: Negative for diabetes, heart disease, stroke, or high blood pressure."
+    },
+    {
+      "reference": "chief complaint: Non-healing surgical wound to the left posterior thigh.",
+      "prediction": "chief complaint: Left thigh wound."
+    },
+    {
+      "reference": "educational courses: The patient was given IV Norflex 60 mg, Zofran 4 mg, and morphine sulfate 4 mg and with that has significant improvement in her discomfort.",
+      "prediction": "educational courses: Norflex 60 mg, Zofran 4 M G, morphine sulfate 4 M G."
+    },
+    {
+      "reference": "past surgeries: Partial colon resection of colon carcinoma in 1961 with no recurrence, cholecystectomy 10 years ago, appendectomy, and glaucoma surgery.",
+      "prediction": "past surgeries: He has had appendix taken out 10 years ago and a partial colon resection due to colon cancer in the late 1960s.  He has not had any recurring episodes of colon cancer."
+    },
+    {
+      "reference": "review of systems: Focal lateral and posterior shoulder pain without a suggestion of any cervical radiculopathies.  He denies any chronic cardiac, pulmonary, GI, GU, neurologic, musculoskeletal, endocrine abnormalities.",
+      "prediction": "review of systems: There is no shoulder, lung, stomach, hormonal issues.  There is no cervical nerve problem.  No radiculopathy."
+    },
+    {
+      "reference": "social history: She lives with her husband.  She is a nonsmoker and no history of drug or alcohol abuse.  She does drink two to three drinks daily.  She completed 12th grade.",
+      "prediction": "social history: The patient lives alone with her husband.  She cleared her twelfth grade but never joined college.  She denies any illicit drug use."
+    },
+    {
+      "reference": "social history: He is a non-cigarette smoker and non-ETOH user.  He is single and he has no children.  He works as a payroll representative and previously did lot of work in jewelry business, working he states with chemical.",
+      "prediction": "social history: She is single.  She does not smoke or drink alcohol.  She works as a payroll representative.  She used to work in jewelry business, with chemical."
+    },
+    {
+      "reference": "past medical history: History of migraine.",
+      "prediction": "past medical history: Migraine."
+    },
+    {
+      "reference": "history of present illness: Daily headaches for 6 months in a 57-year-old.",
+      "prediction": "history of present illness: The patient is a 57-year-old female who has been having headaches every day for the last six months.  She is hoping that she can make them stop."
+    }
+  ]
+}

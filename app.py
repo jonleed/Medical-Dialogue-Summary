@@ -84,20 +84,45 @@ generation_config = GenerationConfig(
     max_length=512,
 )
 
+BOILERPLATE_TEXTS = {
+    "",
+    "none",
+    "noncontributory",
+    "uncontributory",
+    "negative",
+    "unremarkable",
+    "unremarkable except for etoh abuse",
+    "not otherwise pertinent",
+    "no known drug allergies",
+    "no allergies",
+    "reviewed and unchanged",
+    "reviewed and remained unchanged",
+}
+
+
+def is_boilerplate(text):
+    cleaned = text.strip().lower().rstrip(".").strip()
+    return cleaned in BOILERPLATE_TEXTS
+
 
 def build_samples():
     raw = pd.read_csv(DATASET_CSV)
     samples = []
     for dialogue_id, group in raw.groupby(raw["ID"].astype(str), sort=False):
         dialogue = " ".join(group["dialogue"].tolist())
+        header_code = str(group["section_header"].iloc[0])
         sections = [
             {"label": SECTION_LABELS.get(str(h).upper(), str(h)), "text": str(t)}
             for h, t in zip(group["section_header"], group["section_text"])
         ]
-        primary = SECTION_STANDARD_NAMES.get(
-            str(group["section_header"].iloc[0]).upper(), DEFAULT_PRIMARY_SECTION
-        )
-        samples.append({"id": dialogue_id, "dialogue": dialogue, "primary": primary, "sections": sections})
+        primary = SECTION_STANDARD_NAMES.get(header_code.upper(), DEFAULT_PRIMARY_SECTION)
+        samples.append({
+            "id": dialogue_id,
+            "dialogue": dialogue,
+            "primary": primary,
+            "primary_label": SECTION_LABELS.get(header_code.upper(), header_code),
+            "sections": sections,
+        })
     return samples
 
 
@@ -145,8 +170,14 @@ def generate():
         app.logger.exception("Generation failed")
         return jsonify({'error': str(exc)}), 500
 
+    body = note.strip()
+    prefix = f"{primary.lower()}:"
+    if body.lower().startswith(prefix):
+        body = body[len(prefix):].strip()
+
     return jsonify({
         'note': note,
+        'boilerplate': is_boilerplate(body),
         'tokens': n_tokens,
         'truncated': n_tokens > INPUT_MAX_LENGTH,
     })

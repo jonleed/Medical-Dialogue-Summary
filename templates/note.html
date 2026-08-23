@@ -11,90 +11,110 @@
         .sub { color: #666; margin-top: 0; }
         label { font-weight: 600; display: block; margin: 1rem 0 0.25rem; }
         select { padding: 0.4rem; font-size: 0.9rem; min-width: 340px; max-width: 100%; }
-        textarea { width: 100%; box-sizing: border-box; height: 280px; margin-top: 0.5rem;
+        textarea { width: 100%; box-sizing: border-box; height: 240px; margin-top: 0.5rem;
                    font-family: ui-monospace, Menlo, monospace; font-size: 0.88rem;
                    padding: 0.75rem; border: 1px solid #bbb; border-radius: 6px; resize: vertical; }
         button { background: #006f8f; color: #fff; border: none; border-radius: 6px;
                  padding: 0.65rem 1.4rem; font-size: 1rem; font-weight: 600; cursor: pointer; }
         button:hover { background: #0085ab; }
         button:disabled { opacity: 0.5; cursor: wait; }
-        #copy { background: #fff; color: #006f8f; border: 1px solid #006f8f; padding: 0.35rem 0.9rem;
-                font-size: 0.85rem; }
+        .copy { background: #fff; color: #006f8f; border: 1px solid #006f8f;
+                padding: 0.3rem 0.8rem; font-size: 0.82rem; }
+        fieldset { border: 1px solid #ddd; border-radius: 6px; margin-top: 1rem; padding: 0.75rem 1rem; }
+        legend { font-weight: 600; padding: 0 0.4rem; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 0.35rem 1rem; }
+        .grid label { font-weight: 400; margin: 0; display: flex; gap: 0.45rem; align-items: center; cursor: pointer; }
         #warn { background: #fff3cd; border: 1px solid #e0c36a; padding: 0.6rem 0.9rem;
                 border-radius: 6px; margin-top: 1rem; display: none; }
-        #result { margin-top: 1.5rem; display: none; }
-        .note-head { display: flex; align-items: center; gap: 1rem; }
-        pre#note { white-space: pre-wrap; word-wrap: break-word; background: #f5f7f8;
-                   border: 1px solid #ddd; border-radius: 6px; padding: 1rem 1.25rem;
-                   font-family: ui-monospace, Menlo, monospace; font-size: 0.88rem; line-height: 1.55; }
-        details { margin-top: 1.5rem; }
-        summary { cursor: pointer; font-weight: 600; color: #006f8f; }
-        .ref-section { margin: 0.75rem 0; }
-        .ref-label { font-weight: 700; }
-        .meta { color: #888; font-size: 0.85rem; margin-left: auto; }
+        #results { margin-top: 1.5rem; }
+        .block { background: #f5f7f8; border: 1px solid #ddd; border-radius: 6px;
+                 padding: 0.85rem 1.1rem; margin-bottom: 0.9rem; }
+        .block-head { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.4rem; }
+        .block-head h3 { margin: 0; color: #006f8f; font-size: 1rem; }
+        .block pre { white-space: pre-wrap; word-wrap: break-word; margin: 0;
+                     font-family: ui-monospace, Menlo, monospace; font-size: 0.88rem; line-height: 1.55; }
+        .block.boilerplate { opacity: 0.55; }
+        .block.boilerplate .block-head h3::after { content: " (routine/negative)"; font-weight: 400;
+                font-size: 0.78rem; color: #888; }
+        .meta { color: #888; font-size: 0.82rem; margin-left: auto; }
         .spinner { display: inline-block; width: 14px; height: 14px;
                    border: 2px solid #006f8f; border-top-color: transparent; border-radius: 50%;
                    animation: spin 0.8s linear infinite; vertical-align: -2px; margin-right: 6px; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        details { margin-top: 1.5rem; }
+        summary { cursor: pointer; font-weight: 600; color: #006f8f; }
+        .ref-section { margin: 0.75rem 0; }
+        .ref-label { font-weight: 700; }
     </style>
 </head>
 <body>
     <h1>Clinical Note Generator</h1>
-    <p class="sub">Paste the post-visit doctor&ndash;patient transcript &rarr; get a full clinical note for the EHR.
-        LoRA fine-tuned BART-base &middot; deterministic beam search &middot;
+    <p class="sub">Paste the post-visit doctor&ndash;patient transcript, tick the note sections you need,
+        copy each into the EHR. LoRA fine-tuned BART-base &middot; deterministic beam search &middot;
         <a href="https://huggingface.co/jonleed/clinical-note-bart-lora" target="_blank" rel="noopener">model</a></p>
 
     <label for="sample">Load an example from the MTS-Dialog test set</label>
     <select id="sample">
         <option value="">&mdash; choose a dialogue &mdash;</option>
         {% for s in samples %}
-        <option value="{{ loop.index0 }}">{{ s.id }} &middot; {{ s.dialogue[:70] }}&hellip;</option>
+        <option value="{{ loop.index0 }}">{{ s.id }} &middot; {{ s.primary_label }} &middot; {{ s.dialogue[:60] }}&hellip;</option>
         {% endfor %}
     </select>
 
-    <label for="primary">Note focus</label>
-    <select id="primary"></select>
+    <fieldset>
+        <legend>Sections to generate</legend>
+        <div class="grid" id="sections"></div>
+    </fieldset>
 
     <label for="transcript">Transcript</label>
     <textarea id="transcript" placeholder="Doctor: ...&#10;Patient: ...&#10;Doctor: ..."></textarea>
 
     <p>
-        <button id="go">Generate note</button>
+        <button id="go">Generate checked sections</button>
         <span id="status"></span>
     </p>
 
-    <div id="warn">Transcript exceeded the model's 512-token context and was truncated at the end.
+    <div id="warn">One or more requests exceeded the model's 512-token context and were truncated at the end.
         Shorter transcripts produce more complete notes.</div>
 
-    <div id="result">
-        <div class="note-head">
-            <h2>Generated note</h2>
-            <button id="copy">Copy</button>
-            <span class="meta" id="meta"></span>
-        </div>
-        <pre id="note"></pre>
-    </div>
+    <div id="results"></div>
 
-    <details id="ref-wrap">
+    <details id="ref-wrap" style="display:none">
         <summary>Reference sections (ground truth for this dataset example)</summary>
         <div id="ref"></div>
     </details>
 
 <script>
     const SAMPLES = {{ samples | tojson }};
-    const PRIMARY_OPTIONS = [
-        "chief complaint", "history of present illness", "past medical history",
-        "past surgeries", "medications", "allergies", "social history",
-        "educational courses", "review of systems", "physical exam",
-        "assessment", "procedures", "labs", "plan", "disposition"
+    const SECTIONS = [
+        ["chief complaint", "Chief Complaint"],
+        ["history of present illness", "History of Present Illness"],
+        ["past medical history", "Past Medical History"],
+        ["past surgeries", "Past Surgeries"],
+        ["medications", "Medications"],
+        ["allergies", "Allergies"],
+        ["social history", "Social History"],
+        ["educational courses", "Educational Courses"],
+        ["review of systems", "Review of Systems"],
+        ["physical exam", "Physical Exam"],
+        ["assessment", "Assessment"],
+        ["procedures", "Procedures"],
+        ["labs", "Labs"],
+        ["plan", "Plan"],
+        ["disposition", "Disposition"]
     ];
 
-    const primarySel = document.getElementById('primary');
-    for (const p of PRIMARY_OPTIONS) {
-        const opt = document.createElement('option');
-        opt.value = p; opt.textContent = p.charAt(0).toUpperCase() + p.slice(1);
-        primarySel.appendChild(opt);
-    }
+    const grid = document.getElementById('sections');
+    SECTIONS.forEach(([value, labelText], i) => {
+        const cb = document.createElement('input');
+        cb.type = 'checkbox'; cb.id = 'sec-' + i; cb.value = value;
+        if (value === 'history of present illness') cb.checked = true;
+        const lab = document.createElement('label');
+        lab.htmlFor = cb.id;
+        lab.appendChild(cb);
+        lab.appendChild(document.createTextNode(labelText));
+        grid.appendChild(lab);
+    });
 
     let currentSample = null;
 
@@ -103,36 +123,71 @@
         if (idx === '') { currentSample = null; return; }
         currentSample = SAMPLES[parseInt(idx, 10)];
         document.getElementById('transcript').value = currentSample.dialogue;
-        primarySel.value = PRIMARY_OPTIONS.includes(currentSample.primary)
-            ? currentSample.primary : 'history of present illness';
+        document.querySelectorAll('#sections input').forEach(cb => {
+            cb.checked = cb.value === currentSample.primary.toLowerCase();
+        });
         const ref = document.getElementById('ref');
-        ref.innerHTML = currentSample.sections.map(s =>
-            `<div class="ref-section"><span class="ref-label">${s.label}:</span> ${s.text}</div>`
-        ).join('');
+        ref.innerHTML = `<div class="ref-section"><span class="ref-label">${currentSample.primary_label}:</span> ${currentSample.sections[0].text}</div>`;
         document.getElementById('ref-wrap').open = false;
         document.getElementById('ref-wrap').style.display = '';
     });
 
+    function stripPrefix(text, primary) {
+        const p = primary.toLowerCase() + ':';
+        const t = text.trim();
+        return t.toLowerCase().startsWith(p) ? t.slice(p.length).trim() : t;
+    }
+
+    function makeBlock(primaryLabel, text, boilerplate) {
+        const div = document.createElement('div');
+        div.className = 'block' + (boilerplate ? ' boilerplate' : '');
+        const head = document.createElement('div');
+        head.className = 'block-head';
+        const h3 = document.createElement('h3');
+        h3.textContent = primaryLabel;
+        const btn = document.createElement('button');
+        btn.className = 'copy'; btn.textContent = 'Copy';
+        btn.addEventListener('click', async () => {
+            await navigator.clipboard.writeText(text);
+            btn.textContent = 'Copied!';
+            setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+        });
+        head.appendChild(h3); head.appendChild(btn);
+        const pre = document.createElement('pre');
+        pre.textContent = text;
+        div.appendChild(head); div.appendChild(pre);
+        return div;
+    }
+
     async function generate() {
         const dialogue = document.getElementById('transcript').value.trim();
+        const chosen = [...document.querySelectorAll('#sections input:checked')].map(cb => cb.value);
         if (!dialogue) { alert('Paste a transcript first.'); return; }
+        if (!chosen.length) { alert('Tick at least one section.'); return; }
+
         const btn = document.getElementById('go');
         const status = document.getElementById('status');
+        const results = document.getElementById('results');
+        results.innerHTML = '';
+        document.getElementById('warn').style.display = 'none';
         btn.disabled = true;
-        status.innerHTML = '<span class="spinner"></span>Generating note&hellip;';
+
         try {
-            const resp = await fetch('/generate_note', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ dialogue, primary: primarySel.value })
-            });
-            const data = await resp.json();
-            if (!resp.ok) throw new Error(data.error || resp.statusText);
-            document.getElementById('note').textContent = data.note;
-            document.getElementById('meta').textContent =
-                `${data.tokens} input tokens${data.truncated ? ' (truncated)' : ''}`;
-            document.getElementById('warn').style.display = data.truncated ? 'block' : 'none';
-            document.getElementById('result').style.display = 'block';
+            for (let i = 0; i < chosen.length; i++) {
+                const primary = chosen[i];
+                const label = SECTIONS.find(s => s[0] === primary)[1];
+                status.innerHTML = `<span class="spinner"></span>Generating ${label} (${i + 1} of ${chosen.length})&hellip;`;
+                const resp = await fetch('/generate_note', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ dialogue, primary })
+                });
+                const data = await resp.json();
+                if (!resp.ok) throw new Error(data.error || resp.statusText);
+                const text = stripPrefix(data.note || '', primary);
+                results.appendChild(makeBlock(label, text, !text || data.boilerplate));
+                if (data.truncated) document.getElementById('warn').style.display = 'block';
+            }
             status.textContent = '';
         } catch (err) {
             status.textContent = 'Error: ' + err.message;
@@ -144,12 +199,6 @@
     document.getElementById('go').addEventListener('click', generate);
     document.getElementById('transcript').addEventListener('keydown', e => {
         if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') generate();
-    });
-    document.getElementById('copy').addEventListener('click', async () => {
-        await navigator.clipboard.writeText(document.getElementById('note').textContent);
-        const b = document.getElementById('copy');
-        b.textContent = 'Copied!';
-        setTimeout(() => { b.textContent = 'Copy'; }, 1500);
     });
 </script>
 </body>

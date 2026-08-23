@@ -24,3 +24,9 @@ def test_decode_matches_eval_protocol():
 
 def test_input_length_matches_training():
     assert note_app.INPUT_MAX_LENGTH == 512
+
+
+def test_is_boilerplate():
+    assert note_app.is_boilerplate("Noncontributory.")
+    assert note_app.is_boilerplate("None.")
+    assert not note_app.is_boilerplate("The patient is a 54-year-old female with facial twitching.")

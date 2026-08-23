@@ -63,7 +63,7 @@ pip install -r requirements.txt
 python app.py    # whole-transcript demo → http://127.0.0.1:5002 (recommended)
 ```
 
-**Whole-transcript demo** (`app.py`): paste the post-visit doctor–patient transcript, get the full clinical note — the exact task the model was trained on, so it plays to the model's strengths (ROUGE-L ≈ 0.435 territory). Includes sample dialogues from the MTS-Dialog test set with ground-truth sections for comparison, a note-focus selector, truncation warnings, and one-click copy into your EHR.
+**Whole-transcript demo** (`app.py`): paste the post-visit doctor–patient transcript, tick the EHR sections you need, and each is generated with its own in-distribution request (~2s per section) into a separate copy-ready block; routine/negative results (`Noncontributory.`, `None.`, …) are flagged automatically. Serves at parity with the eval harness: ROUGE-L 0.438 vs 0.435 protocol at n=100 ([`results/app-integration-eval.json`](results/app-integration-eval.json)).
 
 ```bash
 python eval.py   # legacy per-section explorer → http://127.0.0.1:5001

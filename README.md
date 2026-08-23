@@ -19,20 +19,30 @@ Fine-tuned **BART-base with LoRA (PEFT)** that turns doctor–patient dialogues 
 
 ## Results
 
-ROUGE against reference section summaries on the MTS-Dialog test set:
+Two evaluation protocols, both fully reproducible:
+
+**1. Original notebook protocol** (per-dialogue full-note generation, validation split, HF `evaluate` ROUGE with stemmer — the exact setup behind the May 2025 number):
 
 | Source | ROUGE-1 | ROUGE-2 | ROUGE-L | ROUGE-Lsum |
 |---|---|---|---|---|
 | Reported at project completion (May 2025) | — | — | **0.43** | — |
-| Re-evaluation Aug 2026 · 100-example sample · seed 42 | 0.290 | 0.114 | 0.252 | 0.259 |
+| Reproduced Aug 2026 · 100 val dialogues · seed 42 | 0.499 | 0.288 | **0.435** | 0.435 |
 
-Both numbers are shown deliberately: the original figure came from an unlogged evaluation setup we can no longer reconstruct exactly, so the 2026 restoration ships a fully reproducible evaluation instead of quietly repeating a number nobody can regenerate:
+```bash
+python eval_notebook_protocol.py --split val
+```
+
+**2. Per-section protocol** (single section rows from the MEDIQA-Chat test CSV, as served by the Flask app — a stricter, off-training-distribution task):
+
+| Decode | ROUGE-1 | ROUGE-2 | ROUGE-L | ROUGE-Lsum |
+|---|---|---|---|---|
+| Original sampling config | 0.290 | 0.114 | 0.252 | 0.259 |
 
 ```bash
 python compute_metrics.py --n 100 --seed 42 --out results/eval.json
 ```
 
-Raw predictions from the re-evaluation are checked in at [`results/eval-2026-08.json`](results/eval-2026-08.json).
+The gap between protocols is explained by task framing: the model was trained on whole-dialogue → whole-note pairs (512-token inputs), so per-section scoring on the app's test CSV measures a harder, off-distribution task. Raw per-section predictions are checked in at [`results/eval-2026-08.json`](results/eval-2026-08.json); `score_sweep.py` documents the decode-config × scoring-method comparison used to trace the difference.
 
 ## Quickstart
 

@@ -44,10 +44,11 @@ python compute_metrics.py --n 100 --seed 42 --out results/eval.json
 
 The gap between protocols is explained by task framing: the model was trained on whole-dialogue → whole-note pairs (512-token inputs), so per-section scoring on the app's test CSV measures a harder, off-distribution task. Raw per-section predictions are checked in at [`results/eval-2026-08.json`](results/eval-2026-08.json); `score_sweep.py` documents the decode-config × scoring-method comparison used to trace the difference.
 
-**3. App integration eval** — scores responses served through Flask's test client with the identical ROUGE protocol as `compute_metrics.py`, proving the demo measures the same thing as the harness (served predictions are byte-identical to direct model calls):
+**3. App integration eval** — scores responses served through Flask's test client with the identical protocol as the corresponding harness, proving the demos measure the same thing as the evals (served predictions are byte-identical to direct model calls):
 
 ```bash
-python eval_app_integration.py --n 100 --out results/app-integration-eval.json
+python eval_app_integration.py --app note --n 100          # whole-transcript demo vs notebook-protocol numbers
+python eval_app_integration.py --app section --n 100       # per-section demo vs results/eval-2026-08.json
 ```
 
 ## Quickstart
@@ -59,13 +60,16 @@ cd Medical-Dialogue-Summary
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-python eval.py
-# → http://127.0.0.1:5001
+python app.py    # whole-transcript demo → http://127.0.0.1:5002 (recommended)
 ```
 
-Browse the dialogue table (search + pagination, expand long dialogues), hit **Summarize**, get a clinical note. The adapter downloads automatically from Hugging Face Hub on first use.
+**Whole-transcript demo** (`app.py`): paste the post-visit doctor–patient transcript, get the full clinical note — the exact task the model was trained on, so it plays to the model's strengths (ROUGE-L ≈ 0.435 territory). Includes sample dialogues from the MTS-Dialog test set with ground-truth sections for comparison, a note-focus selector, truncation warnings, and one-click copy into your EHR.
 
-> macOS note: AirPlay Receiver occupies port 5000 by default, so the app uses 5001. Override with `PORT=<port>`.
+```bash
+python eval.py   # legacy per-section explorer → http://127.0.0.1:5001
+```
+
+> macOS note: AirPlay Receiver occupies port 5000 by default, so the apps use 5001/5002. Override with `PORT=<port>`.
 
 ### Configuration
 

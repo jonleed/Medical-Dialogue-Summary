@@ -16,6 +16,7 @@ INPUT_MAX_LENGTH = 512
 DATASET_CSV = "./MTS-Dialog/Main-Dataset/MTS-Dialog-TestSet-1-MEDIQA-Chat-2023.csv"
 
 app = Flask(__name__)
+APP_NAME = "per-section section explorer (eval.py)"
 
 model = None
 tokenizer = None

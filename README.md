@@ -32,7 +32,7 @@ Two evaluation protocols, both fully reproducible:
 python eval_notebook_protocol.py --split val
 ```
 
-**2. Per-section protocol** (single section rows from the MEDIQA-Chat test CSV, as served by the Flask app — a stricter, off-training-distribution task):
+**2. Per-section protocol** (single section rows from the MEDIQA-Chat test CSV — a stricter, off-training-distribution task; scored under the original sampling decode):
 
 | Decode | ROUGE-1 | ROUGE-2 | ROUGE-L | ROUGE-Lsum |
 |---|---|---|---|---|
@@ -43,6 +43,12 @@ python compute_metrics.py --n 100 --seed 42 --out results/eval.json
 ```
 
 The gap between protocols is explained by task framing: the model was trained on whole-dialogue → whole-note pairs (512-token inputs), so per-section scoring on the app's test CSV measures a harder, off-distribution task. Raw per-section predictions are checked in at [`results/eval-2026-08.json`](results/eval-2026-08.json); `score_sweep.py` documents the decode-config × scoring-method comparison used to trace the difference.
+
+**3. App integration eval** — scores responses served through Flask's test client with the identical ROUGE protocol as `compute_metrics.py`, proving the demo measures the same thing as the harness (served predictions are byte-identical to direct model calls):
+
+```bash
+python eval_app_integration.py --n 100 --out results/app-integration-eval.json
+```
 
 ## Quickstart
 
@@ -93,8 +99,9 @@ This is a continuation of [`Michael-David-Lam/Medical-Dialogue-Summary`](https:/
 - **Deps**: pinned to tested versions (transformers 5.15 / peft 0.20 / torch 2.13, Python 3.14) after verifying generation behavior was preserved
 - **App UX**: lazy model loading, search, pagination over the test set, loading spinner, copy-to-clipboard
 - **Reproducibility**: `compute_metrics.py`, CI smoke tests, checked-in predictions
+- **App/eval parity**: deterministic beam-search decoding in the demo, loud failure instead of silent adapter fallback, `eval_app_integration.py` scoring served outputs end-to-end
 
-The original prompt format and generation configuration are untouched, so outputs match the May 2025 model's behavior.
+The original prompt format and model weights are untouched. Decoding switched from sampling to deterministic beam search (beams=4) to match how the evaluations generate — served outputs are now reproducible byte-for-byte.
 
 **Scope**: educational project demonstrating parameter-efficient fine-tuning of compact seq2seq models for clinical summarization. Not a medical device; outputs are not clinically validated.
 

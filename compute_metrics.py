@@ -68,7 +68,7 @@ def main():
     for _, row in tqdm(df.iterrows(), total=len(df), desc="Summarizing"):
         section_full = SECTION_NAME_MAP.get(str(row["section_header"]).upper(), str(row["section_header"]))
         prompt = f"Summarize the following doctor-patient dialogue into a detailed {section_full} clinical note: {row['dialogue']}"
-        inputs = tokenizer(prompt, max_length=128, padding="max_length", truncation=True, return_tensors="pt").to(device)
+        inputs = tokenizer(prompt, max_length=INPUT_MAX_LENGTH, padding="max_length", truncation=True, return_tensors="pt").to(device)
         outputs = model.generate(
             input_ids=inputs["input_ids"],
             attention_mask=inputs["attention_mask"],

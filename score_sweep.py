@@ -10,6 +10,8 @@ from peft import PeftModel
 
 from compute_metrics import ADAPTER_MODEL_ID, BASE_MODEL_ID, DATASET_CSV, SECTION_NAME_MAP
 
+INPUT_MAX_LENGTH = 512
+
 DECODE_CONFIGS = {
     "original_sampling": GenerationConfig(
         temperature=0.9, top_k=50, top_p=0.95, do_sample=True,
@@ -71,7 +73,7 @@ def main():
         for _, row in tqdm(df.iterrows(), total=len(df), desc=name):
             section_full = SECTION_NAME_MAP.get(str(row["section_header"]).upper(), str(row["section_header"]))
             prompt = f"Summarize the following doctor-patient dialogue into a detailed {section_full} clinical note: {row['dialogue']}"
-            inputs = tokenizer(prompt, max_length=128, padding="max_length", truncation=True, return_tensors="pt").to(device)
+            inputs = tokenizer(prompt, max_length=INPUT_MAX_LENGTH, padding="max_length", truncation=True, return_tensors="pt").to(device)
             outputs = model.generate(
                 input_ids=inputs["input_ids"],
                 attention_mask=inputs["attention_mask"],

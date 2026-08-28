@@ -1,0 +1,38 @@
+{
+  "protocol": "eval_notebook_protocol.py",
+  "split": "val",
+  "n": 100,
+  "seed": 42,
+  "input_max_length": 512,
+  "generation_max_length": 128,
+  "do_sample": false,
+  "num_beams": 4,
+  "repetition_penalty": 2.0,
+  "no_repeat_ngram_size": 4,
+  "models": {
+    "bart_base": {
+      "base_model": "facebook/bart-base",
+      "adapter": null,
+      "rouge1": 0.2195,
+      "rouge2": 0.0746,
+      "rougeL": 0.1673,
+      "rougeLsum": 0.1671
+    },
+    "bart_base_lora": {
+      "base_model": "facebook/bart-base",
+      "adapter": "jonleed/clinical-note-bart-lora",
+      "rouge1": 0.4987,
+      "rouge2": 0.2858,
+      "rougeL": 0.4342,
+      "rougeLsum": 0.4336
+    },
+    "biobart_large_lora": {
+      "base_model": "GanjinZero/biobart-large",
+      "adapter": "./biobart-large-lora",
+      "rouge1": 0.5589,
+      "rouge2": 0.3334,
+      "rougeL": 0.4803,
+      "rougeLsum": 0.4803
+    }
+  }
+}

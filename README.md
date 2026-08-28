@@ -6,7 +6,7 @@
 
 A local Flask application that helps clinicians turn a post-visit doctor-patient transcript into copy-ready EHR sections. The clinician pastes the full transcript, selects only the sections needed for that encounter, reviews each generated block, and copies it into the EHR.
 
-This is a continuation of a May 2025 course project. The original BART fine-tuning approach is preserved; the default backbone is now `GanjinZero/biobart-large`, a biomedical BART model released in 2022. No model released after May 2025 is used.
+This is a continuation of a Deep Learning course project for the University of Surrey. The original BART fine-tuning approach is preserved; the default backbone is now `GanjinZero/biobart-large`, a biomedical BART model released in 2022.
 
 <p align="center">
   <img src="assets/screenshot-note-app.png" alt="Clinical Note Generator Flask application" width="900">
@@ -29,7 +29,6 @@ The workflow is deliberately section-based because the MTS-Dialog training data 
 - Generate each section using the model's original dialogue-to-section task.
 - Review the output before copying it into the EHR.
 - Routine outputs such as `None.` and `Noncontributory.` are visibly flagged.
-- Transcripts longer than the 512-token input context receive a truncation warning.
 
 The older dataset-table explorer remains available:
 
@@ -54,24 +53,15 @@ The committed adapter is `biobart-large-lora/`. It contains only the LoRA adapte
 - Output budget: 512 tokens in the Flask app
 - Decoding: deterministic beam search, 4 beams, repetition penalty 2.0, no-repeat 4-gram constraint
 
-The old adapter remains available for comparison:
-
-```bash
-BASE_MODEL_ID=facebook/bart-base \
-ADAPTER_MODEL_ID=jonleed/clinical-note-bart-lora \
-python eval.py
-```
-
 ## Results
 
 Evaluation uses the same prompt and section-target construction as the original notebook. Scores use ROUGE with stemming on 100 validation dialogues, seed 42.
 
-| Model | ROUGE-1 | ROUGE-2 | ROUGE-L | ROUGE-Lsum |
+| BioBART-large LoRA evaluation | ROUGE-1 | ROUGE-2 | ROUGE-L | ROUGE-Lsum |
 |---|---:|---:|---:|---:|
-| Original BART-base reproduction | 0.499 | 0.288 | 0.435 | 0.435 |
-| BioBART-large LoRA | **0.553** | **0.325** | **0.472** | **0.474** |
+| 100 validation dialogues, seed 42 | **0.553** | **0.325** | **0.472** | **0.474** |
 
-The BioBART-large result is checked in at [`results/eval-biobart-large-2026-08.json`](results/eval-biobart-large-2026-08.json). The original per-section sampling result is preserved at [`results/eval-2026-08.json`](results/eval-2026-08.json).
+The evaluation output is checked in at [`results/eval-biobart-large-2026-08.json`](results/eval-biobart-large-2026-08.json).
 
 Run the original notebook-style evaluation:
 
@@ -86,7 +76,7 @@ python eval_app_integration.py --app note --n 100
 python eval_app_integration.py --app section --n 100
 ```
 
-The BioBART-large adapter produced ROUGE-L 0.4719 through the Flask integration path. This confirms that the served application and direct model evaluation use the same adapter, prompt, input length, and deterministic decode.
+The BioBART-large adapter produced ROUGE-L 0.4719 through the Flask integration path. This confirms that the served application and evaluation use the same adapter, prompt, input length, and deterministic decode.
 
 ## Setup
 
@@ -103,11 +93,11 @@ The base model and local adapter are loaded lazily when the first generation is 
 
 ### Configuration
 
-| Environment variable | Default | Purpose |
-|---|---|---|
-| `BASE_MODEL_ID` | `GanjinZero/biobart-large` | Base seq2seq model |
-| `ADAPTER_MODEL_ID` | `./biobart-large-lora` | Local or Hugging Face LoRA adapter |
-| `HF_TOKEN` | unset | Optional Hugging Face authentication |
+| Environment variable | Default                    | Purpose                              |
+| -------------------- | -------------------------- | ------------------------------------ |
+| `BASE_MODEL_ID`      | `GanjinZero/biobart-large` | Base seq2seq model                   |
+| `ADAPTER_MODEL_ID`   | `./biobart-large-lora`     | Local or Hugging Face LoRA adapter   |
+| `HF_TOKEN`           | unset                      | Optional Hugging Face authentication |
 
 ## Reproducing Training
 

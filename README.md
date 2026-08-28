@@ -2,121 +2,158 @@
 
 [![CI](https://github.com/jonleed/Medical-Dialogue-Summary/actions/workflows/ci.yml/badge.svg)](https://github.com/jonleed/Medical-Dialogue-Summary/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-![Python](https://img.shields.io/badge/Python-3.14-3776AB)
-[![Model](https://img.shields.io/badge/%F0%9F%A4%97-clinical--note--biobart--large--lora-yellow)](https://huggingface.co/jonleed/clinical-note-biobart-large-lora)
+[![Model](https://img.shields.io/badge/model-BioBART--large--LoRA-yellow)](https://huggingface.co/jonleed/clinical-note-biobart-large-lora)
 
-Fine-tuned **BioBART-large with LoRA (PEFT)** that turns doctor–patient dialogues into EHR-style clinical note sections, served through a local Flask demo app. Built May 2025 for a Deep Learning & Advanced AI course project; restored and modernized in August 2026.
+A local Flask application that helps clinicians turn a post-visit doctor-patient transcript into copy-ready EHR sections. The clinician pastes the full transcript, selects only the sections needed for that encounter, reviews each generated block, and copies it into the EHR.
 
-<p align="center">
-  <img src="assets/screenshot-demo.png" alt="Clinical Note Summarizer demo" width="800">
-</p>
+This is a continuation of a May 2025 course project. The original BART fine-tuning approach is preserved; the default backbone is now `GanjinZero/biobart-large`, a biomedical BART model released in 2022. No model released after May 2025 is used.
 
-## What it does
+## Current Application
 
-1. Loads a dialogue and target section (Chief Complaint, HPI, Medications, …) from the [MTS-Dialog](https://github.com/abachaa/MTS-Dialog) MEDIQA-Chat 2023 test set
-2. Wraps them in the training prompt format: *"Summarize the following doctor-patient dialogue into a detailed {section} clinical note: …"*
-3. Generates the note with a LoRA adapter (r=8, α=64 on `q_proj`/`v_proj`) merged into `GanjinZero/biobart-large`, using beam search (beams=4, max_length=512)
+Run the doctor-facing application:
+
+```bash
+python app.py
+```
+
+Open <http://127.0.0.1:5002>.
+
+The workflow is deliberately section-based because the MTS-Dialog training data pairs each dialogue with a documented EHR section. It does not force irrelevant sections into every note.
+
+- Paste the complete conversation, not an isolated snippet.
+- Select the sections relevant to the encounter.
+- Generate each section using the model's original dialogue-to-section task.
+- Review the output before copying it into the EHR.
+- Routine outputs such as `None.` and `Noncontributory.` are visibly flagged.
+- Transcripts longer than the 512-token input context receive a truncation warning.
+
+The older dataset-table explorer remains available:
+
+```bash
+python eval.py
+```
+
+Open <http://127.0.0.1:5001>.
+
+## Model
+
+The committed adapter is `biobart-large-lora/`. It contains only the LoRA adapter and tokenizer; the 407M-parameter BioBART-large base downloads from Hugging Face on first use.
+
+- Base model: [`GanjinZero/biobart-large`](https://huggingface.co/GanjinZero/biobart-large)
+- Adapter: [`jonleed/clinical-note-biobart-large-lora`](https://huggingface.co/jonleed/clinical-note-biobart-large-lora)
+- Fine-tuning method: PEFT LoRA
+- LoRA rank: 8
+- LoRA alpha: 64
+- LoRA dropout: 0.01
+- Target modules: BART `q_proj` and `v_proj`
+- Input context: 512 tokens
+- Output budget: 512 tokens in the Flask app
+- Decoding: deterministic beam search, 4 beams, repetition penalty 2.0, no-repeat 4-gram constraint
+
+The old adapter remains available for comparison:
+
+```bash
+BASE_MODEL_ID=facebook/bart-base \
+ADAPTER_MODEL_ID=jonleed/clinical-note-bart-lora \
+python eval.py
+```
 
 ## Results
 
-Two evaluation protocols, both fully reproducible:
+Evaluation uses the same prompt and section-target construction as the original notebook. Scores use ROUGE with stemming on 100 validation dialogues, seed 42.
 
-**1. Original notebook protocol** (dialogue-to-section generation on the validation split, HF `evaluate` ROUGE with stemmer — the exact setup behind the May 2025 number):
+| Model | ROUGE-1 | ROUGE-2 | ROUGE-L | ROUGE-Lsum |
+|---|---:|---:|---:|---:|
+| Original BART-base reproduction | 0.499 | 0.288 | 0.435 | 0.435 |
+| BioBART-large LoRA | **0.553** | **0.325** | **0.472** | **0.474** |
 
-| Source | ROUGE-1 | ROUGE-2 | ROUGE-L | ROUGE-Lsum |
-|---|---|---|---|---|
-| Reported at project completion (May 2025) | — | — | **0.43** | — |
-| Reproduced Aug 2026 · 100 val dialogues · seed 42 | 0.499 | 0.288 | **0.435** | 0.435 |
-| BioBART-large adapter · 100 val dialogues · seed 42 | **0.553** | **0.325** | **0.472** | **0.474** |
+The BioBART-large result is checked in at [`results/eval-biobart-large-2026-08.json`](results/eval-biobart-large-2026-08.json). The original per-section sampling result is preserved at [`results/eval-2026-08.json`](results/eval-2026-08.json).
+
+Run the original notebook-style evaluation:
 
 ```bash
 python eval_notebook_protocol.py --split val
 ```
 
-**2. Per-section protocol** (single-section rows from the MEDIQA-Chat test CSV, scored under the original sampling decode):
-
-| Decode | ROUGE-1 | ROUGE-2 | ROUGE-L | ROUGE-Lsum |
-|---|---|---|---|---|
-| Original sampling config | 0.290 | 0.114 | 0.252 | 0.259 |
+Run the Flask integration evaluation through the actual test client:
 
 ```bash
-python compute_metrics.py --n 100 --seed 42 --out results/eval.json
+python eval_app_integration.py --app note --n 100
+python eval_app_integration.py --app section --n 100
 ```
 
-The original and per-section protocols use the same dialogue-to-section task on different splits and decoding/scoring settings. The original sampling result remains checked in at [`results/eval-2026-08.json`](results/eval-2026-08.json); the BioBART-large app result is [`results/eval-biobart-large-2026-08.json`](results/eval-biobart-large-2026-08.json).
+The BioBART-large adapter produced ROUGE-L 0.4719 through the Flask integration path. This confirms that the served application and direct model evaluation use the same adapter, prompt, input length, and deterministic decode.
 
-**3. App integration eval** — scores responses served through Flask's test client with the identical protocol as the corresponding harness, proving the demos measure the same thing as the evals (served predictions are byte-identical to direct model calls):
-
-```bash
-python eval_app_integration.py --app note --n 100          # whole-transcript demo vs notebook-protocol numbers
-python eval_app_integration.py --app section --n 100       # per-section demo vs results/eval-2026-08.json
-```
-
-## Quickstart
+## Setup
 
 ```bash
 git clone --recurse-submodules https://github.com/jonleed/Medical-Dialogue-Summary.git
 cd Medical-Dialogue-Summary
-
-python3 -m venv .venv && source .venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
-
-python app.py    # whole-transcript demo → http://127.0.0.1:5002 (recommended)
+python app.py
 ```
 
-**Whole-transcript demo** (`app.py`): paste the post-visit doctor–patient transcript, tick the EHR sections you need, and each is generated with its own in-distribution request (~2s per section) into a separate copy-ready block; routine/negative results (`Noncontributory.`, `None.`, …) are flagged automatically. The original BART-base adapter remains available through `ADAPTER_MODEL_ID` and `BASE_MODEL_ID` overrides.
-
-The BioBART-large adapter improves the same protocol to ROUGE-L **0.472** (ROUGE-1 0.553, ROUGE-2 0.325, ROUGE-Lsum 0.474) on 100 validation dialogues. The committed adapter is used locally by default; the model is also available at [`jonleed/clinical-note-biobart-large-lora`](https://huggingface.co/jonleed/clinical-note-biobart-large-lora).
-
-```bash
-python eval.py   # legacy per-section explorer → http://127.0.0.1:5001
-```
-
-> macOS note: AirPlay Receiver occupies port 5000 by default, so the apps use 5001/5002. Override with `PORT=<port>`.
+The base model and local adapter are loaded lazily when the first generation is requested. On macOS, the applications use ports 5001 and 5002 because AirPlay Receiver commonly occupies port 5000. Override the port with `PORT=<port>`.
 
 ### Configuration
 
-| Env var | Default | Purpose |
+| Environment variable | Default | Purpose |
 |---|---|---|
-| `ADAPTER_MODEL_ID` | `./biobart-large-lora` | LoRA adapter to load |
 | `BASE_MODEL_ID` | `GanjinZero/biobart-large` | Base seq2seq model |
-| `HF_TOKEN` | unset | Only needed for private/gated repos |
+| `ADAPTER_MODEL_ID` | `./biobart-large-lora` | Local or Hugging Face LoRA adapter |
+| `HF_TOKEN` | unset | Optional Hugging Face authentication |
 
-## Training
+## Reproducing Training
 
-[`Medical_Dialogue_Generation.ipynb`](Medical_Dialogue_Generation.ipynb) is the original training notebook (run in Google Colab): data prep → tokenization → `LoraConfig(r=8, alpha=64)` via PEFT → `Seq2SeqTrainer` → ROUGE eval → push to Hub. It is kept as-is for historical accuracy; dependencies are installed in its first cell.
+`train_lora.py` mirrors the original notebook while using BioBART-large by default:
 
-Architecture:
+```bash
+python train_lora.py \
+  --base_model GanjinZero/biobart-large \
+  --output_dir ./biobart-large-lora \
+  --per_device_batch 2 \
+  --grad_accum 4 \
+  --epochs 20
+```
+
+The original notebook recipe is retained in [`Medical_Dialogue_Generation.ipynb`](Medical_Dialogue_Generation.ipynb). Training uses the MTS-Dialog training split, the original prompt and target construction, 512-token inputs, 256-token targets, learning rate `2e-4`, weight decay `0.01`, and per-epoch validation ROUGE. The effective batch size is 8 in the recommended command.
+
+For faster training, run the same script on a CUDA GPU through Google Colab or another GPU service. Use the committed script and the pre-May-2025 BioBART-large base; changing the hardware does not change the project approach.
+
+## Architecture
 
 ```mermaid
 graph LR
-    A["Doctor–patient dialogue"] --> B["Prompt template<br/>(dialogue + section header)"]
-    B --> C["BioBART-large encoder"]
-    C --> D["LoRA adapter r=8<br/>merged into decoder"]
-    D --> E["Beam search decode<br/>(max_length=256)"]
-    E --> F["EHR-style note section"]
+    A["Full doctor-patient transcript"] --> B["Clinician selects EHR sections"]
+    B --> C["Original section prompt"]
+    C --> D["BioBART-large"]
+    D --> E["LoRA adapter"]
+    E --> F["Deterministic beam search"]
+    F --> G["Reviewable EHR section"]
 ```
 
-## Repository notes & history
+## Project History
 
-This is a continuation of [`Michael-David-Lam/Medical-Dialogue-Summary`](https://github.com/Michael-David-Lam/Medical-Dialogue-Summary), built with course collaborators (branches `dev2tariq`, `dev2jon`, `dev3michael` tell that story). The 2026 restoration fixed what time broke:
+The original project used BART-base with LoRA. The restoration preserves that approach and improves the deployable artifact by:
 
-- **Runtime**: the Hub artifact only ever contained the LoRA adapter, but the app tried to load full weights from it — it now loads the selected BioBART/BART base and applies the adapter properly through PEFT (`merge_and_unload()`)
-- **Data**: replaced a dangling submodule gitlink with a real `MTS-Dialog` submodule pinning upstream
-- **Deps**: pinned to tested versions (transformers 5.15 / peft 0.20 / torch 2.13, Python 3.14) after verifying generation behavior was preserved
-- **App UX**: lazy model loading, search, pagination over the test set, loading spinner, copy-to-clipboard
-- **Reproducibility**: `compute_metrics.py`, CI smoke tests, checked-in predictions
-- **App/eval parity**: deterministic beam-search decoding in the demo, loud failure instead of silent adapter fallback, `eval_app_integration.py` scoring served outputs end-to-end
+- Loading the base model and adapter separately through PEFT
+- Using the biomedical BioBART-large backbone
+- Increasing serving input context from 128 to the 512-token training context
+- Removing sampling nondeterminism from the demo
+- Failing loudly instead of silently switching adapters
+- Providing clinician-selected section generation with individual copy-ready results
+- Checking the served output through a Flask integration evaluation
 
-The original prompt format and model weights are untouched. Decoding switched from sampling to deterministic beam search (beams=4) to match how the evaluations generate — served outputs are now reproducible byte-for-byte.
-
-**Scope**: educational project demonstrating parameter-efficient fine-tuning of compact seq2seq models for clinical summarization. Not a medical device; outputs are not clinically validated.
+This project is educational and is not a medical device. Generated text can contain omissions, incorrect facts, incorrect attribution, or unsupported statements. A qualified clinician must review every result before EHR submission.
 
 ## Credits
 
-- Original project: [Michael-David-Lam](https://github.com/Michael-David-Lam) ([original model upload](https://huggingface.co/mdlam/clinical-note-model))
-- Dataset: Ben Abacha et al., *"An Empirical Study of Clinical Note Generation from Doctor-Patient Encounters"* (EACL 2023) — [MTS-Dialog](https://github.com/abachaa/MTS-Dialog)
-- Frameworks: [PEFT](https://github.com/huggingface/peft), [Transformers](https://github.com/huggingface/transformers)
+- Original project: [Michael-David-Lam](https://github.com/Michael-David-Lam)
+- Dataset: Ben Abacha et al., [MTS-Dialog](https://github.com/abachaa/MTS-Dialog), EACL 2023
+- Biomedical base: [GanjinZero/biobart-large](https://huggingface.co/GanjinZero/biobart-large)
+- Frameworks: [PEFT](https://github.com/huggingface/peft), [Transformers](https://github.com/huggingface.co/docs/transformers), Flask
 
 ## License
 

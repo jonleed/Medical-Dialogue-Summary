@@ -8,8 +8,8 @@ from rouge_score import rouge_scorer
 from tqdm import tqdm
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, GenerationConfig
 
-BASE_MODEL_ID = os.environ.get("BASE_MODEL_ID", "facebook/bart-base")
-ADAPTER_MODEL_ID = os.environ.get("ADAPTER_MODEL_ID", "jonleed/clinical-note-bart-lora")
+BASE_MODEL_ID = os.environ.get("BASE_MODEL_ID", "GanjinZero/biobart-large")
+ADAPTER_MODEL_ID = os.environ.get("ADAPTER_MODEL_ID", "./biobart-large-lora")
 DATASET_CSV = "./MTS-Dialog/Main-Dataset/MTS-Dialog-TestSet-1-MEDIQA-Chat-2023.csv"
 
 SECTION_NAME_MAP = {

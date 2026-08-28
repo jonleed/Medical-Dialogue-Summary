@@ -73,6 +73,11 @@ def main():
     parser.add_argument("--split", choices=list(SPLIT_PATHS.keys()), default="val")
     parser.add_argument("--n", type=int, default=None, help="limit number of dialogues")
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument(
+        "--adapter_model",
+        default=ADAPTER_MODEL_ID,
+        help="LoRA adapter path or Hub ID; use 'none' for the base model only",
+    )
     args = parser.parse_args()
 
     try:
@@ -83,7 +88,10 @@ def main():
 
     tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL_ID)
     base = AutoModelForSeq2SeqLM.from_pretrained(BASE_MODEL_ID)
-    model = PeftModel.from_pretrained(base, ADAPTER_MODEL_ID).merge_and_unload()
+    if args.adapter_model.lower() in {"none", "base"}:
+        model = base
+    else:
+        model = PeftModel.from_pretrained(base, args.adapter_model).merge_and_unload()
     device = "mps" if torch.backends.mps.is_available() else ("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(device).eval()
 

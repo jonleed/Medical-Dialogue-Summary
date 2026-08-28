@@ -7,8 +7,8 @@ from flask import Flask, jsonify, render_template, request
 from peft import PeftModel
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, GenerationConfig
 
-BASE_MODEL_ID = os.environ.get("BASE_MODEL_ID", "facebook/bart-base")
-ADAPTER_MODEL_ID = os.environ.get("ADAPTER_MODEL_ID", "jonleed/clinical-note-bart-lora")
+BASE_MODEL_ID = os.environ.get("BASE_MODEL_ID", "GanjinZero/biobart-large")
+ADAPTER_MODEL_ID = os.environ.get("ADAPTER_MODEL_ID", "./biobart-large-lora")
 HF_TOKEN = os.environ.get("HF_TOKEN")
 
 INPUT_MAX_LENGTH = 512

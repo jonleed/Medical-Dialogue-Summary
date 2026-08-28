@@ -8,6 +8,10 @@ A local Flask application that helps clinicians turn a post-visit doctor-patient
 
 This is a continuation of a May 2025 course project. The original BART fine-tuning approach is preserved; the default backbone is now `GanjinZero/biobart-large`, a biomedical BART model released in 2022. No model released after May 2025 is used.
 
+<p align="center">
+  <img src="assets/screenshot-note-app.png" alt="Clinical Note Generator Flask application" width="900">
+</p>
+
 ## Current Application
 
 Run the doctor-facing application:

@@ -63,6 +63,18 @@ Evaluation uses the same prompt and section-target construction as the original 
 
 The evaluation output is checked in at [`results/eval-biobart-large-2026-08.json`](results/eval-biobart-large-2026-08.json).
 
+### Controlled Model Study
+
+Using the same validation split, seed, prompt construction, token limits, deterministic decoding, and ROUGE scorer:
+
+| Model | ROUGE-1 | ROUGE-2 | ROUGE-L | ROUGE-Lsum |
+|---|---:|---:|---:|---:|
+| BART-base, no adapter | 0.2195 | 0.0746 | 0.1673 | 0.1671 |
+| BART-base with LoRA | 0.4987 | 0.2858 | 0.4342 | 0.4336 |
+| BioBART-large with LoRA | **0.5589** | **0.3334** | **0.4803** | **0.4803** |
+
+The complete study record is [`results/model-study-2026-08.json`](results/model-study-2026-08.json). The results show the value of the original LoRA fine-tuning approach and support BioBART-large as the project's selected backbone.
+
 Run the original notebook-style evaluation:
 
 ```bash

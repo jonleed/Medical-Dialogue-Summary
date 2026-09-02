@@ -57,9 +57,9 @@ The committed adapter is `biobart-large-lora/`. It contains only the LoRA adapte
 
 Evaluation uses the same prompt and section-target construction as the original notebook. Scores use ROUGE with stemming on 100 validation dialogues, seed 42.
 
-| BioBART-large LoRA evaluation | ROUGE-1 | ROUGE-2 | ROUGE-L | ROUGE-Lsum |
-|---|---:|---:|---:|---:|
-| 100 validation dialogues, seed 42 | **0.553** | **0.325** | **0.472** | **0.474** |
+| BioBART-large LoRA evaluation     |   ROUGE-1 |   ROUGE-2 |   ROUGE-L | ROUGE-Lsum |
+| --------------------------------- | --------: | --------: | --------: | ---------: |
+| 100 validation dialogues, seed 42 | **0.553** | **0.325** | **0.472** |  **0.474** |
 
 The evaluation output is checked in at [`results/eval-biobart-large-2026-08.json`](results/eval-biobart-large-2026-08.json).
 
@@ -89,8 +89,6 @@ pip install -r requirements.txt
 python app.py
 ```
 
-The base model and local adapter are loaded lazily when the first generation is requested. On macOS, the applications use ports 5001 and 5002 because AirPlay Receiver commonly occupies port 5000. Override the port with `PORT=<port>`.
-
 ### Configuration
 
 | Environment variable | Default                    | Purpose                              |
@@ -114,8 +112,6 @@ python train_lora.py \
 
 The original notebook recipe is retained in [`Medical_Dialogue_Generation.ipynb`](Medical_Dialogue_Generation.ipynb). Training uses the MTS-Dialog training split, the original prompt and target construction, 512-token inputs, 256-token targets, learning rate `2e-4`, weight decay `0.01`, and per-epoch validation ROUGE. The effective batch size is 8 in the recommended command.
 
-For faster training, run the same script on a CUDA GPU through Google Colab or another GPU service. Use the committed script and the pre-May-2025 BioBART-large base; changing the hardware does not change the project approach.
-
 ## Architecture
 
 ```mermaid
@@ -135,16 +131,12 @@ The original project used BART-base with LoRA. The restoration preserves that ap
 - Loading the base model and adapter separately through PEFT
 - Using the biomedical BioBART-large backbone
 - Increasing serving input context from 128 to the 512-token training context
-- Removing sampling nondeterminism from the demo
-- Failing loudly instead of silently switching adapters
-- Providing clinician-selected section generation with individual copy-ready results
-- Checking the served output through a Flask integration evaluation
+- Providing clinician-selected section generation in demo
 
-This project is educational and is not a medical device. Generated text can contain omissions, incorrect facts, incorrect attribution, or unsupported statements. A qualified clinician must review every result before EHR submission.
+This project is educational and is not a medical device.
 
 ## Credits
 
-- Original project: [Michael-David-Lam](https://github.com/Michael-David-Lam)
 - Dataset: Ben Abacha et al., [MTS-Dialog](https://github.com/abachaa/MTS-Dialog), EACL 2023
 - Biomedical base: [GanjinZero/biobart-large](https://huggingface.co/GanjinZero/biobart-large)
 - Frameworks: [PEFT](https://github.com/huggingface/peft), [Transformers](https://github.com/huggingface.co/docs/transformers), Flask

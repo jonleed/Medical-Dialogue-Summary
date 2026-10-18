@@ -157,3 +157,7 @@ This project is educational and is not a medical device.
 ## License
 
 [MIT](LICENSE)
+
+## Targeted free-model pilot
+
+A targeted factuality harness adds local fact inventories, exact-evidence semantic review, and section-aware omission checks with a capped OpenCode transport. The selected free DeepSeek reviewer is currently **blocked by OpenCode's HTTP 403 free-tier check**: no valid semantic reviews were produced. The 24-case development packet and offline diagnostics are available; semantic accuracy and clinical validation remain unestablished. No paid fallback is used by this pilot.

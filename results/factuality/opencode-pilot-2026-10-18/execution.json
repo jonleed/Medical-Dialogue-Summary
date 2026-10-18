@@ -1,0 +1,6 @@
+{
+  "status": "blocked",
+  "reason": "HTTP 403 free-tier restriction from official preview and stable OpenCode clients. No successful semantic reviews. Requires a working interactive provider connection or client/account fix; do not bypass authentication.",
+  "attempts": 4,
+  "production_started": false
+}

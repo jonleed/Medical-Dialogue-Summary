@@ -1,0 +1,27 @@
+{
+  "offline_tests": {
+    "command": ".venv/bin/python -m unittest discover -s tests -v",
+    "passed": true,
+    "count": 109,
+    "log_sha256": "0262cc1f19c8565bd0a2d8a82a167020ab14818f9359532dd91fe7f6867aeacc"
+  },
+  "frozen_cases": 24,
+  "attempts": 4,
+  "valid_semantic_reviews": 0,
+  "status": "blocked",
+  "provider_denial_persists": true,
+  "extra_codex_review_processes_launched": 0,
+  "paid_fallback": false,
+  "active_loopback_review_servers_observed": 0,
+  "review_packet_files": 24,
+  "semantic_accuracy_established": false,
+  "human_reviews": 0,
+  "source_hashes": {
+    "factuality/facts.py": "1f32f0dce162e4e57db7d166ebbd35705cf6b280e2f7ec9060da7c3f7f956e00",
+    "factuality/free_protocol.py": "c2b29932c58b1bfb70542f7e355b46fc1a4c9f7a0a41d08f993136f0b6fcd78d",
+    "factuality/opencode_backend.py": "59e2add5963b2fd37c97d2e7027054fa4e81e53ccfa2011b7f68ad40b4b7c937",
+    "factuality/free_pilot.py": "23e852b7d65546f5966a5bdeb14e19655be405514c4f978a35c02edc6139b5c9",
+    "factuality/free_report.py": "792a61483a9acdb915b6199cf27c6dd9686d0725d8cb158ea3251ccd4d82d6f2",
+    "factuality/free_pilot_cases.py": "e9877d0c0f8ae605ef8c6ae69bee69ba8bbf61454266c68be7811fc2d5131128"
+  }
+}

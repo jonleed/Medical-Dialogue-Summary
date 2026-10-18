@@ -173,3 +173,6 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Local factuality exports and review queues contain dataset text.
+results/factuality/local/

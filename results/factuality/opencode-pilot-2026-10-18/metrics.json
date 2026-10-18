@@ -1,0 +1,75 @@
+{
+  "model": "opencode/deepseek-v4.1-flash-free",
+  "cases": 24,
+  "semantic_performance_status": "unavailable: no valid provider reviews; missing-target counts are coverage failures, not model capability estimates",
+  "valid_reviews": 0,
+  "attempts": 4,
+  "by_capability": {
+    "age": {
+      "tp": 0,
+      "fn": 3,
+      "fp": 0,
+      "tn": 0,
+      "eligible": 6,
+      "unassessed": 6,
+      "precision": null,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "gender": {
+      "tp": 0,
+      "fn": 3,
+      "fp": 0,
+      "tn": 0,
+      "eligible": 6,
+      "unassessed": 6,
+      "precision": null,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "unsupported": {
+      "tp": 0,
+      "fn": 3,
+      "fp": 0,
+      "tn": 0,
+      "eligible": 6,
+      "unassessed": 6,
+      "precision": null,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "omission": {
+      "tp": 0,
+      "fn": 3,
+      "fp": 0,
+      "tn": 0,
+      "eligible": 6,
+      "unassessed": 6,
+      "precision": null,
+      "recall": 0.0,
+      "f1": 0.0
+    }
+  },
+  "target_extraction": {
+    "numerator": 0,
+    "denominator": 24
+  },
+  "end_to_end_correct": {
+    "numerator": 0,
+    "denominator": 24
+  },
+  "usage": {
+    "known_input": 0,
+    "known_output": 0,
+    "unknown_attempts": 4,
+    "reserved_input_upper_bound": 40000,
+    "reserved_output_upper_bound": 8000,
+    "note": "failed provider responses did not expose actual token usage; unknown is not zero"
+  },
+  "limits": [
+    "24 controlled development cases; not independent clinical validation",
+    "model proposals are not physician labels",
+    "missing targets remain in denominators",
+    "provider model alias; weight revision not exposed"
+  ]
+}

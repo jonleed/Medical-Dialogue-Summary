@@ -144,3 +144,9 @@ The evaluator may support the stated project description once its four paths wor
 - [MTS-Dialog release and manual correlation scores](https://github.com/abachaa/MTS-Dialog)
 - [Project dataset audit](../../dataset_selection_2026-10-18.md)
 - [Earlier stopped semantic-study design and limitations](../../semantic_study_2026-10-18_plan.md)
+
+## Execution amendment from the user's subsequent instruction
+
+The user explicitly requested choosing one researched model and running the evaluation rather than comparing reviewers. Use DeepSeek V4.1 Flash Free only; remove ranking and GLM inference. The working pilot budget was reduced to 24 total attempts, with the remaining token limits preserved. Inline execution avoids extra Codex reviewers.
+
+Execution reached four failed attempts and no valid model responses. A durable provider-denial barrier now prevents further requests. The normal OpenCode client uses a private initialized server; the attempted one-shot API path was rejected and removed. Stable OpenCode was tried after the preview rejection, with the executable change disclosed to the user. The current [execution report](../../opencode_factuality_pilot.md) records the block. No tools were enabled or authentication headers forged to evade OpenCode's gate. The 300-summary phase remains unstarted.

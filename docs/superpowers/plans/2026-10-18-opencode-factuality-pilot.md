@@ -164,3 +164,9 @@ def test_restart_does_not_repeat_an_unsettled_job(self):
 - [ ] User reviews this implementation plan and confirms execution method.
 
 Recommended method: inline execution with `superpowers:executing-plans`, without Codex subagents or additional model code-review batches. The user’s usage constraint takes precedence over a skill's default recommendation to spawn reviewers. The only external inference is the bounded OpenCode pilot.
+
+## Execution status and superseding user direction
+
+The user replaced the two-model comparison with one researched reviewer and explicitly requested execution. DeepSeek V4.1 Flash Free was selected; no GLM calls or ranking were performed. The implementation used a 24-attempt cap. Tests are consolidated in `tests/test_free_factuality.py`; code interfaces follow the modules above.
+
+Tasks 1–5 are implemented and verified offline. Task 6 reached a **blocked outcome**: four failed client/provider attempts, zero valid semantic reviews, and a persistent rejection barrier. The local demographic diagnostic flagged 6/6 constructed contradictions with 0/6 control false alarms. This does not complete the intended semantic validation. See `docs/opencode_factuality_pilot.md` for actual artifacts and limitations. The author's final review was performed inline; no additional Codex subagent review was dispatched under the user's usage constraint.

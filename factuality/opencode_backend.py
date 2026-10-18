@@ -27,6 +27,7 @@ def save(path,data):
 
 
 class BudgetLedger:
+    allowed_model = MODEL
     def __init__(self,path):
         self.path=Path(path);self.path.parent.mkdir(parents=True,exist_ok=True)
     def _load(self):return json.loads(self.path.read_text()) if self.path.exists() else {'entries':{}}
@@ -35,7 +36,7 @@ class BudgetLedger:
         with self.path.with_suffix('.lock').open('a') as lock:
             fcntl.flock(lock,fcntl.LOCK_EX);state=self._load();state['blocked_reason']=reason;save(self.path,state)
     def reserve(self,job_id,model,input_bound):
-        if model!=MODEL:raise ValueError('only selected free model is allowed')
+        if model!=self.allowed_model:raise ValueError('only selected free model is allowed')
         if type(input_bound) is not int or not 0<input_bound<=250000:raise ValueError('invalid input reservation')
         with self.path.with_suffix('.lock').open('a') as lock:
             fcntl.flock(lock,fcntl.LOCK_EX);state=self._load();entries=state['entries']

@@ -1,0 +1,38 @@
+{
+  "offline_tests": {
+    "count": 115,
+    "passed": true,
+    "command": ".venv/bin/python -m unittest discover -s tests -v",
+    "log_sha256": "115ad7d207115eb509ccc75059145bf17d4a702fad53df3518cf3685db3690a0"
+  },
+  "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+  "actual_api_calls": 19,
+  "actual_api_cost_usd": 0,
+  "prior_opencode_attempts": 5,
+  "total_attempts": 24,
+  "valid_reviews": 17,
+  "correct_target_decisions": 14,
+  "target_denominator_dispatched": 19,
+  "target_denominator_frozen": 24,
+  "failed_reviews": 2,
+  "undispatched_cases": 5,
+  "human_reviews": 0,
+  "extra_codex_review_workers": 0,
+  "paid_fallback": false,
+  "actual_api_usage": {
+    "input": 12550,
+    "output": 2640
+  },
+  "remaining_account_free_requests": {
+    "used": 19,
+    "limit": 50,
+    "remaining": 31
+  },
+  "source_hashes": {
+    "factuality/openrouter_pilot.py": "83f2c04286a0ecc35d243b9bda45e593ba701cdac8f5d7f25f99af711e14f09c",
+    "factuality/opencode_backend.py": "443786e06ca82b837392a88f61ca57cc90e1f2b86d80a96d3ebab42429853dc9",
+    "factuality/free_report.py": "13f7908a0fb9a74cce804d2646ba2fba56362bd64f2e210583af35438d71d106",
+    "factuality/free_protocol.py": "c2b29932c58b1bfb70542f7e355b46fc1a4c9f7a0a41d08f993136f0b6fcd78d",
+    "tests/test_openrouter_factuality.py": "40474a2a8d7b1401c8d842db52ae0624d76c00e81935bb1e024afa88a66c9ac0"
+  }
+}

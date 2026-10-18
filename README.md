@@ -160,3 +160,5 @@ This project is educational and is not a medical device.
 ## Targeted free-model pilot
 
 A [targeted factuality harness](docs/opencode_factuality_pilot.md) adds local fact inventories, exact-evidence semantic review, and section-aware omission checks with a capped OpenCode transport. The selected free DeepSeek reviewer is currently **blocked by OpenCode's HTTP 403 free-tier check**: no valid semantic reviews were produced. The 24-case development packet and offline diagnostics are available; semantic accuracy and clinical validation remain unestablished. No Codex review subprocesses or paid fallback are used by this pilot.
+
+The [OpenRouter follow-up](docs/openrouter_factuality_pilot.md) ran the targeted packet with Nemotron 3 Ultra Free: 19 requests at $0, 17 valid reviews and 14 correct target decisions. Two invalid responses, two extraction gaps and an unsupported/contradicted confusion remain visible. These are development results; independent clinical accuracy is unestablished.

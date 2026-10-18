@@ -3,7 +3,7 @@
   "cases": 24,
   "semantic_performance_status": "unavailable: no valid provider reviews; missing-target counts are coverage failures, not model capability estimates",
   "valid_reviews": 0,
-  "attempts": 4,
+  "attempts": 5,
   "by_capability": {
     "age": {
       "tp": 0,
@@ -61,9 +61,9 @@
   "usage": {
     "known_input": 0,
     "known_output": 0,
-    "unknown_attempts": 4,
-    "reserved_input_upper_bound": 40000,
-    "reserved_output_upper_bound": 8000,
+    "unknown_attempts": 5,
+    "reserved_input_upper_bound": 50000,
+    "reserved_output_upper_bound": 10000,
     "note": "failed provider responses did not expose actual token usage; unknown is not zero"
   },
   "limits": [

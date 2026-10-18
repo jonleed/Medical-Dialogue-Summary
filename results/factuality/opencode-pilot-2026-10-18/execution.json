@@ -1,6 +1,15 @@
 {
   "status": "blocked",
-  "reason": "HTTP 403 free-tier restriction from official preview and stable OpenCode clients. No successful semantic reviews. Requires a working interactive provider connection or client/account fix; do not bypass authentication.",
-  "attempts": 4,
-  "production_started": false
+  "reason": "Official full TUI displayed: OpenCode's free tier can only be used from within OpenCode.",
+  "attempts": 5,
+  "valid_semantic_reviews": 0,
+  "production_started": false,
+  "terminal_probe": {
+    "status": "provider_denied",
+    "model": "opencode/deepseek-v4.1-flash-free",
+    "permission_policy": "unchanged deny-all",
+    "tools_executed": 0,
+    "valid_semantic_reviews": 0
+  },
+  "next_route": "OpenRouter free API; awaiting locally configured API key"
 }

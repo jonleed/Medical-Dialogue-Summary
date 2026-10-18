@@ -11,12 +11,12 @@ The selected reviewer is `opencode/deepseek-v4.1-flash-free`. The user requested
 | Frozen controlled cases | 24: six each for age, gender/sex/pronouns, unsupported claims, and omissions |
 | Errors and controls | Three errors and three controls per capability |
 | Local demographic rule diagnostic | 6/6 known contradictions flagged; 0/6 controls flagged as contradictions |
-| OpenCode execution attempts | 4, all failed before a usable review |
+| OpenCode execution attempts | 5, all failed before a usable review |
 | Valid semantic reviews | **0/24** |
-| Remaining cases | 20 not attempted; failed cases were not automatically retried |
+| Remaining cases | 19 not attempted; four earlier failures and one separately authorized terminal probe |
 | Semantic unsupported-claim / omission accuracy | **Not measured** |
 | Actual provider token counts | Not available for the failed attempts; full reservations retained |
-| Reserved token allowance for these attempts | 40,000 input / 8,000 output upper bounds; not a claim of actual consumption |
+| Reserved token allowance for these attempts | 50,000 input / 10,000 output upper bounds; not a claim of actual consumption |
 | Paid fallback / Codex review subprocesses | None in this pilot |
 | Offline regression suite | 109 tests passed; see the versioned verification artifact |
 
@@ -66,3 +66,11 @@ The implementation targets the user's description:
 > Built a targeted factuality evaluation for age and gender contradictions, unsupported claims, and omissions in clinical summaries.
 
 For this execution, qualify that the harness and local diagnostics are complete while **LLM execution and semantic performance validation remain blocked**. Expert-equivalent accuracy, clinical safety, complete omission recall, and review of all 300 saved summaries are not established.
+
+## Follow-up: authorized full terminal probe
+
+After the user confirmed that ordinary OpenCode terminal sessions work, one frozen case was submitted through the official full-screen terminal interface in a pseudo-terminal. The selected DeepSeek model, custom reviewer, and deny-all tool policy were unchanged. The interface launched and displayed the supplied case, then displayed the same free-tier access rejection. The terminal was closed at its 60-second deadline and its owned private server was stopped. No review was produced.
+
+The capture remains private in `terminal-probe/terminal.raw`. Temporary-path spelling (`/var` versus `/private/var`) prevented automatic session selection for export; the terminal capture independently records the provider rejection. This was a throwaway feasibility probe, not a completed reusable terminal adapter. The original provider barrier remains active, and all five attempts retain their full token reservations.
+
+OpenRouter is the proposed next transport, pending a locally configured API key. Its [live catalog](https://openrouter.ai/api/v1/models) lists `nvidia/nemotron-3-ultra-550b-a55b:free` at zero prompt and completion prices. NVIDIA reports instruction-following and non-hallucination results in its [technical report](https://research.nvidia.com/labs/nemotron/files/NVIDIA-Nemotron-3-Ultra-Technical-Report.pdf), making this a reasonable candidate for evidence-grounded review; that is an engineering inference, not proof of clinical factuality accuracy or superiority on these cases. DeepSeek V4.1 Flash was not listed as a free OpenRouter variant at the time of inspection. No OpenRouter inference has been attempted and no paid route has been selected. Preserve the four-endpoint rubric and frozen cases; report any provider/model change separately.

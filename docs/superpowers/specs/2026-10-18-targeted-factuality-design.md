@@ -1,6 +1,6 @@
 # Targeted clinical factuality evaluation — design for review
 
-Date: October 18, 2026. Status: proposed design; implementation and inference paused for review.
+Date: October 18, 2026. Status: design approved by the user's “ok lets try it”; implementation-plan review is next. Implementation and inference remain paused.
 
 ## Outcome and scope
 
@@ -132,8 +132,8 @@ The evaluator may support the stated project description once its four paths wor
 - [x] Reflect the user's goal and cost constraint; inspect the current evaluator and installed CLI without inference.
 - [x] Compare approaches and write this design, including scope, budget, failure behavior, and success criteria.
 - [x] Self-review for conflicting budgets, ambiguous provenance, incomplete labels, and scope expansion.
-- [ ] User reviews this written design.
-- [ ] Use `superpowers:writing-plans` to produce a task-by-task implementation plan grounded in this design.
+- [x] User reviews this written design.
+- [x] Use `superpowers:writing-plans` to produce a task-by-task implementation plan grounded in this design: [implementation plan](../plans/2026-10-18-opencode-factuality-pilot.md).
 - [ ] User reviews that plan and selects execution method. Recommend inline execution without Codex subagents to protect usage.
 - [ ] Implement with offline tests, verify transport controls, run only the capped pilot, and report.
 

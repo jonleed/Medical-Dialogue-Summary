@@ -176,3 +176,13 @@ cython_debug/
 
 # Local factuality exports and review queues contain dataset text.
 results/factuality/local/
+
+# Local credentials.
+.env.*
+
+
+# Publish current aggregate results only; raw exports/caches remain local.
+results/factuality/*
+!results/factuality/openrouter-pilot-2026-10-18/
+!results/factuality/saved-summary-screening-2026-10-18/
+!results/factuality/commit-review-2026-10-18/

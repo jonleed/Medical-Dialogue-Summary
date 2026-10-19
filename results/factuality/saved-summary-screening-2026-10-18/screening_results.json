@@ -1,0 +1,174 @@
+{
+  "description": "Local demographic screening of 300 saved clinical summaries",
+  "checker_version": "patient_demographics_v2",
+  "evaluated_at": "2026-10-18T20:17:44-0400",
+  "total_cases": 300,
+  "models": [
+    {
+      "run": "biobart-flask-2026-10-17",
+      "model": "BioBART-large with LoRA",
+      "cases": 100,
+      "automatic": {
+        "checker_version": "patient_demographics_v2",
+        "suggestions": 58,
+        "supported_suggestions": 20,
+        "contradiction_suggestions": 3,
+        "unclear_suggestions": 35,
+        "flagged_cases": 27,
+        "contradiction_flagged_cases": 3,
+        "model_visible_contradictions": 2,
+        "truncated_source_contradictions": 1,
+        "status": "unreviewed suggestions, excluded from annotated rates",
+        "checker_precision": null,
+        "checker_recall": null
+      },
+      "by_type": {
+        "age": {
+          "suggestions": 13,
+          "contradictions": 2,
+          "supported": 11,
+          "unclear": 0,
+          "model_visible_contradictions": 2
+        },
+        "pronoun": {
+          "suggestions": 33,
+          "contradictions": 1,
+          "supported": 9,
+          "unclear": 23,
+          "model_visible_contradictions": 0
+        },
+        "sex": {
+          "suggestions": 12,
+          "contradictions": 0,
+          "supported": 0,
+          "unclear": 12,
+          "model_visible_contradictions": 0
+        }
+      },
+      "flagged_cases": 27,
+      "contradiction_cases": 3
+    },
+    {
+      "run": "bart-lora-flask-2026-10-17",
+      "model": "BART-base with LoRA",
+      "cases": 100,
+      "automatic": {
+        "checker_version": "patient_demographics_v2",
+        "suggestions": 75,
+        "supported_suggestions": 17,
+        "contradiction_suggestions": 4,
+        "unclear_suggestions": 54,
+        "flagged_cases": 38,
+        "contradiction_flagged_cases": 4,
+        "model_visible_contradictions": 4,
+        "truncated_source_contradictions": 0,
+        "status": "unreviewed suggestions, excluded from annotated rates",
+        "checker_precision": null,
+        "checker_recall": null
+      },
+      "by_type": {
+        "age": {
+          "suggestions": 17,
+          "contradictions": 4,
+          "supported": 9,
+          "unclear": 4,
+          "model_visible_contradictions": 4
+        },
+        "pronoun": {
+          "suggestions": 42,
+          "contradictions": 0,
+          "supported": 8,
+          "unclear": 34,
+          "model_visible_contradictions": 0
+        },
+        "sex": {
+          "suggestions": 16,
+          "contradictions": 0,
+          "supported": 0,
+          "unclear": 16,
+          "model_visible_contradictions": 0
+        }
+      },
+      "flagged_cases": 38,
+      "contradiction_cases": 4
+    },
+    {
+      "run": "bart-base-flask-2026-10-17",
+      "model": "BART-base, no adapter",
+      "cases": 100,
+      "automatic": {
+        "checker_version": "patient_demographics_v2",
+        "suggestions": 51,
+        "supported_suggestions": 49,
+        "contradiction_suggestions": 2,
+        "unclear_suggestions": 0,
+        "flagged_cases": 1,
+        "contradiction_flagged_cases": 1,
+        "model_visible_contradictions": 2,
+        "truncated_source_contradictions": 0,
+        "status": "unreviewed suggestions, excluded from annotated rates",
+        "checker_precision": null,
+        "checker_recall": null
+      },
+      "by_type": {
+        "age": {
+          "suggestions": 8,
+          "contradictions": 2,
+          "supported": 6,
+          "unclear": 0,
+          "model_visible_contradictions": 2
+        },
+        "pronoun": {
+          "suggestions": 43,
+          "contradictions": 0,
+          "supported": 43,
+          "unclear": 0,
+          "model_visible_contradictions": 0
+        }
+      },
+      "flagged_cases": 1,
+      "contradiction_cases": 1
+    }
+  ],
+  "cross_model_comparison": [
+    {
+      "model": "BioBART-large with LoRA",
+      "cases": 100,
+      "suggestions": 58,
+      "contradictions": 3,
+      "supported": 20,
+      "unclear": 35,
+      "flagged_cases": 27,
+      "contradiction_cases": 3,
+      "model_visible_contradictions": 2
+    },
+    {
+      "model": "BART-base with LoRA",
+      "cases": 100,
+      "suggestions": 75,
+      "contradictions": 4,
+      "supported": 17,
+      "unclear": 54,
+      "flagged_cases": 38,
+      "contradiction_cases": 4,
+      "model_visible_contradictions": 4
+    },
+    {
+      "model": "BART-base, no adapter",
+      "cases": 100,
+      "suggestions": 51,
+      "contradictions": 2,
+      "supported": 49,
+      "unclear": 0,
+      "flagged_cases": 1,
+      "contradiction_cases": 1,
+      "model_visible_contradictions": 2
+    }
+  ],
+  "limits": [
+    "Automatic rule-based suggestions, not annotated error rates",
+    "Checker precision and recall are unestablished on this sample",
+    "Unclear suggestions are review candidates, not confirmed errors",
+    "Does not cover unsupported claims or omissions (requires LLM reviewer)"
+  ]
+}

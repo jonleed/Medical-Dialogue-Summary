@@ -88,7 +88,69 @@ python eval_app_integration.py --app note --n 100
 python eval_app_integration.py --app section --n 100
 ```
 
-The BioBART-large adapter produced ROUGE-L 0.4719 through the Flask integration path. This confirms that the served application and evaluation use the same adapter, prompt, input length, and deterministic decode.
+An earlier BioBART-large Flask integration result reported ROUGE-L 0.4719. The cached integration predictions lack enough model and input provenance for factuality scoring. Flask and notebook output limits also differ; see the [factuality protocol audit](docs/factuality_report.md#coverage-and-protocol-audit).
+
+## Targeted Factuality Evaluation
+
+Beyond ROUGE, this project includes a targeted factuality evaluation for **age and gender contradictions, unsupported claims, and omissions** in clinical summaries.
+
+### Approach
+
+The evaluation combines two layers:
+
+1. **Local demographic screening** — rule-based extraction of patient age, sex, gender identity and pronoun references from both the source dialogue and the generated summary, with automatic comparison to flag contradictions, supported claims and unclear/review-required cases. Runs offline with no API calls.
+2. **Free-model semantic review** — a [targeted development pilot](docs/openrouter_factuality_pilot.md) using Nemotron 3 Ultra Free (via OpenRouter at \$0 actual cost) to assess unsupported claims and omissions through blinded, exact-evidence validation on 24 controlled cases.
+
+Design choices were informed by published evaluation methods from OpenAI, Anthropic and Google, adapted for a free-inference budget. See the [research sources](docs/frontier_eval_research.md) and [evaluation redesign](docs/frontier_eval_report.md).
+
+### 300-Summary Demographic Screening
+
+All 300 saved validation summaries (100 per model) were screened with the local demographic checker (`patient_demographics_v2`):
+
+| Model | Cases | Suggestions | Contradictions | Supported | Unclear | Flagged cases |
+|---|---:|---:|---:|---:|---:|---:|
+| BioBART-large with LoRA | 100 | 58 | 3 | 20 | 35 | 27 |
+| BART-base with LoRA | 100 | 75 | 4 | 17 | 54 | 38 |
+| BART-base, no adapter | 100 | 51 | 2 | 49 | 0 | 1 |
+
+BioBART-large produces the fewest contradiction flags (3) while maintaining the most supported demographic claims (20). The base model without fine-tuning shows fewer unclear items because its shorter outputs contain fewer demographic references overall; its 2 contradictions are both age errors. The full screening record is [`results/factuality/saved-summary-screening-2026-10-18/screening_results.json`](results/factuality/saved-summary-screening-2026-10-18/screening_results.json).
+
+These are **automatic rule-based suggestions**, not annotated error rates. Checker precision and recall are unestablished on this sample. Unclear suggestions are review candidates, not confirmed errors.
+
+### Development Pilot Results
+
+The [targeted pilot](docs/openrouter_factuality_pilot.md) ran 19 requests through Nemotron 3 Ultra Free at \$0 actual cost:
+
+| Capability | Planned | Valid reviews | Correct target decisions |
+|---|---:|---:|---:|
+| Patient age / relative-age controls | 4 | 3 | 2 |
+| Sex, gender identity and pronouns | 6 | 6 | 5 |
+| Unsupported claims | 3 | 3 | 2 |
+| Omissions / section exclusions | 6 | 5 | 5 |
+| **Total** | **19** | **17** | **14** |
+
+Five observed failure modes (invented plan IDs, misclassified relative ages, missing pronoun targets, unsupported/contradicted confusion, source-only evidence) are documented in the [pilot report](docs/openrouter_factuality_pilot.md). These are development results on implementer-authored fixtures, not independent clinical validation.
+
+### Reproduce
+
+```bash
+# Offline tests (no inference)
+.venv/bin/python -m unittest discover -s tests -v
+
+# Offline report from saved pilot reviews (no inference)
+.venv/bin/python -m factuality.openrouter_pilot report
+
+# Demographic screening of saved summaries (no inference)
+.venv/bin/python -m factuality.evaluate_saved_summaries
+```
+
+### Limitations
+
+- The demographic checker's precision and recall are not calibrated on an independent annotated sample
+- Unsupported claims and omissions require a model reviewer; only the 24-case pilot covers these
+- The development pilot uses implementer-authored fixtures, not clinician-annotated holdout data
+- ROUGE scores above measure surface overlap, not clinical accuracy; they remain separate from factuality
+- This project is educational and is not a medical device
 
 ## Setup
 
@@ -156,9 +218,3 @@ This project is educational and is not a medical device.
 ## License
 
 [MIT](LICENSE)
-
-## Targeted free-model pilot
-
-A [targeted factuality harness](docs/opencode_factuality_pilot.md) adds local fact inventories, exact-evidence semantic review, and section-aware omission checks with a capped OpenCode transport. The selected free DeepSeek reviewer is currently **blocked by OpenCode's HTTP 403 free-tier check**: no valid semantic reviews were produced. The 24-case development packet and offline diagnostics are available; semantic accuracy and clinical validation remain unestablished. No Codex review subprocesses or paid fallback are used by this pilot.
-
-The [OpenRouter follow-up](docs/openrouter_factuality_pilot.md) ran the targeted packet with Nemotron 3 Ultra Free: 19 requests at $0, 17 valid reviews and 14 correct target decisions. Two invalid responses, two extraction gaps and an unsupported/contradicted confusion remain visible. These are development results; independent clinical accuracy is unestablished.

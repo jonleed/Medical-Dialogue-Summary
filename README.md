@@ -88,48 +88,25 @@ python eval_app_integration.py --app note --n 100
 python eval_app_integration.py --app section --n 100
 ```
 
-An earlier BioBART-large Flask integration result reported ROUGE-L 0.4719. The cached integration predictions lack enough model and input provenance for factuality scoring. Flask and notebook output limits also differ; see the [factuality protocol audit](docs/factuality_report.md#coverage-and-protocol-audit).
+An earlier BioBART-large Flask integration result reported ROUGE-L 0.4719. The cached integration predictions lack enough model and input provenance for factuality scoring. Flask and notebook output limits also differ; see the [factuality protocol audit](docs/factuality_report.md#input-and-scoring-provenance).
 
-### Factuality Evaluation Framework: Contradictions, Unsupported Claims, and Omissions
+### Targeted factuality evaluation
 
-Beyond surface ROUGE overlap, this project includes a targeted evaluation framework to audit **age, gender, and race contradictions, unsupported claims, and clinical omissions** in generated summaries.
+Built a targeted factuality evaluation for **age and gender contradictions, unsupported claims, and omissions in clinical summaries**. It adapts published frontier-lab evaluation principles to a local/free-model budget: frozen development cases, blinded review payloads, source-only omission plans, exact evidence checks, explicit coverage, and recorded model/settings/costs. [Design and methods](docs/factuality_report.md).
 
-#### Framework Design Review
+**Local demographic screening** ran on 300 saved validation summaries (100 per model). It checks patient age, sex, gender identity and pronouns while distinguishing relatives and model-visible evidence.
 
-The framework addresses clinical hallucination and confabulation through a two-tiered, frontier-inspired design built for a zero-cost local/free execution budget:
+| Model | Summaries | Contradiction suggestions | Supported suggestions | Unclear suggestions | Summaries flagged for review |
+|---|---:|---:|---:|---:|---:|
+| BioBART-large with LoRA | 100 | 3 | 20 | 35 | 27 |
+| BART-base with LoRA | 100 | 4 | 17 | 54 | 38 |
+| BART-base, no adapter | 100 | 2 | 49 | 0 | 1 |
 
-1. **Deterministic Local Demographic Screening (`patient_demographics_v2`)**:
-   - **Speaker & Context Grounding**: Distinguishes patient self-statements from physician speech, relative mentions (e.g., parents, siblings, children), and clinical staff.
-   - **Explicit Demographic Anchors**: Extracts explicit patient age, biological sex, gender identity, pronouns, and race/ethnicity declarations across dialogue turns.
-   - **Address vs. Ground Truth Separation**: Tracks honorifics (e.g., *"sir"*, *"ma'am"*) as weak conversational address cues rather than biological sex or preferred pronouns.
-   - **Tri-State Verdicts**: Claims are categorized as `supported` (exact source agreement), `contradicted` (incompatible evidence), or `unclear` (demographic attribute present in summary but unestablished or qualified in dialogue, flagging review candidates).
-   - **Input Visibility Tracking**: Audits whether missing facts were visible to the model or cut off by the 512-token context window.
+Counts are **rule-generated suggestions**, not verified errors or model accuracy rankings. A summary can produce multiple suggestions; the two BART-base contradiction suggestions occur in one summary. Unclear means the checker could not establish a defensible verdict. [Screening aggregates](results/factuality/saved-summary-screening-2026-10-18/screening_results.json).
 
-2. **Semantic Claim & Omission Review (Frontier-Inspired Free Pilot)**:
-   - Evaluates complex clinical statements (unsupported medication/diagnosis claims and omissions of requested clinical section content) using a pinned free model (`nvidia/nemotron-3-ultra-550b-a55b:free` via OpenRouter).
-   - Enforces a strict blinding protocol: requires exact substring evidence spans from both dialogue and summary, rejecting hallucinations, fabricated quotation offsets, and invalid plan IDs without paid fallbacks.
+**Semantic review** used Nemotron 3 Ultra Free on 19 of 24 frozen, constructed development cases:
 
-#### Evaluation Results: 300-Summary Demographic Screening
-
-All 300 saved validation summaries across three model configurations (100 per model) were evaluated through the local screening framework:
-
-| Model | Cases | Suggestions | Contradictions | Supported | Unclear | Flagged cases |
-|---|---:|---:|---:|---:|---:|---:|
-| **BioBART-large with LoRA** | 100 | 58 | **3** | **20** | 35 | 27 |
-| **BART-base with LoRA** | 100 | 75 | 4 | 17 | 54 | 38 |
-| **BART-base, no adapter** | 100 | 51 | 2 | 49 | 0 | 1 |
-
-*Key Findings:*
-- **Contradiction Rate**: BioBART-large with LoRA produced the fewest demographic contradictions (3) while generating the most verified supported claims (20).
-- **The "Unclear" Template Confabulation**: In 35 BioBART cases and 54 BART-base LoRA cases, the models generated demographic attributes (e.g., opening sentences such as *"This is a 58-year-old white female..."*) when sex or race was never stated in the conversation. The models inherited this structural preamble from the MTS-Dialog reference training notes, guessing demographic attributes rather than leaving them unstated.
-- **Base Model Artifacts**: BART-base without adapter produced 0 unclear suggestions because its collapsed outputs rarely formulated complete patient introduction clauses, but still generated 2 direct age contradictions.
-- Full machine-readable aggregate: [`results/factuality/saved-summary-screening-2026-10-18/screening_results.json`](results/factuality/saved-summary-screening-2026-10-18/screening_results.json).
-
-#### Free-Model Development Pilot Results
-
-On the 24 frozen development cases covering targeted error types, the pinned Nemotron 3 Ultra Free reviewer achieved:
-
-| Capability | Planned | Valid reviews | Correct target decisions |
+| Capability | Cases attempted | Valid reviews | Correct target decisions |
 |---|---:|---:|---:|
 | Patient age / relative-age controls | 4 | 3 | 2 |
 | Sex, gender identity and pronouns | 6 | 6 | 5 |
@@ -137,27 +114,22 @@ On the 24 frozen development cases covering targeted error types, the pinned Nem
 | Omissions / section exclusions | 6 | 5 | 5 |
 | **Total** | **19** | **17** | **14** |
 
-All 19 requests completed at **\$0.00 actual cost** (12,550 prompt tokens, 2,640 completion tokens). Observed failure modes (including relative age classification and unsupported vs. contradicted confusion) are documented in [`docs/openrouter_factuality_pilot.md`](docs/openrouter_factuality_pilot.md).
+The 19 API requests reported **$0 actual cost** (12,550 input and 2,640 output tokens); paid fallback was disabled. Two reviews were rejected, two targets were not extracted as required, and one unsupported claim was mislabeled as contradicted. Five frozen cases were not attempted within the run budget. [Pilot details](docs/openrouter_factuality_pilot.md) · [Metrics](results/factuality/openrouter-pilot-2026-10-18/metrics.json).
 
-#### Reproduce
+The framework and development pilot are implemented. The 300-summary run covers local demographics; it does **not** provide semantic unsupported-claim or omission rates for those summaries. Independent clinician calibration remains outside these results.
 
 ```bash
-# Offline test suite (115 passing tests, no inference)
-.venv/bin/python -m unittest discover -s tests -v
+# Offline tests; no model inference or downloads.
+HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m pytest -q
 
-# Offline report from saved pilot reviews (no inference)
-.venv/bin/python -m factuality.openrouter_pilot report
-
-# Demographic screening of 300 saved summaries (no inference)
+# Recompute screening when the saved local cases are available.
 .venv/bin/python -m factuality.evaluate_saved_summaries
+
+# Rebuild the pilot report when the saved local responses are available.
+.venv/bin/python -m factuality.openrouter_pilot report
 ```
 
-#### Limitations
-
-- Screening suggestions are deterministic rule-based flags, not human-calibrated error rates.
-- Unsupported non-demographic clinical claims (medications, diagnoses) and section omissions require LLM review; only the 24-case development pilot assessed these.
-- ROUGE scores measure surface n-gram overlap, not clinical accuracy.
-- This project is educational and is not a medical device.
+Public aggregates are committed. Raw source/prediction text, response caches and credentials remain local. A fresh clone can run the offline tests; reproducing the saved-result commands requires the corresponding local artifacts. [Annotation protocol](docs/factuality_protocol.md) · [JSONL schema](docs/factuality_schema.md).
 
 ## Setup
 
@@ -218,14 +190,7 @@ This project is educational and is not a medical device.
 
 ## Future Plans
 
-### Pass EHR Metadata as an Input Context
-
-In real EHR integrations (such as Epic or Cerner), the clinical system already maintains the patient's verified demographic banner (e.g., `Patient: Jane Doe | Age: 58 | Sex: F`). Instead of asking the model to guess demographics from conversational transcripts alone—which frequently leads to ungrounded pronoun hallucination, assumed patient sex/race, or age contradictions—the demographic banner should be prepended directly to the model input context.
-
-Conditioning the summarizer on verified EHR metadata:
-- **Eliminates demographic guessing**: Prevents the model from fabricating age, sex, gender, or race attributes when dialogue transcripts omit demographic declarations.
-- **Prevents downstream clinical risks**: Protects against erroneous sex-specific lab reference ranges, dosing formula discrepancies, and EHR chart mismatches caused by model confabulation.
-- **Focuses summarization capacity**: Allows the seq2seq model to devote its token budget entirely to summarizing clinical complaints, diagnoses, medication changes, and plans discussed during the visit.
+Evaluate whether supplying verified EHR metadata alongside the transcript reduces demographic contradictions and unsupported demographic assertions. This is a proposed experiment; it has not been implemented or measured. Metadata would need provenance and conflict handling, and its input-token cost should be included in the evaluation.
 
 ## Credits
 

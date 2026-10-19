@@ -59,3 +59,35 @@ class InvalidEvidenceTests(unittest.TestCase):
         self.assertEqual(result['status'],'failed')
         self.assertEqual(result['failure_stage'],'evidence_validation')
         self.assertNotIn('result',result)
+
+class PortablePilotTests(unittest.TestCase):
+    def test_prepare_without_private_history_preserves_attempts_on_restart(self):
+        from unittest.mock import patch
+        import factuality.openrouter_pilot as pilot
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);out=root/'run'
+            with patch.object(pilot,'ORIGINAL',root/'missing-history'):
+                pilot.prepare(out)
+                ledger=pilot.RouterLedger(out/'ledger.json')
+                ledger.reserve('j',pilot.MODEL,100);ledger.settle('j',{'input':10,'output':10},'failed')
+                pilot.prepare(out)
+            manifest,cases=pilot.frozen(out)
+            self.assertEqual(len(cases),24)
+            self.assertEqual(manifest['prior_attempts'],0)
+            self.assertEqual(len(ledger.read()['entries']),1)
+            manifest['selected_case_ids'].append('case-02')
+            (out/'manifest.json').write_text(json.dumps(manifest))
+            with self.assertRaises(ValueError):pilot.frozen(out)
+
+    def test_custom_report_cannot_overwrite_published_results(self):
+        from unittest.mock import patch
+        import factuality.openrouter_pilot as pilot
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);out=root/'custom';public=root/'published/openrouter-pilot-2026-10-18'
+            public.mkdir(parents=True);marker=public/'metrics.json';marker.write_text('{"preserved":true}')
+            with patch.object(pilot,'ORIGINAL',root/'missing-history'),patch.object(pilot,'OUT',root/'published/local/openrouter-pilot-2026-10-18'):
+                pilot.prepare(out)
+                metrics=pilot.report(out)
+            self.assertEqual(marker.read_text(),'{"preserved":true}')
+            self.assertEqual(metrics['valid_reviews'],0)
+            self.assertEqual(metrics['attempts'],0)

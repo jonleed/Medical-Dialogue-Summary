@@ -1,8 +1,0 @@
-{
-  "cases": 12,
-  "known_contradictions": 6,
-  "contradictions_captured": 6,
-  "false_contradictions_on_controls": 0,
-  "controls": 6,
-  "kind": "local rules on implementer-authored development fixtures; not clinical validation"
-}

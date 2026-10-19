@@ -32,7 +32,7 @@ The first API response identified its age contradiction correctly but invented a
 
 Raw requests, responses, key-free preflight metadata, source cases, manifest, ledger and local review HTML stay under ignored `results/factuality/local/openrouter-pilot-2026-10-18/`. Public aggregates are in `results/factuality/openrouter-pilot-2026-10-18/`.
 
-Human review, independent annotation agreement, reviewer sensitivity on natural clinical mistakes and factuality assessment of all 300 saved summaries remain outstanding. A successful development packet does not establish frontier-equivalent or clinician-equivalent accuracy. The actual served weight revision and quantization are not exposed by the free endpoint.
+Human review, independent annotation agreement and semantic claim/omission assessment of all 300 saved summaries remain outstanding. Local demographic screening of those 300 outputs has since been completed; see the [framework report](factuality_report.md). A successful development packet does not establish frontier-equivalent or clinician-equivalent accuracy. The actual served weight revision and quantization are not exposed by the free endpoint.
 
 ## Actual results
 
@@ -58,4 +58,10 @@ Observed gaps:
 
 The prompt was not tuned after these latter findings, and failed cases were not retried. Evidence-invalid reviews remain failed assessments while processing other predeclared cases; provider, route, cost and token failures still stop execution persistently. Optional/out-of-section labels are enforced by local source-plan eligibility and original model proposals are preserved. Their successful end-to-end decisions are not solely model ability.
 
-The project can truthfully describe a **targeted factuality evaluation for age and gender contradictions, unsupported claims, and omissions in clinical summaries**, with explicit coverage and validation failures. It cannot yet claim independent clinical validation or frontier-level evaluator accuracy. Further work should address these observed failure modes and evaluate an independent, clinician-annotated sample.
+The project can truthfully describe a **targeted factuality evaluation for age and gender contradictions, unsupported claims, and omissions in clinical summaries**, with explicit coverage and validation failures. These development results do not establish independent clinical accuracy. Further work should address these observed failure modes and evaluate an independent, clinician-annotated sample.
+
+## Preparing a separate reproducibility packet
+
+A fresh clone can freeze the public constructed fixtures offline with `python -m factuality.openrouter_pilot prepare --out /path/to/new-local-run`. Preparation makes no API calls and does not require historical private caches or credentials. It selects the same 19-case subset; an existing run is validated and its ledger is never reset. The optional `run` stage is a separate, explicit inference command and needs a locally configured key and verified free endpoint. Do not invoke it to reproduce the already-recorded counts.
+
+Custom output directories keep their reports local and cannot overwrite the checked-in historical aggregates. The historical run keeps its original five prior failures, exhausted cap and prompt-revision history.

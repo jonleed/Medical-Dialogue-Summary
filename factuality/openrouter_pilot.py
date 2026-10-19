@@ -98,23 +98,32 @@ def validate_completion(payload, raw):
 
 
 def prepare(out):
-    manifest,cases=load_frozen(ORIGINAL)
-    identity=case_hash({'cases':cases,'prompt':PROMPT,'request':request_body({}),'selected':SELECTED})
     if (out/'manifest.json').exists():
-        if json.loads((out/'manifest.json').read_text())['freeze_hash']!=identity:raise ValueError('pilot freeze changed')
+        frozen(out)
         return
-    old=json.loads((ORIGINAL/'ledger.json').read_text())
-    if len(old['entries'])!=5 or any(e['status']=='reserved' for e in old['entries'].values()):raise ValueError('prior attempt accounting changed')
+    if (ORIGINAL/'manifest.json').exists():
+        manifest,cases=load_frozen(ORIGINAL)
+        old=json.loads((ORIGINAL/'ledger.json').read_text())
+        if len(old['entries'])!=5 or any(e['status']=='reserved' for e in old['entries'].values()):raise ValueError('prior attempt accounting changed')
+        source_freeze=manifest['freeze_hash']
+    else:
+        # Public controlled fixtures can be prepared offline on a fresh clone.
+        from .free_pilot_cases import build_cases
+        cases=build_cases();old={'entries':{}}
+        source_freeze=case_hash(cases)
+    identity=case_hash({'cases':cases,'prompt':PROMPT,'request':request_body({}),'selected':SELECTED})
+    prior=len(old['entries'])
     out.mkdir(parents=True,exist_ok=True)
     save(out/'cases.json',cases)
-    save(out/'ledger.json',{'entries':old['entries'],'prior_ledger_hash':case_hash(old),'prior_provider_block':old['blocked_reason'],'authorized_route':'OpenRouter free API after local key setup'})
-    save(out/'manifest.json',{'freeze_hash':identity,'source_freeze':manifest['freeze_hash'],'model':MODEL,'selected_case_ids':[f'case-{i:02d}' for i in SELECTED],'max_total_attempts':24,'prior_attempts':5,'new_request_cap':19,'frozen_at':time.time()})
+    save(out/'ledger.json',{'entries':old['entries'],'prior_ledger_hash':case_hash(old),'prior_provider_block':old.get('blocked_reason'),'authorized_route':'OpenRouter free API; explicit run command required'})
+    save(out/'manifest.json',{'freeze_hash':identity,'source_freeze':source_freeze,'model':MODEL,'selected_case_ids':[f'case-{i:02d}' for i in SELECTED],'max_total_attempts':prior+len(SELECTED),'prior_attempts':prior,'new_request_cap':len(SELECTED),'selection_reason':'five previous provider failures consume the original 24-attempt cap' if prior else 'fixed 19-case development subset; other frozen cases remain unassessed','frozen_at':time.time()})
 
 
 def frozen(out):
     manifest=json.loads((out/'manifest.json').read_text());cases=json.loads((out/'cases.json').read_text())
     identity=case_hash({'cases':cases,'prompt':PROMPT,'request':request_body({}),'selected':SELECTED})
     if identity!=manifest['freeze_hash']:raise ValueError('frozen pilot identity mismatch')
+    if manifest.get('model')!=MODEL or manifest.get('selected_case_ids')!=[f'case-{i:02d}' for i in SELECTED] or manifest.get('new_request_cap')!=len(SELECTED):raise ValueError('frozen reviewer or dispatch selection changed')
     return manifest,cases
 
 
@@ -122,14 +131,15 @@ def report(out):
     manifest,cases=frozen(out)
     responses=[json.loads(p.read_text()) for p in sorted((out/'reviews').glob('*/result.json'))]
     metrics=build_report(cases,responses,RouterLedger(out/'ledger.json').read(),model=MODEL)
-    metrics['selection']={'planned':19,'total_frozen':24,'reason':'five previous provider failures consume the original 24-attempt cap','selected_case_ids':manifest['selected_case_ids']}
+    metrics['selection']={'planned':19,'total_frozen':24,'reason':manifest.get('selection_reason','five previous provider failures consume the original 24-attempt cap'),'selected_case_ids':manifest['selected_case_ids']}
     metrics['assessed_only_by_capability']={cap:binary_metrics([(r['gold_error'],r['prediction']) for r in metrics['decisions'] if r['capability']==cap and r['prediction'] is not None]) for cap in ['age','gender','unsupported','omission']}
     metrics['actual_cost_usd']=sum(r.get('cost_usd',0) for r in responses)
     metrics['cost_accounting_complete']=all('cost_usd' in r for r in responses)
     write_report(metrics,out,cases,responses)
     public=OUT.parents[1]/'openrouter-pilot-2026-10-18'
-    save(public/'metrics.json',{k:v for k,v in metrics.items() if k!='decisions'})
-    if (out/'execution.json').exists():save(public/'execution.json',json.loads((out/'execution.json').read_text()))
+    if out.resolve()==OUT.resolve():
+        save(public/'metrics.json',{k:v for k,v in metrics.items() if k!='decisions'})
+        if (out/'execution.json').exists():save(public/'execution.json',json.loads((out/'execution.json').read_text()))
     return metrics
 
 

@@ -37,6 +37,6 @@ For stochastic semantic judges, retain all trials instead of selecting the most 
 
 This work intentionally has no paid API or hosted-platform dependency. Judge-facing JSONL can be processed by an authorized local or hosted model and imported through `judge-score`; actual model, revision, family, settings and trial must be retained. Providing prompts and an importer is not the same as executing or calibrating a semantic judge.
 
-## What can honestly be claimed
+## Current scope
 
-The stronger harness is implemented and the frozen deterministic screen has been measured. The final [execution report](frontier_eval_report.md) records its actual failures, corrected benchmark versions, tests and pending review counts. There are no actual new frontier-model judgments, clinician judgments, blinded omission labels or untouched clinical-holdout results. The evaluator therefore remains a research tool with an unvalidated screening baseline. Calling it frontier-grade or clinically validated would exceed the evidence.
+The current implementation and results are described in [the framework report](factuality_report.md) and [the free-model pilot](openrouter_factuality_pilot.md). Local demographic screening was executed on 300 saved summaries; semantic review was executed on the constructed development subset. Clinician calibration, complete claim/omission annotation on real summaries and an independent clinical holdout were not performed. The project adapts the published design principles above without claiming to reproduce private frontier-lab infrastructure or clinical accuracy.

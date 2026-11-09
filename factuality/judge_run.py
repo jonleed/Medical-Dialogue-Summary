@@ -161,3 +161,20 @@ def run_secondary(items, out_dir, ledger_path, *, send=None, cap=80):
         return {'status': 'complete', 'raw': raw, 'usage': usage, 'attempts': 1, 'cli_version': SECONDARY_MODEL}
 
     return run_judge(items, out_dir, split='secondary', trials=1, caller=caller, ledger=ledger)
+
+
+def load_judge(out_dir):
+    """-> (merged {(run, case_id): result}, by_trial {'t1': {...}, 't2': {...}}). Failed trials are left out."""
+    out = Path(out_dir)
+    key = _load_json(out / 'key.json', {})
+    merged, by_trial = {}, {}
+    for oid, ident in key.items():
+        results = []
+        for path in sorted((out / oid).glob('t*.json')):
+            record = _load_json(path, {})
+            if record.get('status') == 'complete' and 'result' in record:
+                results.append(record['result'])
+                by_trial.setdefault(path.stem, {})[(ident['run'], ident['case_id'])] = record['result']
+        if results:
+            merged[(ident['run'], ident['case_id'])] = merge_trials(results)
+    return merged, by_trial

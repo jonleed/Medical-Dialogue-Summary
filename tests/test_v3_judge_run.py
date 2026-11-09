@@ -149,3 +149,25 @@ class Secondary(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class Load(unittest.TestCase):
+    def test_round_trip_merges_trials_and_skips_failures(self):
+        from factuality.judge_run import load_judge
+        tmp = Path(tempfile.mkdtemp())
+        ledger = CallLedger(tmp / 'l.json', cap=50)
+        manifest = tmp / 'm.json'
+        manifest.write_text(json.dumps({'probe': {'passed': True, 'cli_version': 'v', 'init_event_hash': 'h'}}))
+        freeze_judge(manifest)
+        items = [('run-a', case(0)), ('run-b', case(1))]
+        run_judge(items, tmp / 'held', split='heldout', trials=2, caller=FakeCaller(ledger), ledger=ledger,
+                  freeze_manifest=manifest)
+        bad = tmp / 'held' / opaque_id('val:1', 'run-b') / 't2.json'
+        record = json.loads(bad.read_text())
+        record['status'] = 'content_failed'
+        bad.write_text(json.dumps(record))
+        merged, by_trial = load_judge(tmp / 'held')
+        self.assertEqual(merged[('run-a', 'val:0')]['claims'][0]['trial_support'], 2)
+        self.assertEqual(merged[('run-b', 'val:1')]['trials'], 1)
+        self.assertIn(('run-a', 'val:0'), by_trial['t2'])
+        self.assertNotIn(('run-b', 'val:1'), by_trial['t2'])

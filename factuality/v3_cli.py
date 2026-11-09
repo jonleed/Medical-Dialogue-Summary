@@ -126,7 +126,7 @@ def cmd_cf_build(args):
 @stage('cf-score', 'Score counterfactual generations against construction gold (rules side)')
 def cmd_cf_score(args):
     from .counterfactual import score_counterfactual
-    report = {Path(r).name: score_counterfactual(read_jsonl(Path(r) / 'cases.jsonl')) for r in args.runs}
+    report = {Path(r).name: score_counterfactual(in_packet(read_jsonl(Path(r) / 'cases.jsonl'))) for r in args.runs}
     dump(args.out, report)
     for name, r in report.items():
         print(name, {k: v for k, v in r['families'].items()})
@@ -253,6 +253,14 @@ EXTENSIONS.append(_probe_parser)
 
 JUDGE_LEDGER = V3 / 'judge_ledger.json'
 CF_RUNS = ('cf-biobart', 'cf-bart-lora')
+# v2 packet = v1 minus 3 pronoun swaps whose gold was unsound; surviving cases are byte-identical,
+# so v1 generations are reused, filtered to this packet by case ID and dialogue hash.
+CF_PACKET = V3 / 'cf_cases_v2.jsonl'
+
+
+def in_packet(cases, packet=CF_PACKET):
+    allowed = {c['case_id']: c['source']['dialogue_sha256'] for c in read_jsonl(packet)}
+    return [c for c in cases if allowed.get(c['case_id']) == c['source']['dialogue_sha256']]
 
 
 def judge_items(split, sample_path=V3 / 'sample.json'):
@@ -260,7 +268,7 @@ def judge_items(split, sample_path=V3 / 'sample.json'):
     if split == 'counterfactual':
         items = []
         for run in CF_RUNS:
-            for c in load_run(V3 / run):
+            for c in in_packet(load_run(V3 / run)):
                 if classify_output(c.get('prediction'), c['dialogue']) == 'summary':
                     items.append((run, c))
         return items

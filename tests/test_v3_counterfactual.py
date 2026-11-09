@@ -87,6 +87,11 @@ class Families(unittest.TestCase):
         self.assertEqual(cf['counterfactual']['gold'], {'pronoun': 'feminine'})
         self.assert_replayable(b, cf)
 
+    def test_swap_rejected_when_masculine_reference_survives(self):
+        # R extracts only the anchored "he"; the later unanchored "Is he" would remain masculine.
+        self.assertIsNone(swap_pronouns(base('Doctor: The patient says he hurt his knee. Doctor: My nurse asked, is he in school?')))
+        self.assertIsNone(swap_pronouns(base('Doctor: The patient says he hurt his knee. Guest_family: Our little man is brave.')))
+
     def test_swap_skips_feminine(self):
         self.assertIsNone(swap_pronouns(base('Doctor: The patient says she hurt her knee.')))
 

@@ -24,6 +24,8 @@ MAX_TOKENS = 512
 AGE_OFFSET = 7
 _PRONOUN_SWAP = {'he': 'she', 'him': 'her', 'his': 'her'}
 _HONORIFIC_SWAP = {'sir': "ma'am", 'mr.': 'Ms.', 'mr': 'Ms', 'mister': 'Miss'}
+# Any masculine reference left after a swap could be about the patient; such cases are rejected.
+_MASCULINE_LEFT = re.compile(r"\b(?:he|him|his|himself|sir|mr\.?|mister|gentleman|man|boy)\b", re.I)
 _AGE_BEFORE = re.compile(r'(?:\d{1,3}|[a-z]+(?:[ -][a-z]+)?)[ -]+(?:years?|yr)[ -]+old\s*$', re.I)
 
 
@@ -145,7 +147,8 @@ def swap_pronouns(case):
         if m:
             start = f['span']['end'] - len(m.group(1))
             edits[start] = _edit(text, start, f['span']['end'], _match_case(m.group(1), _HONORIFIC_SWAP[m.group(1).lower()]))
-    return _make(case, 'pronoun_swap', list(edits.values()), {'pronoun': 'feminine'})
+    cf = _make(case, 'pronoun_swap', list(edits.values()), {'pronoun': 'feminine'})
+    return None if _MASCULINE_LEFT.search(cf['dialogue']) else cf
 
 
 def _consistent(cf):

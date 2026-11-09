@@ -100,6 +100,14 @@ class Runner(unittest.TestCase):
             run_judge(self.items, self.tmp / 'held', split='heldout', trials=2, caller=FakeCaller(self.ledger),
                       ledger=self.ledger, freeze_manifest=None)
 
+    def test_heldout_refuses_changed_cli_version(self):
+        manifest = self.tmp / 'judge_manifest.json'
+        manifest.write_text(json.dumps({'probe': {'passed': True, 'cli_version': '2.1.311', 'init_event_hash': 'h'}}))
+        freeze_judge(manifest)
+        with self.assertRaises(ValueError):
+            run_judge(self.items, self.tmp / 'held', split='heldout', trials=2, caller=FakeCaller(self.ledger),
+                      ledger=self.ledger, freeze_manifest=manifest, cli_version_now='2.2.0')
+
     def test_freeze_requires_passing_probe(self):
         manifest = self.tmp / 'judge_manifest.json'
         manifest.write_text(json.dumps({'probe': {'passed': False}}))

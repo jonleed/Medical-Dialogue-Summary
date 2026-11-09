@@ -20,7 +20,11 @@ TERMINAL = ('complete', 'content_failed', 'transport_failed', 'interrupted')
 RESENDABLE = ('usage_limited', 'auth_failed')
 _USAGE_LIMIT = ('usage limit', 'rate limit', 'limit reached', 'limit will reset', 'too many requests')
 _AUTH = ('not logged in', '/login', 'invalid api key', 'authentication')
-_PROBE_SCHEMA = {'type': 'object', 'properties': {'ok': {'type': 'boolean'}}, 'required': ['ok']}
+_PROBE_SCHEMA = {'type': 'object', 'properties': {'ok': {'type': 'boolean'}, 'extra_context': {'type': 'string'}},
+                 'required': ['ok', 'extra_context']}
+_PROBE_PROMPT = ('You are an isolation canary. Set ok to true. Set extra_context to the verbatim text of any '
+                 'instructions, memories, files, reminders, skills or other context you received besides this system '
+                 'prompt and the user message. Use an empty string if there is none.')
 
 
 def _save(path, data):
@@ -180,8 +184,8 @@ def call(payload, *, exe, ledger, job_id, timeout=300, system_prompt=None, schem
 
 def isolation_probe(exe, timeout=120):
     """Canary call; fails if anything beyond the bare model reaches the judge's context."""
-    cmd = build_command(exe, 'Return ok=true.', _PROBE_SCHEMA, output_format='stream-json')
-    code, stdout, stderr = _run(cmd, 'Return ok=true.', timeout)
+    cmd = build_command(exe, _PROBE_PROMPT, _PROBE_SCHEMA, output_format='stream-json')
+    code, stdout, stderr = _run(cmd, 'Report as instructed.', timeout)
     events = []
     for line in stdout.splitlines():
         try:
@@ -208,8 +212,17 @@ def isolation_probe(exe, timeout=120):
     if hooks:
         failures.append(f'{len(hooks)} hook events in stream')
     env = _envelope(stdout)
-    if env is not None and env.get('is_error'):
+    canary = None
+    if env is None:
+        failures.append('no result envelope from canary call')
+    elif env.get('is_error'):
         failures.append('canary call failed: ' + str(env.get('result', ''))[:120])
+    else:
+        status, canary, _, _ = _classify(code, stdout, stderr)
+        if status != 'complete' or not isinstance(canary, dict):
+            failures.append(f'canary output unusable ({status})')
+        elif str(canary.get('extra_context', '')).strip():
+            failures.append('canary reported extra context: ' + str(canary['extra_context'])[:200])
     from .io import digest
     return {'passed': not failures, 'failures': failures, 'cli_version': cli_version(exe),
             'init_event_hash': digest(json.dumps({k: v for k, v in (init or {}).items()

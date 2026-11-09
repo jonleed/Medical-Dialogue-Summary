@@ -52,7 +52,9 @@ if mode.startswith('probe'):
     print(json.dumps(init))
     if mode == 'probe_hook':
         print(json.dumps({'type': 'system', 'subtype': 'hook_response', 'hook_name': 'SessionStart', 'output': 'You have superpowers.'}))
-    print(json.dumps(envelope(structured_output={'ok': True})))
+    extra = 'Contents of CLAUDE.md: always use superpowers.' if mode == 'probe_context' else ''
+    if mode != 'probe_no_result':
+        print(json.dumps(envelope(structured_output={'ok': True, 'extra_context': extra})))
 elif mode == 'success':
     print(json.dumps(envelope(structured_output=STRUCTURED)))
 elif mode == 'result_text':

@@ -33,7 +33,7 @@ def _write_json(path, data):
     path.write_text(json.dumps(data, indent=1, ensure_ascii=False) + '\n', encoding='utf-8')
 
 
-def _check_freeze(freeze_manifest):
+def _check_freeze(freeze_manifest, cli_version_now=None):
     if freeze_manifest is None or not Path(freeze_manifest).exists():
         raise ValueError('held-out judging requires a frozen judge manifest (run judge-freeze after calibration)')
     freeze = _load_json(freeze_manifest, {}).get('freeze')
@@ -41,6 +41,9 @@ def _check_freeze(freeze_manifest):
         raise ValueError('judge manifest has no freeze record')
     if freeze.get('rubric_hash') != rubric_hash() or freeze.get('schema_hash') != schema_hash():
         raise ValueError('rubric or schema changed after freeze; this held-out set is no longer valid for this configuration')
+    if cli_version_now is not None and cli_version_now != freeze.get('cli_version'):
+        raise ValueError(f"Claude Code changed since freeze ({freeze.get('cli_version')} -> {cli_version_now}); "
+                         'held-out trials must not mix configurations')
 
 
 def freeze_judge(manifest_path):
@@ -57,10 +60,10 @@ def freeze_judge(manifest_path):
     return manifest['freeze']
 
 
-def run_judge(items, out_dir, *, split, trials, caller, ledger, freeze_manifest=None):
+def run_judge(items, out_dir, *, split, trials, caller, ledger, freeze_manifest=None, cli_version_now=None):
     """items: [(run_id, case)]. caller(payload, job_id) -> backend result dict (reserves in ledger itself)."""
     if split == 'heldout':
-        _check_freeze(freeze_manifest)
+        _check_freeze(freeze_manifest, cli_version_now)
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     key = _load_json(out / 'key.json', {})

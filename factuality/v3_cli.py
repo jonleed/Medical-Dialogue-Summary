@@ -296,7 +296,7 @@ def _judge_parsers(subs):
 def cmd_judge(args):
     import random
     from functools import partial
-    from .claude_code_backend import CALL_CAP, CallLedger, call, require_run_preconditions
+    from .claude_code_backend import CALL_CAP, CallLedger, call, cli_version, require_run_preconditions
     from .judge_run import opaque_id, run_judge
     require_run_preconditions(_read_manifest(), args.exe)
     trials = args.trials or (2 if args.split == 'heldout' else 1)
@@ -314,7 +314,7 @@ def cmd_judge(args):
         print(f'counterfactual reduced to {len(items)} summaries to fit the call cap')
     caller = partial(lambda payload, job, exe: call(payload, exe=exe, ledger=ledger, job_id=job), exe=args.exe)
     summary = run_judge(items, V3 / 'judge' / args.split, split=args.split, trials=trials, caller=caller,
-                        ledger=ledger, freeze_manifest=JUDGE_MANIFEST)
+                        ledger=ledger, freeze_manifest=JUDGE_MANIFEST, cli_version_now=cli_version(args.exe))
     print(summary)
 
 

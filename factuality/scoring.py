@@ -2,7 +2,8 @@
 from .io import case_hash
 
 KINDS = ('human', 'agent', 'model', 'synthetic')
-TYPES = {'age','sex','gender','pronoun','medication','diagnosis','symptom','quantity','date','other'}
+TYPES = {'age','sex','gender','pronoun','race_ethnicity','medication','diagnosis','symptom','quantity','date','other'}
+SUBJECTS = {'patient','relative','other'}
 CLAIM_LABELS = {'supported','contradicted','unsupported','unclear','pending'}
 FACT_LABELS = {'present','omitted','unclear','pending','excluded'}
 ASSESSABLE = {'supported','contradicted','unsupported','present','omitted'}
@@ -51,6 +52,7 @@ def validate_annotation(case, annotation):
             seen.add(item['id'])
             _require(item.get('label') in labels, 'invalid label')
             _require(item.get('fact_type') in TYPES, 'invalid fact type')
+            _require('subject' not in item or item['subject'] in SUBJECTS, 'invalid subject')
             _require(bool(item.get('text', '').strip()), 'atomic text required')
             _require(item.get('visibility') in {'visible','truncated','unclear'}, 'invalid visibility')
             _require(isinstance(item.get('source_spans'), list) and isinstance(item.get('visible_spans'), list), 'evidence span lists required')

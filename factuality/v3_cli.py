@@ -158,6 +158,74 @@ def cmd_sample(args):
 EXTENSIONS.append(_sample_parser)
 
 
+def _sampled_cases(sample_path, run_dir):
+    sample = json.loads(Path(sample_path).read_text())
+    ids = set(sample['calibration']) | set(sample['heldout'])
+    return [c for c in load_run(run_dir) if c['case_id'] in ids], sample
+
+
+def _fine_tuned_sampled(sample_path):
+    from .validity import classify_output
+    out = {}
+    for run, _ in FINE_TUNED:
+        cases, _ = _sampled_cases(sample_path, LOCAL / run)
+        out[run] = [c for c in cases if classify_output(c.get('prediction'), c['dialogue']) == 'summary']
+    return out
+
+
+def _annotation_parsers(subs):
+    a = subs.add_parser('plans', help=STAGES['plans'][1])
+    a.add_argument('--sample', default=str(V3 / 'sample.json'))
+    a.add_argument('--out', default=str(V3 / 'plans'))
+    f = subs.add_parser('freeze-plans', help=STAGES['freeze-plans'][1])
+    f.add_argument('--plans', default=str(V3 / 'plans' / 'plans.jsonl'))
+    lp = subs.add_parser('label-packet', help=STAGES['label-packet'][1])
+    lp.add_argument('--sample', default=str(V3 / 'sample.json'))
+    lp.add_argument('--plans', default=str(V3 / 'plans' / 'plans.jsonl'))
+    lp.add_argument('--out', default=str(V3 / 'label'))
+    il = subs.add_parser('import-labels', help=STAGES['import-labels'][1])
+    il.add_argument('--labels', required=True, help='labels.jsonl exported from label.html')
+    il.add_argument('--sample', default=str(V3 / 'sample.json'))
+    il.add_argument('--key', default=str(V3 / 'label' / 'key.json'))
+    il.add_argument('--out', default=str(V3 / 'annotations.jsonl'))
+
+
+@stage('plans', 'Write the blind source-only plan packet (no predictions) for the sampled dialogues')
+def cmd_plans(args):
+    from .annotate import write_plan_packet
+    cases, _ = _sampled_cases(args.sample, LOCAL / RUNS[0][0])
+    out = write_plan_packet(cases, args.out)
+    print(f'{len(cases)} plans -> {out / "plans.html"} (export plans.jsonl from the page into {out})')
+
+
+@stage('freeze-plans', 'Validate and hash-freeze the completed plans')
+def cmd_freeze_plans(args):
+    from .annotate import freeze_plans
+    print(freeze_plans(args.plans))
+
+
+@stage('label-packet', 'Write the model-blinded labelling page for both fine-tuned runs')
+def cmd_label_packet(args):
+    from .annotate import write_label_packet
+    out = write_label_packet(_fine_tuned_sampled(args.sample), args.plans, Path(args.plans).parent / 'plans_freeze.json', args.out)
+    print(f'labelling page -> {out / "label.html"}')
+
+
+@stage('import-labels', 'Validate exported labels and write canonical annotations (re-runnable)')
+def cmd_import_labels(args):
+    from .annotate import import_labels
+    from .io import write_jsonl
+    records = import_labels(args.labels, args.key, _fine_tuned_sampled(args.sample))
+    out = Path(args.out)
+    if out.exists():
+        out.unlink()
+    write_jsonl(out, records)
+    print(f'{len(records)} annotations validated -> {out}')
+
+
+EXTENSIONS.append(_annotation_parsers)
+
+
 def main(argv=None):
     args = build_parser().parse_args(argv)
     STAGES[args.stage][0](args)

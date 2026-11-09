@@ -226,6 +226,31 @@ def cmd_import_labels(args):
 EXTENSIONS.append(_annotation_parsers)
 
 
+JUDGE_MANIFEST = V3 / 'judge_manifest.json'
+
+
+def _read_manifest():
+    return json.loads(JUDGE_MANIFEST.read_text()) if JUDGE_MANIFEST.exists() else {}
+
+
+def _probe_parser(subs):
+    pr = subs.add_parser('probe', help=STAGES['probe'][1])
+    pr.add_argument('--exe', default='claude')
+
+
+@stage('probe', 'Isolation probe for the headless Claude Code judge (one canary call)')
+def cmd_probe(args):
+    from .claude_code_backend import isolation_probe
+    result = isolation_probe(args.exe)
+    manifest = _read_manifest()
+    manifest['probe'] = result
+    dump(JUDGE_MANIFEST, manifest)
+    print(json.dumps({k: result[k] for k in ('passed', 'failures', 'cli_version')}, indent=1))
+
+
+EXTENSIONS.append(_probe_parser)
+
+
 def main(argv=None):
     args = build_parser().parse_args(argv)
     STAGES[args.stage][0](args)

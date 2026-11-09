@@ -130,3 +130,29 @@ class PlanFreeze(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class VisibleSpansRecomputed(unittest.TestCase):
+    def test_plan_fact_visible_span_mapped_into_model_input(self):
+        prefix = 'Summarize the following doctor-patient dialogue into a detailed history of present illness clinical note: '
+        cases = {r: [dict(c, model_input={'text': prefix + c['dialogue'], 'truncated': False}) for c in cs]
+                 for r, cs in CASES.items()}
+        cases['run-bart'][0]['model_input'] = {'text': prefix + D1[:20], 'truncated': True}  # cough beyond window
+        tmp = Path(tempfile.mkdtemp())
+        write_plan_packet(cases['run-biobart'], tmp / 'plans')
+        plans_path = tmp / 'plans' / 'plans.jsonl'
+        by_id = {c['case_id']: c['dialogue'] for c in cases['run-biobart']}
+        plans_path.write_text(''.join(json.dumps(frozen_plan(p, by_id[p['case_id']])) + '\n' for p in read_jsonl(plans_path)))
+        freeze_plans(plans_path)
+        write_label_packet(cases, plans_path, tmp / 'plans' / 'plans_freeze.json', tmp / 'label')
+        key = json.loads((tmp / 'label' / 'key.json').read_text())
+        rows = [{'item_id': i, 'reviewer': 'Owner', 'status': 'partial', 'claims_complete': False, 'unresolved': ['x'],
+                 'claims': [], 'expected_facts': [{'id': 'f1', 'label': 'omitted', 'rationale': 'absent'}]} for i in key]
+        labels = tmp / 'labels.jsonl'
+        labels.write_text(''.join(json.dumps(r) + '\n' for r in rows))
+        records = {(r['run'], r['case_id']): r for r in import_labels(labels, tmp / 'label' / 'key.json', cases)}
+        visible = records[('run-biobart', 'val:1')]['expected_facts'][0]
+        self.assertEqual(visible['visibility'], 'visible')
+        self.assertEqual(visible['visible_spans'][0]['start'], len(prefix) + D1.index('cough'))
+        cut = records[('run-bart', 'val:1')]['expected_facts'][0]
+        self.assertEqual((cut['visibility'], cut['visible_spans']), ('truncated', []))

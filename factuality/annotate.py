@@ -108,6 +108,20 @@ def write_label_packet(cases_by_model, plans_path, freeze_path, out_dir, seed=20
     return out
 
 
+def _visible_evidence(case, source_spans):
+    """Map plan source spans into this summary's model-visible input (which starts with the prompt prefix)."""
+    mi = case.get('model_input') or {}
+    visible = mi.get('text', '')
+    base = visible.find(case['dialogue'][:30])
+    spans = []
+    for s in source_spans:
+        start = visible.find(s['text'], max(0, base + s['start'] - 50)) if base >= 0 else visible.find(s['text'])
+        if start < 0:
+            return [], ('truncated' if mi.get('truncated') else 'unclear')
+        spans.append({'start': start, 'end': start + len(s['text']), 'text': s['text']})
+    return spans, 'visible'
+
+
 def import_labels(labels_jsonl, key_path, cases_by_model):
     key = json.loads(Path(key_path).read_text(encoding='utf-8'))
     records = []
@@ -119,8 +133,10 @@ def import_labels(labels_jsonl, key_path, cases_by_model):
         facts = []
         for f in plan['expected_facts']:
             got = labels.get(f['id'], {})
+            visible_spans, visibility = _visible_evidence(case, f.get('source_spans', []))
             merged = dict(f, label='excluded' if f['label'] == 'excluded' else got.get('label', 'pending'),
-                          rationale=got.get('rationale') or f.get('rationale', ''))
+                          rationale=got.get('rationale') or f.get('rationale', ''),
+                          visible_spans=visible_spans, visibility=visibility)
             if got.get('generated_span'):
                 merged['generated_span'] = got['generated_span']
             facts.append(merged)

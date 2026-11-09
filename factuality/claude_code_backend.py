@@ -15,7 +15,7 @@ from pathlib import Path
 MODEL = 'claude-sonnet-5-5'
 CALL_CAP = 1000
 ALLOWED_TOOLS = ('StructuredOutput',)
-TERMINAL = ('complete', 'content_failed', 'transport_failed')
+TERMINAL = ('complete', 'content_failed', 'transport_failed', 'interrupted')
 # Never judged: may be re-sent once the owner unblocks the ledger.
 RESENDABLE = ('usage_limited', 'auth_failed')
 _USAGE_LIMIT = ('usage limit', 'rate limit', 'limit reached', 'limit will reset', 'too many requests')
@@ -58,6 +58,9 @@ class CallLedger:
 
     def calls_used(self):
         return self._used(self._load())
+
+    def status(self, job_id):
+        return self._load()['entries'].get(job_id, {}).get('status')
 
     def done(self, job_id):
         return self._load()['entries'].get(job_id, {}).get('status') in TERMINAL
@@ -144,6 +147,11 @@ def _classify(code, stdout, stderr):
         try:
             raw = json.loads(env.get('result', ''))
         except ValueError:
+            # Limit/auth text can arrive in a non-error envelope; never mark that as a judged failure.
+            if any(s in text for s in _AUTH):
+                return 'auth_failed', None, None, env
+            if any(s in text for s in _USAGE_LIMIT):
+                return 'usage_limited', None, None, env
             return 'content_failed', None, env.get('usage'), env
     return 'complete', raw, env.get('usage'), env
 

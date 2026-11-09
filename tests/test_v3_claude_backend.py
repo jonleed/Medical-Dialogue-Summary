@@ -88,6 +88,11 @@ class Backend(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.ledger.reserve('j2')
 
+    def test_usage_limit_text_without_error_flag(self):
+        r = self.run_call('usage_limit_soft')
+        self.assertEqual(r['status'], 'usage_limited')
+        self.assertFalse(self.ledger.done('j1'))
+
     def test_not_logged_in_blocks_ledger(self):
         self.assertEqual(self.run_call('not_logged_in')['status'], 'auth_failed')
         with self.assertRaises(ValueError):

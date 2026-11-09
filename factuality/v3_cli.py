@@ -334,6 +334,50 @@ def cmd_judge_secondary(args):
 EXTENSIONS.append(_judge_parsers)
 
 
+def _score_parser(subs):
+    sc = subs.add_parser('score', help=STAGES['score'][1])
+    sc.add_argument('--out', required=True, help='public metrics path, e.g. results/factuality/v3-<date>/metrics.json')
+    sc.add_argument('--annotations', default=str(V3 / 'annotations.jsonl'))
+    sc.add_argument('--sample', default=str(V3 / 'sample.json'))
+
+
+@stage('score', 'Score rules and judges against human labels; write public metrics (counts and rates only)')
+def cmd_score(args):
+    from .checks_v3 import suggestions_v3
+    from .counterfactual import score_counterfactual
+    from .judge_run import load_judge
+    from .v3_scoring import assemble_metrics, judge_on_counterfactual
+    annotations = read_jsonl(args.annotations)
+    sample = json.loads(Path(args.sample).read_text())
+    cases = {(run, c['case_id']): c for run, _ in FINE_TUNED for c in load_run(LOCAL / run)}
+    rules = {(a['run'], a['case_id']): {'claims': suggestions_v3(cases[(a['run'], a['case_id'])])} for a in annotations}
+    claude, trials = {}, {'t1': {}, 't2': {}}
+    for split in ('calibration', 'heldout'):
+        merged, by_trial = load_judge(V3 / 'judge' / split)
+        claude.update(merged)
+        if split == 'heldout':
+            trials = {k: by_trial.get(k, {}) for k in ('t1', 't2')}
+    secondary = load_judge(V3 / 'judge' / 'secondary')[0] if (V3 / 'judge' / 'secondary').exists() else None
+    cf_items = judge_items('counterfactual') if all((V3 / r).exists() for r in CF_RUNS) else []
+    counterfactual = None
+    if cf_items:
+        counterfactual = {'rules_view': {r: score_counterfactual([c for run, c in cf_items if run == r]) for r in CF_RUNS},
+                          'judge_on_construction_gold': judge_on_counterfactual(cf_items, load_judge(V3 / 'judge' / 'counterfactual')[0])}
+    validity = json.loads((V3 / 'validity.json').read_text()) if (V3 / 'validity.json').exists() else None
+    validity = {k: v['counts'] for k, v in (validity or {}).items()}
+    metrics = assemble_metrics(annotations, sample, {'rules': rules, 'claude': claude}, trials=trials,
+                               secondary=secondary, counterfactual=counterfactual, validity=validity)
+    dump(args.out, metrics)
+    for name, lines in metrics['heldout']['headline'].items():
+        print(name)
+        for t, text in lines.items():
+            print('  ', t, '->', text)
+    print(metrics['heldout']['caveat'])
+
+
+EXTENSIONS.append(_score_parser)
+
+
 def main(argv=None):
     args = build_parser().parse_args(argv)
     STAGES[args.stage][0](args)

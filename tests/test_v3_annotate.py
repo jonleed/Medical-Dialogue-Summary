@@ -52,6 +52,14 @@ class PlanFreeze(unittest.TestCase):
         self.write([frozen_plan(p, by_id[p['case_id']]) for p in plans])
         return freeze_plans(self.plans_path)
 
+    def test_plan_page_is_source_only(self):
+        CASES['run-biobart'][0]['reference'] = 'REFERENCE NOTE TEXT'
+        try:
+            write_plan_packet(CASES['run-biobart'], self.tmp / 'plans2')
+        finally:
+            CASES['run-biobart'][0]['reference'] = 'ref'
+        self.assertNotIn('REFERENCE NOTE TEXT', (self.tmp / 'plans2' / 'plans.html').read_text())
+
     def test_plan_packet_has_no_predictions(self):
         text = (self.tmp / 'plans' / 'plans.html').read_text() + self.plans_path.read_text()
         self.assertNotIn('40 years old with cough', text)

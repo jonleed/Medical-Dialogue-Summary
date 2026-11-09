@@ -95,10 +95,12 @@ def validate_judge_output(payload, raw):
         if key in seen:
             raise JudgeOutputError('duplicate_claim', c['text'][:60])
         seen.add(key)
-        ambiguous = len(generated) > 1 or any(len(g) > 1 for g in groups)
-        claims.append(dict(c, proposed_label=c['label'], label='unclear' if ambiguous else c['label'],
+        # Only an ambiguous summary location makes the label unusable; repeated short evidence
+        # (e.g. "Yes.") is flagged but keeps the judge's label.
+        claims.append(dict(c, proposed_label=c['label'], label='unclear' if len(generated) > 1 else c['label'],
                            generated_span=generated[0], source_spans=[s for g in groups for s in g],
-                           ambiguous_evidence=ambiguous))
+                           ambiguous_location=len(generated) > 1,
+                           ambiguous_evidence=len(generated) > 1 or any(len(g) > 1 for g in groups)))
     inventory = []
     for f in raw['section_inventory']:
         _require(isinstance(f, dict) and f.get('status') in ('present', 'omitted') and str(f.get('text', '')).strip(),

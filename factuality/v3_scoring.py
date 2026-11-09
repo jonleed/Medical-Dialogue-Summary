@@ -254,6 +254,12 @@ def assemble_metrics(annotations, sample, detectors, *, trials=None, secondary=N
     held, held_rows, held_anns = split(set(sample['heldout']))
     held['headline'] = {name: {t: headline_wording(t, m) for t, m in held[name].items()} for name in held_rows}
     held['caveat'] = headline_caveat(held['dialogues'])
+    held['by_summarizer'] = {}
+    for run in sorted({a['run'] for a in held_anns}):
+        mine = [a for a in held_anns if a['run'] == run]
+        dets = dict(detectors, **({'secondary': secondary} if secondary is not None else {}))
+        held['by_summarizer'][run] = {name: detector_metrics(rows_by_dialogue(mine, d, omissions=name != 'rules'), resamples, seed)
+                                      for name, d in dets.items()}
     cal, _, _ = split(set(sample['calibration']))
     cal['note'] = 'Calibration split was used to revise the judge prompt; not an independent estimate.'
     agree = {f'{name}_vs_human': _human_agreement(r) for name, r in held_rows.items()}

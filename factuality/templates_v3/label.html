@@ -73,7 +73,7 @@ function planItem(item) {
   const frozen = el('input', {type: 'checkbox'}); frozen.checked = st.frozen;
   frozen.addEventListener('change', () => { st.frozen = frozen.checked; st.frozen_at = new Date().toISOString(); save(); });
   return el('div', {class: 'item'}, el('h2', {}, item.case_id + ' — ' + item.requested_section),
-    el('h3', {}, 'Source dialogue'), pre, el('h3', {}, 'Reference note (coverage aid only)'), el('pre', {}, item.reference || ''),
+    el('h3', {}, 'Source dialogue'), pre,
     el('h3', {}, 'Expected facts for this section'), box,
     el('div', {class: 'row'}, el('button', {on: {click: () => { st.facts.push({id: 'f' + (st.facts.length + 1), label: 'pending', fact_type: 'other', subject: 'patient', visibility: 'visible', text: '', rationale: '', source_spans: [], visible_spans: []}); save(); draw(); }}}, 'Add fact'),
       el('label', {}, frozen, ' Plan complete and frozen; I have not seen any summary for this dialogue')));

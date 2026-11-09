@@ -85,6 +85,11 @@ class Validate(unittest.TestCase):
         out = validate_judge_output(p, raw())
         self.assertEqual((out['claims'][0]['label'], out['claims'][0]['ambiguous_evidence']), ('unclear', True))
 
+    def test_repeated_evidence_keeps_label(self):
+        p = dict(self.p, dialogue='Patient: I am 40 years old. Doctor: So I am 40 years old, you said?')
+        out = validate_judge_output(p, raw([claim(evidence_quotes=['I am 40 years old'])]))
+        self.assertEqual((out['claims'][0]['label'], out['claims'][0]['ambiguous_evidence']), ('supported', True))
+
     def test_inventory(self):
         inv = [{'text': 'Cough', 'source_quote': 'I have a cough', 'status': 'omitted', 'generated_quote': ''},
                {'text': 'Age', 'source_quote': 'I am 40 years old', 'status': 'present', 'generated_quote': '40 years old'}]

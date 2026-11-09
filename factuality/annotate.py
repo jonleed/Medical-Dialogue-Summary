@@ -35,8 +35,10 @@ def write_plan_packet(cases, out_dir):
     out = _new_dir(out_dir)
     plans = blind_plans(cases)
     write_jsonl(out / 'plans.jsonl', plans)
+    # Source-only (spec §5.2): the reference note is the summarizers' training target and is not shown.
     _render(out / 'plans.html', 'plan', [{'case_id': p['case_id'], 'requested_section': p['requested_section'],
-                                          'dialogue': p['dialogue'], 'reference': p['reference'], 'plan': p}
+                                          'dialogue': p['dialogue'],
+                                          'plan': {k: v for k, v in p.items() if k != 'reference'}}
                                          for p in plans])
     return out
 

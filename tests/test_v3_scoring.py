@@ -209,3 +209,4 @@ class Assemble(unittest.TestCase):
         self.assertIn('headline', m['heldout'])
         self.assertTrue(m['heldout']['caveat'].endswith('4 held-out dialogues'))
         self.assertNotIn('secret', json.dumps(m))
+        self.assertEqual(m['heldout']['by_summarizer']['a']['claude']['age_contradiction']['positives'], 2)

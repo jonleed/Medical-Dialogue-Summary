@@ -59,6 +59,34 @@ def build_parser():
 EXTENSIONS = []  # later stages append parser-builders here
 
 
+def _screen_parser(subs):
+    sp = subs.add_parser('screen', help=STAGES['screen'][1])
+    sp.add_argument('--out', required=True, help='public aggregate path, e.g. results/factuality/v3-<date>/screening.json')
+    sp.add_argument('--local-out', default=str(V3 / 'screen_per_case.jsonl'))
+
+
+@stage('screen', 'Validity-gated v3 rule screening of the saved runs')
+def cmd_screen(args):
+    from .io import write_jsonl
+    from .v3_screen import per_case_local, screen_runs
+    runs = [(r, label, load_run(LOCAL / r)) for r, label in RUNS]
+    report = screen_runs(runs)
+    dump(args.out, report)
+    local = Path(args.local_out)
+    local.parent.mkdir(parents=True, exist_ok=True)
+    if local.exists():
+        local.unlink()
+    write_jsonl(local, per_case_local(runs))
+    for m in report['models']:
+        a = m['automatic']
+        print(f"{m['model']:<26} valid {m['valid_cases']:>3}/{m['cases']}  suggestions {a['suggestions']:>3}  "
+              f"contradicted {a['contradiction_suggestions']}  unsupported {a['unsupported_suggestions']}  "
+              f"unclear {a['unclear_suggestions']}  flagged cases {a['flagged_cases']}")
+
+
+EXTENSIONS.append(_screen_parser)
+
+
 def main(argv=None):
     args = build_parser().parse_args(argv)
     STAGES[args.stage][0](args)

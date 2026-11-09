@@ -210,3 +210,6 @@ class Assemble(unittest.TestCase):
         self.assertTrue(m['heldout']['caveat'].endswith('4 held-out dialogues'))
         self.assertNotIn('secret', json.dumps(m))
         self.assertEqual(m['heldout']['by_summarizer']['a']['claude']['age_contradiction']['positives'], 2)
+        topped = dict(sample, random=sample['random'][:4], top_up=sample['random'][4:])
+        m2 = assemble_metrics(anns, topped, detectors, resamples=5)
+        self.assertEqual(m2['summarizer_rates']['a']['dialogues'], 6)

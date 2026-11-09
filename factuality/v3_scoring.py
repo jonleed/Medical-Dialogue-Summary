@@ -269,7 +269,7 @@ def assemble_metrics(annotations, sample, detectors, *, trials=None, secondary=N
     if secondary is not None and 'claude' in held_rows:
         agree['claude_vs_secondary'] = _pair_agreement(held_rows['claude'], held_rows['secondary'])
     return {'heldout': held, 'calibration': cal, 'agreement': agree,
-            'summarizer_rates': summarizer_rates(annotations, set(sample['random']), resamples, seed),
+            'summarizer_rates': summarizer_rates(annotations, set(sample['random']) | set(sample.get('top_up', [])), resamples, seed),
             'counterfactual': counterfactual, 'validity': validity,
             'limits': ['Single non-clinician annotator; no inter-annotator agreement',
                        'Validation dialogues were already used for summarizer model selection',

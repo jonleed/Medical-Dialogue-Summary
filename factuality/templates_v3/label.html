@@ -136,7 +136,7 @@ function exportRows() {
 document.getElementById('export').addEventListener('click', exportRows);
 document.getElementById('title').textContent = DATA.mode === 'plan' ? 'Source-only expected-fact plans' : 'Blinded summary review';
 document.getElementById('intro').textContent = DATA.mode === 'plan'
-  ? 'Write the facts each requested section should contain, from the dialogue alone. Do not open any summary until every plan is frozen.'
+  ? 'Write the facts each requested section should contain, from the dialogue alone (rules: docs/factuality_v3_plan_guide.md). Do not open any summary until every plan is frozen.'
   : 'Summaries are shown in a fixed shuffled order with no source model identified. Label every atomic claim and each frozen expected fact.';
 const root = document.getElementById('items');
 for (const item of DATA.items) root.append(DATA.mode === 'plan' ? planItem(item) : labelItem(item));

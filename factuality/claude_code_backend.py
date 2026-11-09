@@ -15,7 +15,9 @@ from pathlib import Path
 MODEL = 'claude-sonnet-5-5'
 CALL_CAP = 1000
 ALLOWED_TOOLS = ('StructuredOutput',)
-TERMINAL = ('complete', 'content_failed', 'transport_failed', 'usage_limited', 'auth_failed')
+TERMINAL = ('complete', 'content_failed', 'transport_failed')
+# Never judged: may be re-sent once the owner unblocks the ledger.
+RESENDABLE = ('usage_limited', 'auth_failed')
 _USAGE_LIMIT = ('usage limit', 'rate limit', 'limit reached', 'limit will reset', 'too many requests')
 _AUTH = ('not logged in', '/login', 'invalid api key', 'authentication')
 _PROBE_SCHEMA = {'type': 'object', 'properties': {'ok': {'type': 'boolean'}}, 'required': ['ok']}
@@ -28,7 +30,8 @@ def _save(path, data):
 
 
 class CallLedger:
-    """Durable per-job call accounting; a job with a terminal entry is never re-sent."""
+    """Durable per-job call accounting. A job with a terminal entry is never re-sent;
+    a usage-limited or auth-failed job (never judged) is re-sendable after unblock()."""
 
     def __init__(self, path, cap=CALL_CAP):
         self.path, self.cap = Path(path), cap
@@ -48,8 +51,13 @@ class CallLedger:
     def read(self):
         return self._load()
 
+    @staticmethod
+    def _used(state):
+        return sum(e.get('attempts', 1) + sum(h.get('attempts', 1) for h in e.get('history', []))
+                   for e in state['entries'].values())
+
     def calls_used(self):
-        return sum(e.get('attempts', 1) for e in self._load()['entries'].values())
+        return self._used(self._load())
 
     def done(self, job_id):
         return self._load()['entries'].get(job_id, {}).get('status') in TERMINAL
@@ -57,17 +65,22 @@ class CallLedger:
     def block(self, reason):
         self._locked(lambda s: s.update(blocked_reason=reason))
 
+    def unblock(self):
+        self._locked(lambda s: s.pop('blocked_reason', None))
+
     def reserve(self, job_id):
         def go(state):
             if state.get('blocked_reason'):
                 raise ValueError('ledger blocked: ' + state['blocked_reason'])
             entry = state['entries'].get(job_id)
+            history = []
             if entry is not None:
-                raise ValueError(f'{job_id} already has a {entry["status"]} entry; never re-sent automatically')
-            used = sum(e.get('attempts', 1) for e in state['entries'].values())
-            if used >= self.cap:
+                if entry['status'] not in RESENDABLE:
+                    raise ValueError(f'{job_id} already has a {entry["status"]} entry; never re-sent automatically')
+                history = entry.pop('history', []) + [entry]
+            if self._used(state) >= self.cap:
                 raise ValueError(f'call cap {self.cap} reached')
-            state['entries'][job_id] = {'status': 'reserved', 'reserved_at': time.time()}
+            state['entries'][job_id] = {'status': 'reserved', 'reserved_at': time.time(), 'history': history}
         self._locked(go)
 
     def settle(self, job_id, status, usage, attempts=1):

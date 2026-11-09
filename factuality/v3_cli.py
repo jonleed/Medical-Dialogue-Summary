@@ -251,6 +251,89 @@ def cmd_probe(args):
 EXTENSIONS.append(_probe_parser)
 
 
+JUDGE_LEDGER = V3 / 'judge_ledger.json'
+CF_RUNS = ('cf-biobart', 'cf-bart-lora')
+
+
+def judge_items(split, sample_path=V3 / 'sample.json'):
+    from .validity import classify_output
+    if split == 'counterfactual':
+        items = []
+        for run in CF_RUNS:
+            for c in load_run(V3 / run):
+                if classify_output(c.get('prediction'), c['dialogue']) == 'summary':
+                    items.append((run, c))
+        return items
+    sample = json.loads(Path(sample_path).read_text())
+    by_run = {run: [c for c in load_run(LOCAL / run) if classify_output(c.get('prediction'), c['dialogue']) == 'summary']
+              for run, _ in FINE_TUNED}
+    if split in ('calibration', 'heldout'):
+        ids = set(sample[split])
+    else:  # all-real: every valid fine-tuned summary outside the annotation sample
+        ids = {c['case_id'] for cs in by_run.values() for c in cs} - set(sample['calibration']) - set(sample['heldout'])
+    return [(run, c) for run, cs in by_run.items() for c in cs if c['case_id'] in ids]
+
+
+def _judge_parsers(subs):
+    j = subs.add_parser('judge', help=STAGES['judge'][1])
+    j.add_argument('--split', required=True, choices=['calibration', 'heldout', 'all-real', 'counterfactual'])
+    j.add_argument('--trials', type=int, default=None, help='default: 2 for heldout, else 1')
+    j.add_argument('--exe', default='claude')
+    subs.add_parser('judge-freeze', help=STAGES['judge-freeze'][1])
+    subs.add_parser('judge-unblock', help=STAGES['judge-unblock'][1])
+    subs.add_parser('judge-secondary', help=STAGES['judge-secondary'][1])
+
+
+@stage('judge', 'Run the isolated Claude Sonnet 5.5 judge on one split (LIVE; uses the subscription)')
+def cmd_judge(args):
+    import random
+    from functools import partial
+    from .claude_code_backend import CALL_CAP, CallLedger, call, require_run_preconditions
+    from .judge_run import opaque_id, run_judge
+    require_run_preconditions(_read_manifest(), args.exe)
+    trials = args.trials or (2 if args.split == 'heldout' else 1)
+    ledger = CallLedger(JUDGE_LEDGER, cap=CALL_CAP)
+    items = judge_items(args.split)
+    pending = lambda its: sum(not ledger.done(f'{args.split}:{opaque_id(c["case_id"], r)}:t{t}')
+                              for r, c in its for t in range(1, trials + 1))
+    room = CALL_CAP - ledger.calls_used()
+    if pending(items) > room:
+        if args.split != 'counterfactual':
+            raise SystemExit(f'{pending(items)} calls needed but only {room} remain under the {CALL_CAP}-call cap')
+        random.Random(20261109).shuffle(items)
+        while items and pending(items) > room:
+            items.pop()
+        print(f'counterfactual reduced to {len(items)} summaries to fit the call cap')
+    caller = partial(lambda payload, job, exe: call(payload, exe=exe, ledger=ledger, job_id=job), exe=args.exe)
+    summary = run_judge(items, V3 / 'judge' / args.split, split=args.split, trials=trials, caller=caller,
+                        ledger=ledger, freeze_manifest=JUDGE_MANIFEST)
+    print(summary)
+
+
+@stage('judge-freeze', 'Freeze rubric/schema/model/CLI flags after calibration (before any held-out call)')
+def cmd_judge_freeze(args):
+    from .judge_run import freeze_judge
+    print(freeze_judge(JUDGE_MANIFEST))
+
+
+@stage('judge-unblock', 'Clear a usage-limit/auth block so never-judged jobs can be re-sent')
+def cmd_judge_unblock(args):
+    from .claude_code_backend import CallLedger
+    ledger = CallLedger(JUDGE_LEDGER)
+    print('was blocked:', ledger.read().get('blocked_reason'))
+    ledger.unblock()
+
+
+@stage('judge-secondary', 'Free Nemotron agreement judge on held-out (LIVE; zero-price guards)')
+def cmd_judge_secondary(args):
+    from .judge_run import _check_freeze, run_secondary
+    _check_freeze(JUDGE_MANIFEST)
+    print(run_secondary(judge_items('heldout'), V3 / 'judge' / 'secondary', V3 / 'secondary_ledger.json'))
+
+
+EXTENSIONS.append(_judge_parsers)
+
+
 def main(argv=None):
     args = build_parser().parse_args(argv)
     STAGES[args.stage][0](args)

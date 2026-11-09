@@ -54,6 +54,26 @@ class Runner(unittest.TestCase):
         run_judge(self.items, self.tmp / 'out', split='calibration', trials=1, caller=second, ledger=self.ledger)
         self.assertEqual(second.sent, first.sent[2:3] + [f'calibration:{opaque_id(c["case_id"], r)}:t1' for r, c in self.items[3:]])
 
+    def test_interrupted_reservation_recorded_and_run_continues(self):
+        stuck = f'calibration:{opaque_id("val:0", "run-a")}:t1'
+        self.ledger.reserve(stuck)  # simulates a crash after reserve, before settle
+        caller = FakeCaller(self.ledger)
+        summary = run_judge(self.items[:2], self.tmp / 'out', split='calibration', trials=1, caller=caller, ledger=self.ledger)
+        self.assertIsNone(summary['stopped'])
+        self.assertEqual(caller.sent, [f'calibration:{opaque_id("val:1", "run-a")}:t1'])
+        record = json.loads((self.tmp / 'out' / opaque_id('val:0', 'run-a') / 't1.json').read_text())
+        self.assertEqual(record['status'], 'interrupted')
+        self.assertTrue(self.ledger.done(stuck))
+
+    def test_stops_after_consecutive_content_failures(self):
+        bad = judged()
+        bad['claims'][0]['generated_quote'] = 'forty'
+        items = [('run-a', case(i)) for i in range(8)]
+        caller = FakeCaller(self.ledger, output=bad)
+        summary = run_judge(items, self.tmp / 'out', split='calibration', trials=1, caller=caller, ledger=self.ledger)
+        self.assertEqual(len(caller.sent), 5)
+        self.assertIn('consecutive', summary['stopped'])
+
     def test_second_trial_only(self):
         caller = FakeCaller(self.ledger)
         run_judge(self.items[:1], self.tmp / 'out', split='calibration', trials=1, caller=caller, ledger=self.ledger)

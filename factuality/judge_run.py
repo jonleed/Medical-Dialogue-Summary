@@ -15,6 +15,7 @@ from .judge_v3 import (OUTPUT_SCHEMA, JudgeOutputError, build_payload, rubric_ha
 
 SECONDARY_MODEL = 'nvidia/nemotron-3-ultra-550b-a55b:free'
 STOP_STATUSES = ('usage_limited', 'auth_failed')
+MAX_CONSECUTIVE_FAILURES = 5  # a broken prompt/CLI must not burn the call cap
 
 
 def opaque_id(case_id, run):
@@ -66,13 +67,18 @@ def run_judge(items, out_dir, *, split, trials, caller, ledger, freeze_manifest=
     for run, case in items:
         key[opaque_id(case['case_id'], run)] = {'run': run, 'case_id': case['case_id']}
     _write_json(out / 'key.json', key)
-    sent, stopped = 0, None
+    sent, stopped, failures = 0, None, 0
     for run, case in items:
         oid = opaque_id(case['case_id'], run)
         payload = build_payload(case, oid)
         for trial in range(1, trials + 1):
             job, path = f'{split}:{oid}:t{trial}', out / oid / f't{trial}.json'
             if path.exists() or ledger.done(job):
+                continue
+            if ledger.status(job) == 'reserved':  # crashed after reserve: recorded as a failed assessment
+                ledger.settle(job, 'interrupted', None)
+                _write_json(path, {'opaque_id': oid, 'trial': trial, 'split': split, 'status': 'interrupted',
+                                   'rubric_hash': rubric_hash(), 'schema_hash': schema_hash()})
                 continue
             try:
                 result = caller(payload, job)
@@ -93,6 +99,10 @@ def run_judge(items, out_dir, *, split, trials, caller, ledger, freeze_manifest=
                 except JudgeOutputError as error:
                     record.update(status='content_failed', failure_reason=error.reason, failure_detail=str(error))
             _write_json(path, record)
+            failures = failures + 1 if record['status'] != 'complete' else 0
+            if failures >= MAX_CONSECUTIVE_FAILURES:
+                stopped = f'stopped after {failures} consecutive failed assessments; inspect before resuming'
+                break
         if stopped:
             break
     return {'split': split, 'sent': sent, 'stopped': stopped, 'calls_used': ledger.calls_used()}

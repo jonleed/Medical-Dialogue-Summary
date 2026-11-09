@@ -65,6 +65,8 @@ elif mode == 'not_logged_in':
 elif mode == 'usage_limit':
     print(json.dumps(dict(base, result='Claude usage limit reached. Your limit will reset at 5pm.', terminal_reason='api_error', api_error_status=429)))
     sys.exit(1)
+elif mode == 'usage_limit_soft':  # limit text in a non-error result envelope
+    print(json.dumps(envelope(result='Claude usage limit reached. Your limit will reset at 5pm.')))
 elif mode == 'timeout':
     time.sleep(5)
 elif mode == 'timeout_then_success':

@@ -135,6 +135,29 @@ def cmd_cf_score(args):
 EXTENSIONS.append(_cf_parsers)
 
 
+def _sample_parser(subs):
+    sp = subs.add_parser('sample', help=STAGES['sample'][1])
+    sp.add_argument('--screen', default=str(V3 / 'screen_per_case.jsonl'))
+    sp.add_argument('--out', default=str(V3 / 'sample.json'))
+
+
+@stage('sample', 'Seeded annotation sample and splits (prints sizes only, never which issues qualified)')
+def cmd_sample(args):
+    from .sampling import enrichment_eligible, select_sample
+    rows = read_jsonl(args.screen)
+    ids = sorted({c['case_id'] for c in load_run(LOCAL / RUNS[0][0])})
+    out = Path(args.out)
+    if out.exists():
+        raise SystemExit(f'{out} exists; the sample is frozen once drawn')
+    sample = select_sample(ids, enrichment_eligible(rows, {r for r, _ in FINE_TUNED}))
+    dump(out, sample)
+    print({k: len(sample[k]) for k in ['random', 'enrichment', 'calibration', 'heldout']},
+          'enrichment pool', sample['enrichment_pool_size'])
+
+
+EXTENSIONS.append(_sample_parser)
+
+
 def main(argv=None):
     args = build_parser().parse_args(argv)
     STAGES[args.stage][0](args)

@@ -268,6 +268,15 @@ def in_packet(cases, packet=CF_PACKET):
     return [c for c in cases if allowed.get(c['case_id']) == c['source']['dialogue_sha256']]
 
 
+def round_split(split, rnd):
+    return split if rnd == 1 else f'{split}-r{rnd}'
+
+
+def latest_round_dir(root, split):
+    dirs = [d for d in Path(root).iterdir() if d.name == split or d.name.startswith(split + '-r')]
+    return max(dirs, key=lambda d: int(d.name.rsplit('-r', 1)[1]) if '-r' in d.name else 1)
+
+
 def judge_items(split, sample_path=V3 / 'sample.json'):
     from .validity import classify_output
     if split == 'counterfactual':
@@ -292,6 +301,7 @@ def _judge_parsers(subs):
     j.add_argument('--split', required=True, choices=['calibration', 'heldout', 'all-real', 'counterfactual'])
     j.add_argument('--trials', type=int, default=None, help='default: 2 for heldout, else 1')
     j.add_argument('--exe', default='claude')
+    j.add_argument('--round', type=int, default=1, help='calibration revision round (new job IDs and folder)')
     subs.add_parser('judge-freeze', help=STAGES['judge-freeze'][1])
     subs.add_parser('judge-unblock', help=STAGES['judge-unblock'][1])
     subs.add_parser('judge-secondary', help=STAGES['judge-secondary'][1])
@@ -305,9 +315,12 @@ def cmd_judge(args):
     from .judge_run import opaque_id, run_judge
     require_run_preconditions(_read_manifest(), args.exe)
     trials = args.trials or (2 if args.split == 'heldout' else 1)
+    if args.round != 1 and args.split != 'calibration':
+        raise SystemExit('only the calibration split may be re-run in rounds')
+    name = round_split(args.split, args.round)
     ledger = CallLedger(JUDGE_LEDGER, cap=CALL_CAP)
     items = judge_items(args.split)
-    pending = lambda its: sum(not ledger.done(f'{args.split}:{opaque_id(c["case_id"], r)}:t{t}')
+    pending = lambda its: sum(not ledger.done(f'{name}:{opaque_id(c["case_id"], r)}:t{t}')
                               for r, c in its for t in range(1, trials + 1))
     room = CALL_CAP - ledger.calls_used()
     if pending(items) > room:
@@ -318,7 +331,7 @@ def cmd_judge(args):
             items.pop()
         print(f'counterfactual reduced to {len(items)} summaries to fit the call cap')
     caller = partial(lambda payload, job, exe: call(payload, exe=exe, ledger=ledger, job_id=job), exe=args.exe)
-    summary = run_judge(items, V3 / 'judge' / args.split, split=args.split, trials=trials, caller=caller,
+    summary = run_judge(items, V3 / 'judge' / name, split=name, trials=trials, caller=caller,
                         ledger=ledger, freeze_manifest=JUDGE_MANIFEST, cli_version_now=cli_version(args.exe))
     print(summary)
 
@@ -366,7 +379,7 @@ def cmd_score(args):
     rules = {(a['run'], a['case_id']): {'claims': suggestions_v3(cases[(a['run'], a['case_id'])])} for a in annotations}
     claude, trials = {}, {'t1': {}, 't2': {}}
     for split in ('calibration', 'heldout'):
-        merged, by_trial = load_judge(V3 / 'judge' / split)
+        merged, by_trial = load_judge(latest_round_dir(V3 / 'judge', split))
         claude.update(merged)
         if split == 'heldout':
             trials = {k: by_trial.get(k, {}) for k in ('t1', 't2')}

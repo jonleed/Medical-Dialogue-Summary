@@ -47,9 +47,14 @@ def match_claims(human_claims, detector_claims):
         match = next((d for d in candidates if d['fact_type'] == h['fact_type']), candidates[0] if candidates else None)
         if match is not None:
             unused.remove(match)
+        # Judge the detector under the human's fact type only for the same type or the known
+        # relative-age convention (age vs quantity); otherwise its own type applies.
+        compatible = match is not None and (match['fact_type'] == h['fact_type']
+                                            or {match['fact_type'], h['fact_type']} == {'age', 'quantity'})
+        eval_type = h['fact_type'] if compatible else (match['fact_type'] if match else None)
         for t in CLAIM_TYPES:
             rows.append({'error_type': t, 'human_positive': _positive(t, h['fact_type'], h['label']),
-                         'detector_positive': _detector_value(t, h['fact_type'], match) if match else None,
+                         'detector_positive': _detector_value(t, eval_type, match) if match else None,
                          'label_correct': bool(match) and _label(match) == h['label'],
                          'type_convention_match': bool(match) and match['fact_type'] == h['fact_type'],
                          'matched': match is not None, 'extra': False})

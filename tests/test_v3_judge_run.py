@@ -124,11 +124,22 @@ class Merge(unittest.TestCase):
         self.assertEqual(m['claims'][0]['label'], 'unclear')
         self.assertTrue(m['claims'][0]['trial_disagreement'])
 
-    def test_single_trial_claim_kept(self):
+    def test_single_trial_claim_is_unclear(self):
         r2 = self.result('supported')
         r2['claims'] = []
         m = merge_trials([self.result('supported'), r2])
-        self.assertEqual(m['claims'][0]['trial_support'], 1)
+        self.assertEqual((m['claims'][0]['trial_support'], m['claims'][0]['label']), (1, 'unclear'))
+        self.assertTrue(m['claims'][0]['trial_disagreement'])
+
+    def test_different_fact_types_not_paired(self):
+        r1, r2 = self.result('supported'), self.result('unsupported')
+        r2['claims'][0]['fact_type'] = 'race_ethnicity'
+        m = merge_trials([r1, r2])
+        self.assertEqual(sorted((c['fact_type'], c['trial_support']) for c in m['claims']), [('age', 1), ('race_ethnicity', 1)])
+
+    def test_single_trial_run_keeps_labels(self):
+        m = merge_trials([self.result('contradicted')])
+        self.assertEqual(m['claims'][0]['label'], 'contradicted')
 
 
 class Secondary(unittest.TestCase):

@@ -45,6 +45,11 @@ class Matching(unittest.TestCase):
         [r] = rows_for('age_contradiction', rows)
         self.assertEqual((r['detector_positive'], r['label_correct'], r['type_convention_match']), (True, True, False))
 
+    def test_fallback_match_of_other_type_does_not_count_as_hit(self):
+        rows = match_claims([human('contradicted', ft='age')], [det('contradicted', ft='sex')])
+        [r] = rows_for('age_contradiction', rows)
+        self.assertNotEqual(r['detector_positive'], True)
+
     def test_race_inserted(self):
         [r] = rows_for('race_inserted', match_claims([human('unsupported', ft='race_ethnicity')],
                                                      [det('unsupported', ft='race_ethnicity', issue='race_inserted')]))

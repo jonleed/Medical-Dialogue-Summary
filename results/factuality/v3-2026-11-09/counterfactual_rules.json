@@ -27,12 +27,12 @@
         "reverted_to_original": 0
       },
       "pronoun_swap": {
-        "faithful": 4,
-        "contradicted": 2,
+        "faithful": 3,
+        "contradicted": 0,
         "inserted": 0,
         "omitted": 1,
         "invalid": 0,
-        "n": 7
+        "n": 4
       }
     },
     "race_by_group": {
@@ -116,12 +116,12 @@
         "reverted_to_original": 1
       },
       "pronoun_swap": {
-        "faithful": 5,
+        "faithful": 2,
         "contradicted": 0,
         "inserted": 0,
         "omitted": 2,
         "invalid": 0,
-        "n": 7
+        "n": 4
       }
     },
     "race_by_group": {

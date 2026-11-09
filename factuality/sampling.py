@@ -14,7 +14,7 @@ def enrichment_eligible(rows, runs):
     return {r['case_id'] for r in rows if r['run'] in runs and any(hit(s) for s in r['suggestions'])}
 
 
-def select_sample(dialogue_ids, enrichment_pool, seed=SEED, seen=SEEN):
+def select_sample(dialogue_ids, enrichment_pool, seed=SEED, seen=SEEN, heldout_target=None):
     rng = random.Random(seed)
     ids = sorted(set(dialogue_ids))
     rand = rng.sample(ids, N_RANDOM)
@@ -29,6 +29,15 @@ def select_sample(dialogue_ids, enrichment_pool, seed=SEED, seen=SEEN):
     heldout = sorted(set(sampled) - set(calibration))
     probability = {i: N_RANDOM / len(ids) for i in rand}
     probability.update({i: min(1.0, N_ENRICH / len(pool)) for i in enrich})
-    return {'seed': seed, 'random': rand, 'enrichment': enrich, 'calibration': calibration, 'heldout': heldout,
+    # Optional top-up of held-out from unsampled, unseen dialogues. A separate seeded draw, so the
+    # original random/enrichment/calibration selection is unchanged. Top-ups count as random draws.
+    top_up = []
+    if heldout_target and len(heldout) < heldout_target:
+        remaining = sorted(set(ids) - set(sampled) - seen)
+        top_up = random.Random(seed + 1).sample(remaining, min(heldout_target - len(heldout), len(remaining)))
+        heldout = sorted(heldout + top_up)
+        probability.update({i: len(top_up) / len(remaining) for i in top_up})
+    return {'seed': seed, 'random': rand, 'enrichment': enrich, 'top_up': top_up, 'calibration': calibration,
+            'heldout': heldout, 'heldout_target': heldout_target,
             'inclusion_probability': probability, 'enrichment_pool_size': len(pool),
             'seen_excluded_from_heldout': sorted(seen)}

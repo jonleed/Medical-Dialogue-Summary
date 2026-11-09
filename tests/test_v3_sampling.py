@@ -59,5 +59,28 @@ class Eligibility(unittest.TestCase):
         self.assertEqual(enrichment_eligible(rows, runs={'a', 'b'}), {'val:1', 'val:2', 'val:3'})
 
 
+
+class TopUp(unittest.TestCase):
+    def test_tops_heldout_up_to_target_without_changing_original_draw(self):
+        base = select_sample(IDS, ELIGIBLE, seen=frozenset())
+        s = select_sample(IDS, ELIGIBLE, seen=frozenset(), heldout_target=40)
+        self.assertEqual((s['random'], s['enrichment'], s['calibration']), (base['random'], base['enrichment'], base['calibration']))
+        self.assertEqual(len(s['heldout']), 40)
+        self.assertEqual(len(s['top_up']), 5)
+        self.assertTrue(set(s['top_up']) <= set(s['heldout']))
+        self.assertFalse(set(s['top_up']) & (set(base['random']) | set(base['enrichment'])))
+        self.assertEqual(s, select_sample(IDS, ELIGIBLE, seen=frozenset(), heldout_target=40))
+
+    def test_top_up_never_draws_seen(self):
+        s = select_sample(IDS, set(), seen=SEEN, heldout_target=40)
+        self.assertFalse(set(s['top_up']) & SEEN)
+        pool = set(IDS) - set(s['random']) - set(s['enrichment']) - SEEN
+        self.assertEqual(len(s['top_up']), 15)
+        self.assertEqual(s['inclusion_probability'][s['top_up'][0]], 15 / len(pool))
+
+    def test_no_top_up_by_default(self):
+        self.assertEqual(select_sample(IDS, ELIGIBLE)['top_up'], [])
+
+
 if __name__ == '__main__':
     unittest.main()

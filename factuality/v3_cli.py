@@ -139,6 +139,7 @@ def _sample_parser(subs):
     sp = subs.add_parser('sample', help=STAGES['sample'][1])
     sp.add_argument('--screen', default=str(V3 / 'screen_per_case.jsonl'))
     sp.add_argument('--out', default=str(V3 / 'sample.json'))
+    sp.add_argument('--heldout-target', type=int, default=35)
 
 
 @stage('sample', 'Seeded annotation sample and splits (prints sizes only, never which issues qualified)')
@@ -147,11 +148,15 @@ def cmd_sample(args):
     rows = read_jsonl(args.screen)
     ids = sorted({c['case_id'] for c in load_run(LOCAL / RUNS[0][0])})
     out = Path(args.out)
+    sample = select_sample(ids, enrichment_eligible(rows, {r for r, _ in FINE_TUNED}), heldout_target=args.heldout_target)
     if out.exists():
-        raise SystemExit(f'{out} exists; the sample is frozen once drawn')
-    sample = select_sample(ids, enrichment_eligible(rows, {r for r, _ in FINE_TUNED}))
+        old = json.loads(out.read_text())
+        if any(old[k] != sample[k] for k in ('random', 'enrichment', 'calibration')):
+            raise SystemExit(f'{out} exists and the new draw changes the original selection; the sample is frozen')
+        if set(old['heldout']) - set(sample['heldout']):
+            raise SystemExit('a held-out dialogue would be removed; refusing')
     dump(out, sample)
-    print({k: len(sample[k]) for k in ['random', 'enrichment', 'calibration', 'heldout']},
+    print({k: len(sample[k]) for k in ['random', 'enrichment', 'top_up', 'calibration', 'heldout']},
           'enrichment pool', sample['enrichment_pool_size'])
 
 

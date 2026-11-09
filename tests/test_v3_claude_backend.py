@@ -93,6 +93,14 @@ class Backend(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.ledger.reserve('j2')
 
+    def test_usage_limited_job_resendable_after_unblock(self):
+        self.run_call('usage_limit')
+        self.assertFalse(self.ledger.done('j1'))
+        self.ledger.unblock()
+        r = self.run_call('success')
+        self.assertEqual(r['status'], 'complete')
+        self.assertEqual(self.ledger.read()['entries']['j1']['history'][0]['status'], 'usage_limited')
+
     def test_completed_job_not_resent(self):
         self.run_call('success')
         with self.assertRaises(ValueError):

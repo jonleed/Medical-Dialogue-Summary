@@ -136,6 +136,14 @@ class Probe(unittest.TestCase):
     def test_user_plugin_fails(self):
         self.assertFalse(self.probe('probe_user_plugin')['passed'])
 
+    def test_canary_reporting_extra_context_fails(self):
+        p = self.probe('probe_context')
+        self.assertFalse(p['passed'])
+        self.assertIn('CLAUDE.md', ' '.join(p['failures']))
+
+    def test_missing_result_envelope_fails(self):
+        self.assertFalse(self.probe('probe_no_result')['passed'])
+
     def test_tools_fail(self):
         self.assertFalse(self.probe('probe_tools')['passed'])
 

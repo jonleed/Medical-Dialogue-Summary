@@ -87,6 +87,54 @@ def cmd_screen(args):
 EXTENSIONS.append(_screen_parser)
 
 
+TOKENIZERS = ('GanjinZero/biobart-large', 'facebook/bart-base')  # app.py loads the tokenizer from the base model
+
+
+def _cf_parsers(subs):
+    b = subs.add_parser('cf-build', help=STAGES['cf-build'][1])
+    b.add_argument('--cases', default=str(LOCAL / RUNS[0][0] / 'cases.jsonl'))
+    b.add_argument('--out', default=str(V3 / 'cf_cases.jsonl'))
+    b.add_argument('--cap', type=int, default=250)
+    sc = subs.add_parser('cf-score', help=STAGES['cf-score'][1])
+    sc.add_argument('--runs', nargs='+', required=True, help='generation output directories (cases.jsonl inside)')
+    sc.add_argument('--out', required=True)
+
+
+@stage('cf-build', 'Build the counterfactual packet from validation cases (no predictions printed)')
+def cmd_cf_build(args):
+    from collections import Counter
+    from transformers import AutoTokenizer
+    from .counterfactual import build_packet
+    from .io import write_jsonl
+    toks = [AutoTokenizer.from_pretrained(t, local_files_only=True) for t in TOKENIZERS]
+    count = lambda s: max(len(t(s)['input_ids']) for t in toks)
+    packet = build_packet(read_jsonl(args.cases), count, cap=args.cap)
+    out = Path(args.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    if out.exists():
+        raise SystemExit(f'{out} exists; use a new path (packets are frozen once built)')
+    write_jsonl(out, packet)
+    print(dict(Counter(c['counterfactual']['family'] for c in packet)), 'total', len(packet))
+    for c in packet:
+        if c['counterfactual']['family'] == 'race_removal':
+            for e in c['counterfactual']['edits']:
+                base = next(x for x in read_jsonl(args.cases) if x['case_id'] == c['counterfactual']['base_case_id'])
+                print('REMOVAL', c['case_id'], 'before:', repr(base['dialogue'][max(0, e['start'] - 80):e['end'] + 40]))
+                print('        after: ', repr(c['dialogue'][max(0, e['start'] - 80):e['start'] + 40]))
+
+
+@stage('cf-score', 'Score counterfactual generations against construction gold (rules side)')
+def cmd_cf_score(args):
+    from .counterfactual import score_counterfactual
+    report = {Path(r).name: score_counterfactual(read_jsonl(Path(r) / 'cases.jsonl')) for r in args.runs}
+    dump(args.out, report)
+    for name, r in report.items():
+        print(name, {k: v for k, v in r['families'].items()})
+
+
+EXTENSIONS.append(_cf_parsers)
+
+
 def main(argv=None):
     args = build_parser().parse_args(argv)
     STAGES[args.stage][0](args)

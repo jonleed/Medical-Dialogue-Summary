@@ -118,12 +118,18 @@ def _merge(lists, span_key, same, value_key):
                 m[value_key] = 'unclear'
                 m['trial_disagreement'] = True
         merged += [dict(o, trial_support=1) for o in unused]
+    for m in merged:  # found in only some trials: the trials disagree on whether it exists
+        if m['trial_support'] < len(lists) and m[value_key] != 'unclear':
+            m.setdefault('trial_values', [m[value_key]])
+            m[value_key], m['trial_disagreement'] = 'unclear', True
     return merged
 
 
 def merge_trials(results):
-    """Combine validated trials: agreement keeps the label, disagreement becomes 'unclear'."""
-    claims = _merge([r['claims'] for r in results], 'generated_span', lambda a, b: a['subject'] == b['subject'], 'label')
+    """Combine validated trials: agreement keeps the label; a differing label, or a claim found
+    in only some trials, becomes 'unclear' (spec §6.5)."""
+    claims = _merge([r['claims'] for r in results], 'generated_span',
+                    lambda a, b: a['subject'] == b['subject'] and a['fact_type'] == b['fact_type'], 'label')
     inventory = _merge([r['section_inventory'] for r in results], 'source_span', lambda a, b: True, 'status')
     return {'trials': len(results), 'claims_complete': all(r['claims_complete'] for r in results),
             'claims': claims, 'section_inventory': inventory}

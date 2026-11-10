@@ -90,50 +90,57 @@ python eval_app_integration.py --app section --n 100
 
 An earlier BioBART-large Flask integration result reported ROUGE-L 0.4719. The cached integration predictions lack enough model and input provenance for factuality scoring. Flask and notebook output limits also differ, so the two scores aren't comparable.
 
-### Targeted factuality evaluation
+### Evaluating factuality
 
-A targeted factuality evaluation for **age, gender and race/ethnicity contradictions, unsupported claims and omissions** in the clinical summaries. Two detectors are scored against blinded human labels:
+The BART models I worked with kept getting patient demographics wrong. They contradicted or invented the patient's age, sex, gender and race. In a clinical note, a wrong age or sex is not a style problem: it can change how a reader interprets everything else. So I built an evaluation framework to measure these errors properly, alongside unsupported claims and omissions, instead of relying on ROUGE, which can't see any of them.
 
-- **Rules:** a deterministic demographic checker that covers race/ethnicity insertion.
-- **Judge:** Claude Sonnet 5.5, isolated so it never sees rule output, plans or model identity.
+**Key findings**
 
-The labels come from source-only expected-fact plans written and frozen before any summary was seen, then claim-level labels on 100 summaries with the models hidden. Headline numbers use 35 held-out dialogues the judge rubric was never tuned on. [Full report](docs/factuality_v3_report.md) · [Metrics](results/factuality/v3-2026-11-09/metrics.json).
+- **The demographic errors were real, and much more common in BART-base + LoRA.** On 46 randomly sampled dialogues, 28% of BART-base + LoRA summaries (95% CI 15–41%) contained at least one wrong or unsupported patient age, sex or pronoun, against 11% for BioBART-large + LoRA (2–20%).
+- **Changing a patient's age exposes it directly.** When the dialogue's age was edited, BioBART-large followed the new age in 9 of 10 cases; BART-base + LoRA followed it in only 3.
+- **Race was never invented.** Across all 200 summaries, race only appeared when the dialogue stated it. When I added a race statement to 97 dialogues, both models usually left it out.
+- **Omissions are the biggest error overall.** Both models leave out about 30% of the facts a section should contain.
 
-**Held-out detector results** (single non-clinician annotator, 35 held-out dialogues; 95% CIs from resampling whole dialogues):
+| Summarizer | Patient demographic error | Contradicted claims | Unsupported claims | Expected facts omitted |
+|---|---:|---:|---:|---:|
+| BioBART-large + LoRA | 11% of summaries | 8% | 4% | 29% |
+| BART-base + LoRA | 28% of summaries | 13% | 8% | 31% |
 
-- **Omissions:** the judge detects omissions, precision 0.93 (95% CI 0.81–1.00), recall 0.87 (95% CI 0.72–1.00).
-- **Unsupported claims:** the judge screens for unsupported claims, measured recall 0.56 (95% CI 0.32–0.91), precision 0.82.
-- **Demographic contradictions:** too few held-out positives to estimate recall.
-  - Age: 3, all relatives' ages, all found by the judge.
-  - Sex-reference: 4, of which the judge found 3.
-  - Race: 0.
-  - On calibration, the rules (frozen before any labels) found all 6 patient-age contradictions with no false flags.
+Claim and fact rates are per labelled claim or planned fact, on the same 46 dialogues ([intervals in the report](docs/factuality_v3_report.md#summarizer-error-rates)). Without fine-tuning, BART-base only echoes its prompt, so it has no factuality row.
 
-**Summarizer error rates** on 46 randomly sampled dialogues:
+**How it works**
 
-| Summarizer | Contradicted claims | Unsupported claims | Expected facts omitted |
-|---|---:|---:|---:|
-| BioBART-large + LoRA | 8% (4–13%) | 4% (1–6%) | 29% (18–39%) |
-| BART-base + LoRA | 13% (8–19%) | 8% (4–12%) | 31% (23–40%) |
+1. **Write the answer key first.** For each dialogue, I wrote down the facts its requested note section should contain, before seeing any summary. This defines what counts as an omission ([plan guide](docs/factuality_v3_plan_guide.md)).
+2. **Label every claim.** I labelled each claim in 100 summaries as supported, contradicted, unsupported or unclear, with the source model hidden.
+3. **Run two automatic detectors.** One is a rule checker for patient age, sex, pronouns and race. The other is an LLM judge (Claude Sonnet 5.5), isolated so it never sees the rule checker's answers, my labels or which model wrote the summary.
+4. **Score the detectors against my labels.** Headline numbers use 35 held-out dialogues the judge was never tuned on, with confidence intervals from resampling whole dialogues.
+5. **Edit dialogues to create rare errors on purpose.** Demographic errors are too rare in real data to measure reliably, so I changed ages, swapped pronouns, and added or removed race statements, then checked whether the summaries followed.
 
-**No inserted race was found.** This covers all 200 fine-tuned summaries, the held-out labels, and dialogues with their race statement removed. When race was injected into 97 dialogues, the summarizers mostly left it out, and the judge labelled the resulting race claims correctly 75 of 76 times.
+**How well the automatic judge works**
 
-**Age edits:** BART-base + LoRA followed only 3 of 10 edited patient ages; BioBART-large followed 9 of 10.
+| Error type | Judge precision | Judge recall |
+|---|---:|---:|
+| Omitted facts (46 held-out) | 0.93 | 0.87 |
+| Unsupported claims (16 held-out) | 0.82 | 0.56 |
 
-**Validity:** BART-base without an adapter echoes the prompt in all 100 outputs, so it's reported as invalid output, not scored for factuality.
+On the edited dialogues, the judge labelled the summary's demographic claim correctly in 100 of 101 cases. Held-out data has too few real demographic errors to estimate the judge's recall for them.
 
-**Limits:** one non-clinician annotator; validation data already used for model selection; the judge rubric was revised once on calibration before freezing; no second judge family. The October 2026 [free-model pilot](docs/openrouter_factuality_pilot.md) is kept as a historical record.
+**What I learned building it**
+
+- **An LLM judge can look accurate for the wrong reason.** In an early pilot, the judge was shown the rule checker's suggestions and simply copied them. Isolating the judge is what made its scores meaningful.
+- **Deciding what counts as one claim is half the work.** The first judge rubric bundled facts that I had labelled separately. Spelling out what a single claim is, along with two other rubric fixes, cut the claims the judge failed to match from 45 to 32 on calibration.
+- **Rare errors need constructed tests.** Real dialogues contained only 3 race statements, so editing dialogues was the only way to test race handling at all.
+- **Writing the answer key before reading outputs matters.** Omission rates depend on it, and it's easy to bias without noticing.
+
+All labels are mine (one non-clinician annotator) on the MTS-Dialog validation split. [Full report](docs/factuality_v3_report.md) · [Design](docs/factuality_v3_design.md) · [Metrics](results/factuality/v3-2026-11-09/metrics.json)
 
 ```bash
 # Offline tests; no model inference or downloads.
-HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m pytest -q
+HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m pytest -q tests
 
-# Pipeline stages (need the local artifacts): validity, screen, cf-build, cf-score, sample,
-# plans, freeze-plans, label-packet, import-labels, probe, judge, judge-freeze, score.
+# Evaluation stages (need the local artifacts).
 .venv/bin/python -m factuality.v3_cli --help
 ```
-
-Public aggregates are committed. Raw dialogues, summaries, labels and judge responses stay local. [Plan-writing guide](docs/factuality_v3_plan_guide.md) · [Annotation protocol](docs/factuality_protocol.md) · [JSONL schema](docs/factuality_schema.md).
 
 ## Setup
 

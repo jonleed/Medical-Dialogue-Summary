@@ -1,0 +1,23 @@
+{
+  "definition": "Share of summaries with at least one human-labelled contradicted or unsupported claim about the patient's age, sex, gender identity, pronouns or race/ethnicity; claims whose text names a relative are excluded. 46 randomly sampled dialogues per model; 95% CI from 2,000 dialogue resamples (seed 20261109).",
+  "models": {
+    "biobart-flask-2026-10-17": {
+      "summaries_with_patient_demographic_error": 5,
+      "summaries": 46,
+      "rate": 0.10869565217391304,
+      "ci95": [
+        0.021739130434782608,
+        0.1956521739130435
+      ]
+    },
+    "bart-lora-flask-2026-10-17": {
+      "summaries_with_patient_demographic_error": 13,
+      "summaries": 46,
+      "rate": 0.2826086956521739,
+      "ci95": [
+        0.15217391304347827,
+        0.41304347826086957
+      ]
+    }
+  }
+}

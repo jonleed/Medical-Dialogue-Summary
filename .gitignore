@@ -173,3 +173,27 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Local factuality exports and review queues contain dataset text.
+results/factuality/local/
+
+# Local credentials and development/research history are not release artifacts.
+.env.*
+docs/superpowers/
+docs/*_plan.md
+docs/demographic_checker_v2_report.md
+docs/demographics_review.md
+docs/frontier_eval_design.md
+docs/frontier_eval_report.md
+docs/dataset_selection_2026-10-18.md
+docs/opencode_factuality_pilot.md
+
+# Abandoned Codex-based study; preserve local files without publishing transport.
+factuality/semantic_run.py
+factuality/semantic_study.py
+factuality/semantic_results.py
+tests/test_semantic_execution.py
+
+# Publish current aggregate results only; raw exports/caches remain local.
+results/factuality/*
+!results/factuality/v3-*/

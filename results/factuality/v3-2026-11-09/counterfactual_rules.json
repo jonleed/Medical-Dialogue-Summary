@@ -1,0 +1,180 @@
+{
+  "cf-biobart": {
+    "families": {
+      "race_injection": {
+        "faithful": 31,
+        "contradicted": 0,
+        "inserted": 0,
+        "omitted": 66,
+        "invalid": 0,
+        "n": 97
+      },
+      "race_removal": {
+        "faithful": 3,
+        "contradicted": 0,
+        "inserted": 0,
+        "omitted": 0,
+        "invalid": 0,
+        "n": 3
+      },
+      "age_shift": {
+        "faithful": 9,
+        "contradicted": 1,
+        "inserted": 0,
+        "omitted": 0,
+        "invalid": 0,
+        "n": 10,
+        "reverted_to_original": 0
+      },
+      "pronoun_swap": {
+        "faithful": 3,
+        "contradicted": 0,
+        "inserted": 0,
+        "omitted": 1,
+        "invalid": 0,
+        "n": 4
+      }
+    },
+    "race_by_group": {
+      "white": {
+        "faithful": 4,
+        "contradicted": 0,
+        "omitted": 8,
+        "n": 12
+      },
+      "black": {
+        "faithful": 3,
+        "contradicted": 0,
+        "omitted": 9,
+        "n": 12
+      },
+      "hispanic_latino": {
+        "faithful": 5,
+        "contradicted": 0,
+        "omitted": 7,
+        "n": 12
+      },
+      "asian": {
+        "faithful": 3,
+        "contradicted": 0,
+        "omitted": 9,
+        "n": 12
+      },
+      "american_indian_alaska_native": {
+        "faithful": 6,
+        "contradicted": 0,
+        "omitted": 6,
+        "n": 12
+      },
+      "nhpi": {
+        "faithful": 3,
+        "contradicted": 0,
+        "omitted": 9,
+        "n": 12
+      },
+      "mena": {
+        "faithful": 6,
+        "contradicted": 0,
+        "omitted": 7,
+        "n": 13
+      },
+      "multiracial": {
+        "faithful": 1,
+        "contradicted": 0,
+        "omitted": 11,
+        "n": 12
+      },
+      "underpowered": true
+    },
+    "note": "Construction gold covers only the edited attribute."
+  },
+  "cf-bart-lora": {
+    "families": {
+      "race_injection": {
+        "faithful": 44,
+        "contradicted": 1,
+        "inserted": 0,
+        "omitted": 52,
+        "invalid": 0,
+        "n": 97
+      },
+      "race_removal": {
+        "faithful": 3,
+        "contradicted": 0,
+        "inserted": 0,
+        "omitted": 0,
+        "invalid": 0,
+        "n": 3
+      },
+      "age_shift": {
+        "faithful": 3,
+        "contradicted": 7,
+        "inserted": 0,
+        "omitted": 0,
+        "invalid": 0,
+        "n": 10,
+        "reverted_to_original": 1
+      },
+      "pronoun_swap": {
+        "faithful": 2,
+        "contradicted": 0,
+        "inserted": 0,
+        "omitted": 2,
+        "invalid": 0,
+        "n": 4
+      }
+    },
+    "race_by_group": {
+      "white": {
+        "faithful": 5,
+        "contradicted": 0,
+        "omitted": 7,
+        "n": 12
+      },
+      "black": {
+        "faithful": 4,
+        "contradicted": 0,
+        "omitted": 8,
+        "n": 12
+      },
+      "hispanic_latino": {
+        "faithful": 5,
+        "contradicted": 0,
+        "omitted": 7,
+        "n": 12
+      },
+      "asian": {
+        "faithful": 8,
+        "contradicted": 0,
+        "omitted": 4,
+        "n": 12
+      },
+      "american_indian_alaska_native": {
+        "faithful": 7,
+        "contradicted": 0,
+        "omitted": 5,
+        "n": 12
+      },
+      "nhpi": {
+        "faithful": 6,
+        "contradicted": 0,
+        "omitted": 6,
+        "n": 12
+      },
+      "mena": {
+        "faithful": 7,
+        "contradicted": 0,
+        "omitted": 6,
+        "n": 13
+      },
+      "multiracial": {
+        "faithful": 2,
+        "contradicted": 1,
+        "omitted": 9,
+        "n": 12
+      },
+      "underpowered": true
+    },
+    "note": "Construction gold covers only the edited attribute."
+  }
+}

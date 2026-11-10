@@ -1,5 +1,8 @@
 # Targeted factuality evaluation
 
+> **Superseded:** the current results are in the [v3 report](factuality_v3_report.md). This page records the October 2026 framework and pilot as history.
+
+
 The framework evaluates age and gender contradictions, unsupported claims and requested-section omissions. It applies published frontier-lab evaluation methods with deterministic local checks and a pinned free semantic reviewer. Training and serving behavior are unchanged by this evaluation.
 
 ## Design

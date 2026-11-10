@@ -92,44 +92,48 @@ An earlier BioBART-large Flask integration result reported ROUGE-L 0.4719. The c
 
 ### Targeted factuality evaluation
 
-Built a targeted factuality evaluation for **age and gender contradictions, unsupported claims, and omissions in clinical summaries**. It adapts published frontier-lab evaluation principles to a local/free-model budget: frozen development cases, blinded review payloads, source-only omission plans, exact evidence checks, explicit coverage, and recorded model/settings/costs. [Design and methods](docs/factuality_report.md).
+A targeted factuality evaluation for **age, gender and race/ethnicity contradictions, unsupported claims and omissions** in the clinical summaries. Two detectors are scored against blinded human labels:
 
-**Local demographic screening** ran on 300 saved validation summaries (100 per model). It checks patient age, sex, gender identity and pronouns while distinguishing relatives and model-visible evidence.
+- **Rules:** a deterministic demographic checker that covers race/ethnicity insertion.
+- **Judge:** Claude Sonnet 5.5, isolated so it never sees rule output, plans or model identity.
 
-| Model | Summaries | Contradiction suggestions | Supported suggestions | Unclear suggestions | Summaries flagged for review |
-|---|---:|---:|---:|---:|---:|
-| BioBART-large with LoRA | 100 | 3 | 20 | 35 | 27 |
-| BART-base with LoRA | 100 | 4 | 17 | 54 | 38 |
-| BART-base, no adapter | 100 | 2 | 49 | 0 | 1 |
+The labels come from source-only expected-fact plans written and frozen before any summary was seen, then claim-level labels on 100 summaries with the models hidden. Headline numbers use 35 held-out dialogues the judge rubric was never tuned on. [Full report](docs/factuality_v3_report.md) · [Metrics](results/factuality/v3-2026-11-09/metrics.json).
 
-Counts are **rule-generated suggestions**, not verified errors or model accuracy rankings. A summary can produce multiple suggestions; the two BART-base contradiction suggestions occur in one summary. Unclear means the checker could not establish a defensible verdict. [Screening aggregates](results/factuality/saved-summary-screening-2026-10-18/screening_results.json).
+**Held-out detector results** (single non-clinician annotator, 35 held-out dialogues; 95% CIs from resampling whole dialogues):
 
-**Semantic review** used Nemotron 3 Ultra Free on 19 of 24 frozen, constructed development cases:
+- **Omissions:** the judge detects omissions, precision 0.93 (95% CI 0.81–1.00), recall 0.87 (95% CI 0.72–1.00).
+- **Unsupported claims:** the judge screens for unsupported claims, measured recall 0.56 (95% CI 0.32–0.91), precision 0.82.
+- **Demographic contradictions:** too few held-out positives to estimate recall.
+  - Age: 3, all relatives' ages, all found by the judge.
+  - Sex-reference: 4, of which the judge found 3.
+  - Race: 0.
+  - On calibration, the rules (frozen before any labels) found all 6 patient-age contradictions with no false flags.
 
-| Capability | Cases attempted | Valid reviews | Correct target decisions |
+**Summarizer error rates** on 46 randomly sampled dialogues:
+
+| Summarizer | Contradicted claims | Unsupported claims | Expected facts omitted |
 |---|---:|---:|---:|
-| Patient age / relative-age controls | 4 | 3 | 2 |
-| Sex, gender identity and pronouns | 6 | 6 | 5 |
-| Unsupported claims | 3 | 3 | 2 |
-| Omissions / section exclusions | 6 | 5 | 5 |
-| **Total** | **19** | **17** | **14** |
+| BioBART-large + LoRA | 8% (4–13%) | 4% (1–6%) | 29% (18–39%) |
+| BART-base + LoRA | 13% (8–19%) | 8% (4–12%) | 31% (23–40%) |
 
-The 19 API requests reported **$0 actual cost** (12,550 input and 2,640 output tokens); paid fallback was disabled. Two reviews were rejected, two targets were not extracted as required, and one unsupported claim was mislabeled as contradicted. Five frozen cases were not attempted within the run budget. [Pilot details](docs/openrouter_factuality_pilot.md) · [Metrics](results/factuality/openrouter-pilot-2026-10-18/metrics.json).
+**No inserted race was found.** This covers all 200 fine-tuned summaries, the held-out labels, and dialogues with their race statement removed. When race was injected into 97 dialogues, the summarizers mostly left it out, and the judge labelled the resulting race claims correctly 75 of 76 times.
 
-The framework and development pilot are implemented. The 300-summary run covers local demographics; it does **not** provide semantic unsupported-claim or omission rates for those summaries. Independent clinician calibration remains outside these results.
+**Age edits:** BART-base + LoRA followed only 3 of 10 edited patient ages; BioBART-large followed 9 of 10.
+
+**Validity:** BART-base without an adapter echoes the prompt in all 100 outputs, so it's reported as invalid output, not scored for factuality.
+
+**Limits:** one non-clinician annotator; validation data already used for model selection; the judge rubric was revised once on calibration before freezing; no second judge family. The October 2026 [free-model pilot](docs/openrouter_factuality_pilot.md) is kept as a historical record.
 
 ```bash
 # Offline tests; no model inference or downloads.
 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m pytest -q
 
-# Recompute screening when the saved local cases are available.
-.venv/bin/python -m factuality.evaluate_saved_summaries
-
-# Rebuild the pilot report when the saved local responses are available.
-.venv/bin/python -m factuality.openrouter_pilot report
+# Pipeline stages (need the local artifacts): validity, screen, cf-build, cf-score, sample,
+# plans, freeze-plans, label-packet, import-labels, probe, judge, judge-freeze, score.
+.venv/bin/python -m factuality.v3_cli --help
 ```
 
-Public aggregates are committed. Raw source/prediction text, response caches and credentials remain local. A fresh clone can run the offline tests; reproducing the saved-result commands requires the corresponding local artifacts. [Annotation protocol](docs/factuality_protocol.md) · [JSONL schema](docs/factuality_schema.md).
+Public aggregates are committed. Raw dialogues, summaries, labels and judge responses stay local. [Plan-writing guide](docs/factuality_v3_plan_guide.md) · [Annotation protocol](docs/factuality_protocol.md) · [JSONL schema](docs/factuality_schema.md).
 
 ## Setup
 

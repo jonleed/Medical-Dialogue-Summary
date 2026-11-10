@@ -40,8 +40,9 @@ Each status is fixed by a reporting rule written before the held-out run. "Detec
 - **The 3 held-out age contradictions are all relatives' ages** (for example, a parent's age at death). The rules check only the patient's own age, so they can't catch these.
   - The labels record these claims with the page's default subject, `patient`, while the judge labelled them `relative`. Scoring matches claims on the same summary span even when the subject or fact type differs, and counts those differences separately.
   - Across all matched held-out claims, 36 differ only in subject.
-  - On the **calibration** split, the rules found all 6 patient-age contradictions with no false flags. This is a fair test of the rules: they were frozen before any labels existed and were never adjusted.
+  - On the **calibration** split, the rules found all 6 patient-age contradictions with no false flags. This confirms the rules work on the errors they were designed around, not an independent estimate: the v2 checker was developed on these same saved summaries, and the 6 cases are the ones it was built to catch.
 - **Unsupported claims** are the judge's weakest category. In 31% of these cases it abstained or didn't produce a matching claim. 1 unsupported flag fell on a claim the owner hadn't split out separately; it isn't counted as a false positive.
+- **Omission scores cover the facts in the owner's plans.** The judge builds its own list of expected facts. Facts it lists that aren't in a plan aren't scored either way.
 - **The rules flag no unsupported or omission errors by design.** Their 0.00 recall on unsupported claims reflects scope, not failure.
 
 **Trial stability.** Claude Code exposes no temperature setting, so each held-out summary was judged twice. Claims are kept only when both trials agree; otherwise they become `unclear`. The two trials were separate calls. 29 of 70 summaries differed between trials in how claims were split or worded. On every error decision that lines up with a labelled claim, the two trials agreed.
@@ -86,6 +87,9 @@ The age and pronoun sets are small because few dialogues met the eligibility rul
 - **One annotator, not a clinician.** No inter-annotator agreement is available. Relevance and atomicity decisions follow the written [plan guide](factuality_v3_plan_guide.md).
 - **Label provenance.** Earlier exports of the 70 held-out items carried the reviewer string "Claude draft labels (pending review by Jonathan Leeder)", which another session had assigned. The owner attests that they authored and reviewed all 100 items. The reviewer field was corrected, and the label content is unchanged. The record is kept locally in `annotation_provenance.json`.
 - **Prompt revision.** The judge rubric was revised once on 30 calibration summaries: contradicted vs. unsupported, claim granularity, and the quote rule. It was then frozen. Calibration figures are not independent estimates.
+- **Scoring fixes after the first held-out scoring.** Two matching bugs surfaced when the held-out results were first scored, and both were fixed before these numbers were written up:
+  - Claims on the same span are now matched even when the subject label differs (the relative-age cases). This moved age contradictions from 0 of 3 to 3 of 3, and unsupported-claim recall from 0.50 to 0.56.
+  - Counterfactual summaries with no attribute claim are no longer scored as judge misses.
 - **No second judge.** No second judge model family was run. It was planned as an optional sensitivity check and dropped after its API key was rejected.
 - **Development data.** These validation dialogues were already used for model selection. The MTS-Dialog test splits were not used.
 - **Not for patient care.** No patient-care recommendations follow from this study.

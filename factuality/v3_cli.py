@@ -304,7 +304,6 @@ def _judge_parsers(subs):
     j.add_argument('--round', type=int, default=1, help='calibration revision round (new job IDs and folder)')
     subs.add_parser('judge-freeze', help=STAGES['judge-freeze'][1])
     subs.add_parser('judge-unblock', help=STAGES['judge-unblock'][1])
-    subs.add_parser('judge-secondary', help=STAGES['judge-secondary'][1])
 
 
 @stage('judge', 'Run the isolated Claude Sonnet 5.5 judge on one split (LIVE; uses the subscription)')
@@ -350,13 +349,6 @@ def cmd_judge_unblock(args):
     ledger.unblock()
 
 
-@stage('judge-secondary', 'Free Nemotron agreement judge on held-out (LIVE; zero-price guards)')
-def cmd_judge_secondary(args):
-    from .judge_run import _check_freeze, run_secondary
-    _check_freeze(JUDGE_MANIFEST)
-    print(run_secondary(judge_items('heldout'), V3 / 'judge' / 'secondary', V3 / 'secondary_ledger.json'))
-
-
 EXTENSIONS.append(_judge_parsers)
 
 
@@ -383,7 +375,6 @@ def cmd_score(args):
         claude.update(merged)
         if split == 'heldout':
             trials = {k: by_trial.get(k, {}) for k in ('t1', 't2')}
-    secondary = load_judge(V3 / 'judge' / 'secondary')[0] if (V3 / 'judge' / 'secondary').exists() else None
     cf_items = judge_items('counterfactual') if all((V3 / r).exists() for r in CF_RUNS) else []
     counterfactual = None
     if cf_items:
@@ -392,7 +383,7 @@ def cmd_score(args):
     validity = json.loads((V3 / 'validity.json').read_text()) if (V3 / 'validity.json').exists() else None
     validity = {k: v['counts'] for k, v in (validity or {}).items()}
     metrics = assemble_metrics(annotations, sample, {'rules': rules, 'claude': claude}, trials=trials,
-                               secondary=secondary, counterfactual=counterfactual, validity=validity)
+                               counterfactual=counterfactual, validity=validity)
     dump(args.out, metrics)
     for name, lines in metrics['heldout']['headline'].items():
         print(name)

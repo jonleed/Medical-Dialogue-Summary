@@ -1,4 +1,4 @@
-"""Judge runner (spec §6.4–6.6): opaque IDs, per-trial jobs, resume, freeze gate, trial merge, secondary judge.
+"""Judge runner (spec §6.4–6.6): opaque IDs, per-trial jobs, resume, freeze gate, trial merge.
 
 Per-trial records never contain real case IDs or run names; only key.json maps
 opaque IDs back. Held-out runs refuse to start unless the frozen rubric/schema
@@ -13,7 +13,6 @@ from .io import digest
 from .judge_v3 import (OUTPUT_SCHEMA, JudgeOutputError, build_payload, rubric_hash, rubric_text, schema_hash,
                        validate_judge_output)
 
-SECONDARY_MODEL = 'nvidia/nemotron-3-ultra-550b-a55b:free'
 STOP_STATUSES = ('usage_limited', 'auth_failed')
 MAX_CONSECUTIVE_FAILURES = 5  # a broken prompt/CLI must not burn the call cap
 
@@ -148,40 +147,6 @@ def merge_trials(results):
             'claims': claims, 'section_inventory': inventory}
 
 
-def _secondary_request(payload):
-    text = (rubric_text() + '\nReturn JSON matching this schema:\n' + json.dumps(OUTPUT_SCHEMA)
-            + '\nTASK:\n' + json.dumps(payload, ensure_ascii=False))
-    return {'model': SECONDARY_MODEL, 'messages': [{'role': 'user', 'content': text}], 'temperature': 0,
-            'max_tokens': 4000, 'reasoning': {'enabled': False}, 'stream': False,
-            'provider': {'only': ['nvidia'], 'allow_fallbacks': False, 'require_parameters': True,
-                         'max_price': {'prompt': 0, 'completion': 0, 'request': 0}}}
-
-
-def _openrouter_send(body):
-    from .openrouter_pilot import KEY_FILE, api, credentials, parse_response, verify_endpoint
-    verify_endpoint(api('models/' + SECONDARY_MODEL + '/endpoints')['data'])
-    return parse_response(api('chat/completions', credentials(KEY_FILE), body))
-
-
-def run_secondary(items, out_dir, ledger_path, *, send=None, cap=80):
-    """Free Nemotron judge on the same allowlisted payload and validator; one trial; zero-price guards."""
-    send = send or _openrouter_send
-    ledger = CallLedger(ledger_path, cap=cap)
-
-    def caller(payload, job_id):
-        ledger.reserve(job_id)
-        try:
-            raw, usage = send(_secondary_request(payload))
-        except (ValueError, KeyError) as error:
-            ledger.settle(job_id, 'transport_failed', None)
-            ledger.block(str(error)[:200])
-            return {'status': 'transport_failed', 'raw': None, 'usage': None, 'attempts': 1, 'cli_version': None}
-        ledger.settle(job_id, 'complete', usage)
-        return {'status': 'complete', 'raw': raw, 'usage': usage, 'attempts': 1, 'cli_version': SECONDARY_MODEL}
-
-    return run_judge(items, out_dir, split='secondary', trials=1, caller=caller, ledger=ledger)
-
-
 def load_judge(out_dir):
     """-> (merged {(run, case_id): result}, by_trial {'t1': {...}, 't2': {...}}). Failed trials are left out."""
     out = Path(out_dir)
@@ -197,3 +162,4 @@ def load_judge(out_dir):
         if results:
             merged[(ident['run'], ident['case_id'])] = merge_trials(results)
     return merged, by_trial
+

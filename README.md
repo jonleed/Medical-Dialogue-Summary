@@ -88,7 +88,7 @@ python eval_app_integration.py --app note --n 100
 python eval_app_integration.py --app section --n 100
 ```
 
-An earlier BioBART-large Flask integration result reported ROUGE-L 0.4719. The cached integration predictions lack enough model and input provenance for factuality scoring. Flask and notebook output limits also differ; see the [factuality protocol audit](docs/factuality_report.md#input-and-scoring-provenance).
+An earlier BioBART-large Flask integration result reported ROUGE-L 0.4719. The cached integration predictions lack enough model and input provenance for factuality scoring. Flask and notebook output limits also differ, so the two scores aren't comparable.
 
 ### Targeted factuality evaluation
 

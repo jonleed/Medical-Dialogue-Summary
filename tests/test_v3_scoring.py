@@ -50,6 +50,17 @@ class Matching(unittest.TestCase):
         [r] = rows_for('age_contradiction', rows)
         self.assertNotEqual(r['detector_positive'], True)
 
+    def test_subject_convention_mismatch_still_matches(self):
+        rows = match_claims([human('contradicted', subject='patient')], [det('contradicted', subject='relative')])
+        [r] = rows_for('age_contradiction', rows)
+        self.assertEqual((r['detector_positive'], r['subject_convention_match'], r['extra']), (True, False, False))
+
+    def test_same_subject_preferred_over_other_subject(self):
+        rows = match_claims([human('contradicted', subject='relative')],
+                            [det('supported', subject='patient'), det('contradicted', subject='relative')])
+        [r] = [x for x in rows_for('age_contradiction', rows) if not x['extra']]
+        self.assertEqual((r['detector_positive'], r['subject_convention_match']), (True, True))
+
     def test_race_inserted(self):
         [r] = rows_for('race_inserted', match_claims([human('unsupported', ft='race_ethnicity')],
                                                      [det('unsupported', ft='race_ethnicity', issue='race_inserted')]))
@@ -186,6 +197,13 @@ class Assembly(unittest.TestCase):
         judged = {'claims': [det('contradicted', ft='race_ethnicity', s=white, e=white + 5)]}
         r = judge_on_counterfactual([('cf-a', cf)], {('cf-a', cf['case_id']): judged})
         self.assertEqual(r['race_injection'], {'n': 1, 'correct': 1, 'missed': 0, 'wrong_label': 0})
+
+    def test_faithful_race_removal_has_nothing_to_judge(self):
+        from factuality.v3_scoring import judge_on_counterfactual
+        cf = {'case_id': 'cf:race_removal:val:1', 'dialogue': 'Patient: hi.', 'prediction': 'This is a 40-year-old male.',
+              'counterfactual': {'family': 'race_removal', 'gold': {'race': None}}}
+        r = judge_on_counterfactual([('cf-a', cf)], {('cf-a', cf['case_id']): {'claims': []}})
+        self.assertEqual(r['race_removal']['n'], 0)
 
 
 class Assemble(unittest.TestCase):

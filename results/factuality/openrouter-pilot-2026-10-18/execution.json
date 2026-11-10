@@ -1,8 +1,0 @@
-{
-  "status": "planned_subset_processed_with_invalid_reviews",
-  "reason": null,
-  "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
-  "total_attempts": 24,
-  "production_started": false,
-  "paid_fallback": false
-}

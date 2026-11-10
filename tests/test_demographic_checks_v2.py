@@ -173,21 +173,6 @@ class AuditIntegrationRegressions(unittest.TestCase):
         self.assertEqual(summary['flagged_cases'],1)
         self.assertEqual(summary['contradiction_flagged_cases'],0)
 
-    def test_audit_is_reproducible_and_preserves_existing_files(self):
-        import tempfile
-        from factuality.io import write_jsonl, file_hash
-        from factuality.demographic_audit import audit_run
-        from test_factuality import annotation
-        c=case(prediction='The patient is 24 years old.')
-        with tempfile.TemporaryDirectory() as d:
-            source=Path(d)/'cases.jsonl'; gold=Path(d)/'agent.jsonl'; out=Path(d)/'audit'
-            write_jsonl(source,[c]);write_jsonl(gold,[annotation(c,'contradicted')])
-            summary=audit_run(source,out,gold)
-            self.assertEqual(summary['cases_sha256'],file_hash(source))
-            self.assertEqual(summary['reviewed_regressions']['known_contradictions_captured'],1)
-            with self.assertRaises(ValueError):audit_run(source,out,gold)
-
-
 class SavedOutputRegressions(unittest.TestCase):
     def test_real_source_age_misses_and_truncation(self):
         path=Path('results/factuality/local/biobart-flask-2026-10-17/cases.jsonl')

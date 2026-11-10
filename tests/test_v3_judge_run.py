@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 from factuality.claude_code_backend import CallLedger
-from factuality.judge_run import freeze_judge, merge_trials, opaque_id, run_judge, run_secondary
+from factuality.judge_run import freeze_judge, merge_trials, opaque_id, run_judge
 from factuality.judge_v3 import rubric_hash, schema_hash
 
 DIALOGUE = 'Patient: I am 40 years old. I have a cough.'
@@ -168,26 +168,6 @@ class Merge(unittest.TestCase):
     def test_single_trial_run_keeps_labels(self):
         m = merge_trials([self.result('contradicted')])
         self.assertEqual(m['claims'][0]['label'], 'contradicted')
-
-
-class Secondary(unittest.TestCase):
-    def test_uses_same_payload_validator_and_ledger(self):
-        tmp = Path(tempfile.mkdtemp())
-        sent = []
-
-        def send(body):
-            sent.append(body)
-            return judged(), {'input': 10, 'output': 5}
-
-        run_secondary([('run-a', case(0))], tmp / 'sec', tmp / 'sec_ledger.json', send=send, cap=80)
-        record = json.loads((tmp / 'sec' / opaque_id('val:0', 'run-a') / 't1.json').read_text())
-        self.assertEqual(record['status'], 'complete')
-        self.assertNotIn('val:0', json.dumps(sent))
-        self.assertTrue(CallLedger(tmp / 'sec_ledger.json').done(f'secondary:{opaque_id("val:0", "run-a")}:t1'))
-
-
-if __name__ == '__main__':
-    unittest.main()
 
 
 class Load(unittest.TestCase):

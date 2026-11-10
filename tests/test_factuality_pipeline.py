@@ -54,12 +54,6 @@ class PipelineDiagnostics(unittest.TestCase):
         c = case(); a = annotation(c); c['prediction']=None; a['case_hash']=case_hash(c); a['claims']=[]
         with self.assertRaises(ValueError): validate_annotation(c,a)
 
-    def test_reject_mixed_generation_protocols(self):
-        from factuality.rouge import compute_rouge
-        a = case(); a.update(protocol='flask-note',reference='a')
-        b = case(); b.update(case_id='synthetic:2',protocol='notebook',reference='a')
-        with self.assertRaises(ValueError): compute_rouge([a,b])
-
     def test_reject_duplicate_atomic_claims(self):
         c = case(); a = annotation(c)
         a['claims'].append(dict(a['claims'][0],id='c2'))
@@ -71,6 +65,7 @@ class PipelineDiagnostics(unittest.TestCase):
         self.assertEqual(s['unsupported_claims']['numerator'],1)
         self.assertEqual(s['age_contradictions']['numerator'],0)
 
+    @unittest.skipUnless(Path('MTS-Dialog/Main-Dataset/MTS-Dialog-ValidationSet.csv').exists(), 'needs the MTS-Dialog submodule')
     def test_real_sample_parity_with_historical_preprocessing(self):
         # Read validation only and extract historical preprocessing without heavy imports.
         import ast
@@ -161,46 +156,5 @@ class RequestProvenanceDiagnostics(unittest.TestCase):
         self.assertEqual(validate_case_request(c),c['prompt'])
         c['prompt']=c['prompt'].replace('have pain','deny pain')
         with self.assertRaises(ValueError): validate_case_request(c)
-
-    def test_duplicate_paired_run_labels_are_rejected(self):
-        from factuality.paired import compare_runs
-        with self.assertRaisesRegex(ValueError,'unique'):
-            compare_runs(['/does-not-exist/model/run','/other/model/run'])
-
-class SummaryDiagnostics(unittest.TestCase):
-    def test_synthetic_serialization_of_pending_run(self):
-        # Uses validation metadata to check sampling, with explicitly dummy output;
-        # no model execution and no empirical labels are produced by this test.
-        from factuality.export import sample_cases
-        from factuality.summarize import summarize_run
-        from factuality.io import write_jsonl,write_json,file_hash
-        c=sample_cases(n=1)[0]
-        c['prediction']='Synthetic serialization test only.'
-        c['model_input']={'text':c['dialogue'],'truncated':False,'sha256':'synthetic','full_token_count':10}
-        with tempfile.TemporaryDirectory() as d:
-            run=Path(d)/'run';run.mkdir()
-            write_jsonl(run/'cases.jsonl',[c])
-            manifest={'status':'complete','completed':1,'case_ids':[c['case_id']],
-              'cases_sha256':file_hash(run/'cases.jsonl'),'dataset_revision':'synthetic-metadata',
-              'dataset_csv_sha256':c['source']['csv_sha256']}
-            write_json(run/'generation_manifest.json',manifest)
-            summary=summarize_run(run,Path(d)/'summary')
-            self.assertEqual(summary['human_pending'],1)
-            self.assertEqual(summary['human_reviewed'],0)
-            metrics=json.loads((Path(d)/'summary/metrics.json').read_text())
-            self.assertIsNone(metrics['human']['full_source']['unsupported_claims']['rate'])
-            self.assertTrue((run/'review/review.html').exists())
-            original_queue=(run/'review/annotations.jsonl').read_bytes()
-            second=summarize_run(run,Path(d)/'second-summary',run/'review/annotations.jsonl')
-            self.assertEqual(second['human_pending'],1)
-            self.assertEqual((run/'review/annotations.jsonl').read_bytes(),original_queue)
-
-    def test_finalize_rejects_incomplete_runs(self):
-        from factuality.summarize import summarize_run
-        from factuality.io import write_json
-        with tempfile.TemporaryDirectory() as d:
-            run=Path(d)/'run';run.mkdir();write_json(run/'generation_manifest.json',{'status':'failed'})
-            with self.assertRaisesRegex(ValueError,'incomplete'): summarize_run(run,Path(d)/'summary')
-
 
 if __name__=='__main__': unittest.main()

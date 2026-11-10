@@ -88,7 +88,7 @@ python eval_app_integration.py --app note --n 100
 python eval_app_integration.py --app section --n 100
 ```
 
-An earlier BioBART-large Flask integration result reported ROUGE-L 0.4719. The cached integration predictions lack enough model and input provenance for factuality scoring. Flask and notebook output limits also differ; see the [factuality protocol audit](docs/factuality_pilot.md#input-and-scoring-provenance).
+An earlier BioBART-large Flask integration result reported ROUGE-L 0.4719. The cached integration predictions lack enough model and input provenance for factuality scoring. Flask and notebook output limits also differ, so the two scores aren't comparable.
 
 ### Targeted factuality evaluation
 
@@ -122,7 +122,7 @@ The labels come from source-only expected-fact plans written and frozen before a
 
 **Validity:** BART-base without an adapter echoes the prompt in all 100 outputs, so it's reported as invalid output, not scored for factuality.
 
-**Limits:** one non-clinician reviewer; validation data already used for model selection; the judge rubric was revised once on calibration before freezing; no second judge family. The October 2026 [free-model pilot](docs/factuality_pilot.md) is kept as a historical record.
+**Limits:** one non-clinician reviewer; validation data already used for model selection; the judge rubric was revised once on calibration before freezing; no second judge family. The October 2026 free-model pilot is kept as a historical record.
 
 ```bash
 # Offline tests; no model inference or downloads.

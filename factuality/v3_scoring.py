@@ -42,9 +42,12 @@ def _detector_value(error_type, fact_type, claim):
 def match_claims(human_claims, detector_claims):
     unused, rows = list(detector_claims), []
     for h in human_claims:
-        candidates = [d for d in unused if d.get('subject', 'patient') == h.get('subject', 'patient')
-                      and _overlap(d.get('generated_span'), h.get('generated_span'))]
-        match = next((d for d in candidates if d['fact_type'] == h['fact_type']), candidates[0] if candidates else None)
+        # Overlapping span required. Prefer the same subject and type; a differing subject or type on the
+        # same span is a labelling-convention difference (tallied separately), not a different claim.
+        candidates = [d for d in unused if _overlap(d.get('generated_span'), h.get('generated_span'))]
+        candidates.sort(key=lambda d: (d.get('subject', 'patient') != h.get('subject', 'patient'),
+                                       d['fact_type'] != h['fact_type']))
+        match = candidates[0] if candidates else None
         if match is not None:
             unused.remove(match)
         # Judge the detector under the human's fact type only for the same type or the known
@@ -57,11 +60,13 @@ def match_claims(human_claims, detector_claims):
                          'detector_positive': _detector_value(t, eval_type, match) if match else None,
                          'label_correct': bool(match) and _label(match) == h['label'],
                          'type_convention_match': bool(match) and match['fact_type'] == h['fact_type'],
+                         'subject_convention_match': bool(match) and match.get('subject', 'patient') == h.get('subject', 'patient'),
                          'matched': match is not None, 'extra': False})
     for d in unused:
         for t in CLAIM_TYPES:
             rows.append({'error_type': t, 'human_positive': False, 'detector_positive': _detector_value(t, d['fact_type'], d),
-                         'label_correct': False, 'type_convention_match': False, 'matched': False, 'extra': True})
+                         'label_correct': False, 'type_convention_match': False, 'subject_convention_match': False,
+                         'matched': False, 'extra': True})
     return rows
 
 
@@ -74,7 +79,8 @@ def match_omissions(plan_facts, judge_inventory):
         value = None if item is None or item['status'] == 'unclear' else item['status'] == 'omitted'
         rows.append({'error_type': 'omission', 'human_positive': f['label'] == 'omitted', 'detector_positive': value,
                      'label_correct': value is not None and value == (f['label'] == 'omitted'),
-                     'type_convention_match': True, 'matched': item is not None, 'extra': False})
+                     'type_convention_match': True, 'subject_convention_match': True,
+                     'matched': item is not None, 'extra': False})
     return rows
 
 
@@ -90,7 +96,8 @@ def _point(rows):
     return {'positives': positives, 'tp': tp, 'fp': fp, 'precision': precision, 'recall': recall, 'f1': f1,
             'abstention_rate': abstain / positives if positives else None,
             'extra_detector_flags': sum(r['extra'] and r['detector_positive'] is True for r in rows),
-            'convention_mismatches': sum(r['matched'] and r['label_correct'] and not r['type_convention_match'] for r in core)}
+            'convention_mismatches': sum(r['matched'] and r['label_correct'] and not r['type_convention_match'] for r in core),
+            'subject_convention_mismatches': sum(r['matched'] and not r.get('subject_convention_match', True) for r in core)}
 
 
 def _interval(values):
@@ -211,6 +218,8 @@ def judge_on_counterfactual(items, judged):
         if expected is None:  # attribute omitted from the summary: nothing to judge
             continue
         spans = [f['span'] for f in extract[family](cf.get('prediction') or '')]
+        if not spans:  # e.g. faithful race removal: no attribute claim in the summary to judge
+            continue
         claims = (judged.get((run, cf['case_id'])) or {}).get('claims', [])
         hits = [c for c in claims if any(_overlap(c.get('generated_span'), s) for s in spans)]
         row = out[family]

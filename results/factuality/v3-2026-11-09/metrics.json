@@ -1,0 +1,1559 @@
+{
+  "heldout": {
+    "dialogues": 35,
+    "summaries": 70,
+    "rules": {
+      "age_contradiction": {
+        "positives": 3,
+        "tp": 0,
+        "fp": 0,
+        "precision": null,
+        "recall": 0.0,
+        "f1": 0.0,
+        "abstention_rate": 1.0,
+        "extra_detector_flags": 0,
+        "convention_mismatches": 1,
+        "subject_convention_mismatches": 0,
+        "ci95": {
+          "precision": null,
+          "recall": [
+            0.0,
+            0.0
+          ]
+        },
+        "dialogues": 35
+      },
+      "cross_dimension_inconsistency": {
+        "positives": 4,
+        "tp": 0,
+        "fp": 0,
+        "precision": null,
+        "recall": 0.0,
+        "f1": 0.0,
+        "abstention_rate": 1.0,
+        "extra_detector_flags": 0,
+        "convention_mismatches": 1,
+        "subject_convention_mismatches": 0,
+        "ci95": {
+          "precision": null,
+          "recall": [
+            0.0,
+            0.0
+          ]
+        },
+        "dialogues": 35
+      },
+      "pronoun_contradiction": {
+        "positives": 0,
+        "tp": 0,
+        "fp": 0,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "abstention_rate": null,
+        "extra_detector_flags": 0,
+        "convention_mismatches": 1,
+        "subject_convention_mismatches": 0,
+        "ci95": {
+          "precision": null,
+          "recall": null
+        },
+        "dialogues": 35
+      },
+      "race_contradiction": {
+        "positives": 0,
+        "tp": 0,
+        "fp": 0,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "abstention_rate": null,
+        "extra_detector_flags": 0,
+        "convention_mismatches": 1,
+        "subject_convention_mismatches": 0,
+        "ci95": {
+          "precision": null,
+          "recall": null
+        },
+        "dialogues": 35
+      },
+      "race_inserted": {
+        "positives": 0,
+        "tp": 0,
+        "fp": 0,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "abstention_rate": null,
+        "extra_detector_flags": 0,
+        "convention_mismatches": 1,
+        "subject_convention_mismatches": 0,
+        "ci95": {
+          "precision": null,
+          "recall": null
+        },
+        "dialogues": 35
+      },
+      "sex_contradiction": {
+        "positives": 1,
+        "tp": 0,
+        "fp": 0,
+        "precision": null,
+        "recall": 0.0,
+        "f1": 0.0,
+        "abstention_rate": 1.0,
+        "extra_detector_flags": 0,
+        "convention_mismatches": 1,
+        "subject_convention_mismatches": 0,
+        "ci95": {
+          "precision": null,
+          "recall": [
+            0.0,
+            0.0
+          ]
+        },
+        "dialogues": 35
+      },
+      "unsupported_claim": {
+        "positives": 16,
+        "tp": 0,
+        "fp": 0,
+        "precision": null,
+        "recall": 0.0,
+        "f1": 0.0,
+        "abstention_rate": 1.0,
+        "extra_detector_flags": 0,
+        "convention_mismatches": 1,
+        "subject_convention_mismatches": 0,
+        "ci95": {
+          "precision": null,
+          "recall": [
+            0.0,
+            0.0
+          ]
+        },
+        "dialogues": 35
+      }
+    },
+    "claude": {
+      "age_contradiction": {
+        "positives": 3,
+        "tp": 3,
+        "fp": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "abstention_rate": 0.0,
+        "extra_detector_flags": 0,
+        "convention_mismatches": 31,
+        "subject_convention_mismatches": 36,
+        "ci95": {
+          "precision": [
+            1.0,
+            1.0
+          ],
+          "recall": [
+            1.0,
+            1.0
+          ]
+        },
+        "dialogues": 35
+      },
+      "cross_dimension_inconsistency": {
+        "positives": 4,
+        "tp": 3,
+        "fp": 1,
+        "precision": 0.75,
+        "recall": 0.75,
+        "f1": 0.75,
+        "abstention_rate": 0.0,
+        "extra_detector_flags": 0,
+        "convention_mismatches": 31,
+        "subject_convention_mismatches": 36,
+        "ci95": {
+          "precision": [
+            0.0,
+            1.0
+          ],
+          "recall": [
+            0.0,
+            1.0
+          ]
+        },
+        "dialogues": 35
+      },
+      "omission": {
+        "positives": 46,
+        "tp": 40,
+        "fp": 3,
+        "precision": 0.9302325581395349,
+        "recall": 0.8695652173913043,
+        "f1": 0.898876404494382,
+        "abstention_rate": 0.06521739130434782,
+        "extra_detector_flags": 0,
+        "convention_mismatches": 0,
+        "subject_convention_mismatches": 0,
+        "ci95": {
+          "precision": [
+            0.8064516129032258,
+            1.0
+          ],
+          "recall": [
+            0.723404255319149,
+            1.0
+          ]
+        },
+        "dialogues": 35
+      },
+      "pronoun_contradiction": {
+        "positives": 0,
+        "tp": 0,
+        "fp": 1,
+        "precision": 0.0,
+        "recall": null,
+        "f1": 0.0,
+        "abstention_rate": null,
+        "extra_detector_flags": 0,
+        "convention_mismatches": 31,
+        "subject_convention_mismatches": 36,
+        "ci95": {
+          "precision": [
+            0.0,
+            0.0
+          ],
+          "recall": null
+        },
+        "dialogues": 35
+      },
+      "race_contradiction": {
+        "positives": 0,
+        "tp": 0,
+        "fp": 0,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "abstention_rate": null,
+        "extra_detector_flags": 0,
+        "convention_mismatches": 31,
+        "subject_convention_mismatches": 36,
+        "ci95": {
+          "precision": null,
+          "recall": null
+        },
+        "dialogues": 35
+      },
+      "race_inserted": {
+        "positives": 0,
+        "tp": 0,
+        "fp": 0,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "abstention_rate": null,
+        "extra_detector_flags": 0,
+        "convention_mismatches": 31,
+        "subject_convention_mismatches": 36,
+        "ci95": {
+          "precision": null,
+          "recall": null
+        },
+        "dialogues": 35
+      },
+      "sex_contradiction": {
+        "positives": 1,
+        "tp": 0,
+        "fp": 0,
+        "precision": null,
+        "recall": 0.0,
+        "f1": 0.0,
+        "abstention_rate": 0.0,
+        "extra_detector_flags": 0,
+        "convention_mismatches": 31,
+        "subject_convention_mismatches": 36,
+        "ci95": {
+          "precision": null,
+          "recall": [
+            0.0,
+            0.0
+          ]
+        },
+        "dialogues": 35
+      },
+      "unsupported_claim": {
+        "positives": 16,
+        "tp": 9,
+        "fp": 2,
+        "precision": 0.8181818181818182,
+        "recall": 0.5625,
+        "f1": 0.6666666666666666,
+        "abstention_rate": 0.3125,
+        "extra_detector_flags": 1,
+        "convention_mismatches": 31,
+        "subject_convention_mismatches": 36,
+        "ci95": {
+          "precision": [
+            0.5,
+            1.0
+          ],
+          "recall": [
+            0.3157894736842105,
+            0.9090909090909091
+          ]
+        },
+        "dialogues": 35
+      }
+    },
+    "headline": {
+      "rules": {
+        "age_contradiction": "insufficient positives to estimate detector recall",
+        "cross_dimension_inconsistency": "insufficient positives to estimate detector recall",
+        "pronoun_contradiction": "insufficient positives to estimate detector recall",
+        "race_contradiction": "insufficient positives to estimate detector recall",
+        "race_inserted": "insufficient positives to estimate detector recall",
+        "sex_contradiction": "insufficient positives to estimate detector recall",
+        "unsupported_claim": "screens for unsupported claim, measured recall 0.00 (95% CI 0.00–0.00)"
+      },
+      "claude": {
+        "age_contradiction": "insufficient positives to estimate detector recall",
+        "cross_dimension_inconsistency": "insufficient positives to estimate detector recall",
+        "omission": "detects omission, precision 0.93 (95% CI 0.81–1.00), recall 0.87 (95% CI 0.72–1.00)",
+        "pronoun_contradiction": "insufficient positives to estimate detector recall",
+        "race_contradiction": "insufficient positives to estimate detector recall",
+        "race_inserted": "insufficient positives to estimate detector recall",
+        "sex_contradiction": "insufficient positives to estimate detector recall",
+        "unsupported_claim": "screens for unsupported claim, measured recall 0.56 (95% CI 0.32–0.91)"
+      }
+    },
+    "caveat": "single non-clinician annotator, 35 held-out dialogues",
+    "by_summarizer": {
+      "bart-lora-flask-2026-10-17": {
+        "rules": {
+          "age_contradiction": {
+            "positives": 2,
+            "tp": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": 0.0,
+            "f1": 0.0,
+            "abstention_rate": 1.0,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 1,
+            "subject_convention_mismatches": 0,
+            "ci95": {
+              "precision": null,
+              "recall": [
+                0.0,
+                0.0
+              ]
+            },
+            "dialogues": 35
+          },
+          "cross_dimension_inconsistency": {
+            "positives": 2,
+            "tp": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": 0.0,
+            "f1": 0.0,
+            "abstention_rate": 1.0,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 1,
+            "subject_convention_mismatches": 0,
+            "ci95": {
+              "precision": null,
+              "recall": [
+                0.0,
+                0.0
+              ]
+            },
+            "dialogues": 35
+          },
+          "pronoun_contradiction": {
+            "positives": 0,
+            "tp": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "abstention_rate": null,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 1,
+            "subject_convention_mismatches": 0,
+            "ci95": {
+              "precision": null,
+              "recall": null
+            },
+            "dialogues": 35
+          },
+          "race_contradiction": {
+            "positives": 0,
+            "tp": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "abstention_rate": null,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 1,
+            "subject_convention_mismatches": 0,
+            "ci95": {
+              "precision": null,
+              "recall": null
+            },
+            "dialogues": 35
+          },
+          "race_inserted": {
+            "positives": 0,
+            "tp": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "abstention_rate": null,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 1,
+            "subject_convention_mismatches": 0,
+            "ci95": {
+              "precision": null,
+              "recall": null
+            },
+            "dialogues": 35
+          },
+          "sex_contradiction": {
+            "positives": 0,
+            "tp": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "abstention_rate": null,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 1,
+            "subject_convention_mismatches": 0,
+            "ci95": {
+              "precision": null,
+              "recall": null
+            },
+            "dialogues": 35
+          },
+          "unsupported_claim": {
+            "positives": 10,
+            "tp": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": 0.0,
+            "f1": 0.0,
+            "abstention_rate": 1.0,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 1,
+            "subject_convention_mismatches": 0,
+            "ci95": {
+              "precision": null,
+              "recall": [
+                0.0,
+                0.0
+              ]
+            },
+            "dialogues": 35
+          }
+        },
+        "claude": {
+          "age_contradiction": {
+            "positives": 2,
+            "tp": 2,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "abstention_rate": 0.0,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 14,
+            "subject_convention_mismatches": 15,
+            "ci95": {
+              "precision": [
+                1.0,
+                1.0
+              ],
+              "recall": [
+                1.0,
+                1.0
+              ]
+            },
+            "dialogues": 35
+          },
+          "cross_dimension_inconsistency": {
+            "positives": 2,
+            "tp": 2,
+            "fp": 1,
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "f1": 0.8,
+            "abstention_rate": 0.0,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 14,
+            "subject_convention_mismatches": 15,
+            "ci95": {
+              "precision": [
+                0.0,
+                1.0
+              ],
+              "recall": [
+                1.0,
+                1.0
+              ]
+            },
+            "dialogues": 35
+          },
+          "omission": {
+            "positives": 23,
+            "tp": 19,
+            "fp": 1,
+            "precision": 0.95,
+            "recall": 0.8260869565217391,
+            "f1": 0.8837209302325582,
+            "abstention_rate": 0.13043478260869565,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 0,
+            "subject_convention_mismatches": 0,
+            "ci95": {
+              "precision": [
+                0.8125,
+                1.0
+              ],
+              "recall": [
+                0.6153846153846154,
+                1.0
+              ]
+            },
+            "dialogues": 35
+          },
+          "pronoun_contradiction": {
+            "positives": 0,
+            "tp": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "abstention_rate": null,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 14,
+            "subject_convention_mismatches": 15,
+            "ci95": {
+              "precision": null,
+              "recall": null
+            },
+            "dialogues": 35
+          },
+          "race_contradiction": {
+            "positives": 0,
+            "tp": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "abstention_rate": null,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 14,
+            "subject_convention_mismatches": 15,
+            "ci95": {
+              "precision": null,
+              "recall": null
+            },
+            "dialogues": 35
+          },
+          "race_inserted": {
+            "positives": 0,
+            "tp": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "abstention_rate": null,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 14,
+            "subject_convention_mismatches": 15,
+            "ci95": {
+              "precision": null,
+              "recall": null
+            },
+            "dialogues": 35
+          },
+          "sex_contradiction": {
+            "positives": 0,
+            "tp": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "abstention_rate": null,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 14,
+            "subject_convention_mismatches": 15,
+            "ci95": {
+              "precision": null,
+              "recall": null
+            },
+            "dialogues": 35
+          },
+          "unsupported_claim": {
+            "positives": 10,
+            "tp": 6,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 0.6,
+            "f1": 0.75,
+            "abstention_rate": 0.3,
+            "extra_detector_flags": 1,
+            "convention_mismatches": 14,
+            "subject_convention_mismatches": 15,
+            "ci95": {
+              "precision": [
+                1.0,
+                1.0
+              ],
+              "recall": [
+                0.3333333333333333,
+                1.0
+              ]
+            },
+            "dialogues": 35
+          }
+        }
+      },
+      "biobart-flask-2026-10-17": {
+        "rules": {
+          "age_contradiction": {
+            "positives": 1,
+            "tp": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": 0.0,
+            "f1": 0.0,
+            "abstention_rate": 1.0,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 0,
+            "subject_convention_mismatches": 0,
+            "ci95": {
+              "precision": null,
+              "recall": [
+                0.0,
+                0.0
+              ]
+            },
+            "dialogues": 35
+          },
+          "cross_dimension_inconsistency": {
+            "positives": 2,
+            "tp": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": 0.0,
+            "f1": 0.0,
+            "abstention_rate": 1.0,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 0,
+            "subject_convention_mismatches": 0,
+            "ci95": {
+              "precision": null,
+              "recall": [
+                0.0,
+                0.0
+              ]
+            },
+            "dialogues": 35
+          },
+          "pronoun_contradiction": {
+            "positives": 0,
+            "tp": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "abstention_rate": null,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 0,
+            "subject_convention_mismatches": 0,
+            "ci95": {
+              "precision": null,
+              "recall": null
+            },
+            "dialogues": 35
+          },
+          "race_contradiction": {
+            "positives": 0,
+            "tp": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "abstention_rate": null,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 0,
+            "subject_convention_mismatches": 0,
+            "ci95": {
+              "precision": null,
+              "recall": null
+            },
+            "dialogues": 35
+          },
+          "race_inserted": {
+            "positives": 0,
+            "tp": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "abstention_rate": null,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 0,
+            "subject_convention_mismatches": 0,
+            "ci95": {
+              "precision": null,
+              "recall": null
+            },
+            "dialogues": 35
+          },
+          "sex_contradiction": {
+            "positives": 1,
+            "tp": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": 0.0,
+            "f1": 0.0,
+            "abstention_rate": 1.0,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 0,
+            "subject_convention_mismatches": 0,
+            "ci95": {
+              "precision": null,
+              "recall": [
+                0.0,
+                0.0
+              ]
+            },
+            "dialogues": 35
+          },
+          "unsupported_claim": {
+            "positives": 6,
+            "tp": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": 0.0,
+            "f1": 0.0,
+            "abstention_rate": 1.0,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 0,
+            "subject_convention_mismatches": 0,
+            "ci95": {
+              "precision": null,
+              "recall": [
+                0.0,
+                0.0
+              ]
+            },
+            "dialogues": 35
+          }
+        },
+        "claude": {
+          "age_contradiction": {
+            "positives": 1,
+            "tp": 1,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "abstention_rate": 0.0,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 17,
+            "subject_convention_mismatches": 21,
+            "ci95": {
+              "precision": [
+                1.0,
+                1.0
+              ],
+              "recall": [
+                1.0,
+                1.0
+              ]
+            },
+            "dialogues": 35
+          },
+          "cross_dimension_inconsistency": {
+            "positives": 2,
+            "tp": 1,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.6666666666666666,
+            "abstention_rate": 0.0,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 17,
+            "subject_convention_mismatches": 21,
+            "ci95": {
+              "precision": [
+                1.0,
+                1.0
+              ],
+              "recall": [
+                0.0,
+                1.0
+              ]
+            },
+            "dialogues": 35
+          },
+          "omission": {
+            "positives": 23,
+            "tp": 21,
+            "fp": 2,
+            "precision": 0.9130434782608695,
+            "recall": 0.9130434782608695,
+            "f1": 0.9130434782608695,
+            "abstention_rate": 0.0,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 0,
+            "subject_convention_mismatches": 0,
+            "ci95": {
+              "precision": [
+                0.7692307692307693,
+                1.0
+              ],
+              "recall": [
+                0.7777777777777778,
+                1.0
+              ]
+            },
+            "dialogues": 35
+          },
+          "pronoun_contradiction": {
+            "positives": 0,
+            "tp": 0,
+            "fp": 1,
+            "precision": 0.0,
+            "recall": null,
+            "f1": 0.0,
+            "abstention_rate": null,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 17,
+            "subject_convention_mismatches": 21,
+            "ci95": {
+              "precision": [
+                0.0,
+                0.0
+              ],
+              "recall": null
+            },
+            "dialogues": 35
+          },
+          "race_contradiction": {
+            "positives": 0,
+            "tp": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "abstention_rate": null,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 17,
+            "subject_convention_mismatches": 21,
+            "ci95": {
+              "precision": null,
+              "recall": null
+            },
+            "dialogues": 35
+          },
+          "race_inserted": {
+            "positives": 0,
+            "tp": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "abstention_rate": null,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 17,
+            "subject_convention_mismatches": 21,
+            "ci95": {
+              "precision": null,
+              "recall": null
+            },
+            "dialogues": 35
+          },
+          "sex_contradiction": {
+            "positives": 1,
+            "tp": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": 0.0,
+            "f1": 0.0,
+            "abstention_rate": 0.0,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 17,
+            "subject_convention_mismatches": 21,
+            "ci95": {
+              "precision": null,
+              "recall": [
+                0.0,
+                0.0
+              ]
+            },
+            "dialogues": 35
+          },
+          "unsupported_claim": {
+            "positives": 6,
+            "tp": 3,
+            "fp": 2,
+            "precision": 0.6,
+            "recall": 0.5,
+            "f1": 0.5454545454545454,
+            "abstention_rate": 0.3333333333333333,
+            "extra_detector_flags": 0,
+            "convention_mismatches": 17,
+            "subject_convention_mismatches": 21,
+            "ci95": {
+              "precision": [
+                0.0,
+                1.0
+              ],
+              "recall": [
+                0.0,
+                1.0
+              ]
+            },
+            "dialogues": 35
+          }
+        }
+      }
+    }
+  },
+  "calibration": {
+    "dialogues": 15,
+    "summaries": 30,
+    "rules": {
+      "age_contradiction": {
+        "positives": 6,
+        "tp": 6,
+        "fp": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "abstention_rate": 0.0,
+        "extra_detector_flags": 0,
+        "convention_mismatches": 3,
+        "subject_convention_mismatches": 0,
+        "ci95": {
+          "precision": [
+            1.0,
+            1.0
+          ],
+          "recall": [
+            1.0,
+            1.0
+          ]
+        },
+        "dialogues": 15
+      },
+      "cross_dimension_inconsistency": {
+        "positives": 3,
+        "tp": 0,
+        "fp": 0,
+        "precision": null,
+        "recall": 0.0,
+        "f1": 0.0,
+        "abstention_rate": 1.0,
+        "extra_detector_flags": 0,
+        "convention_mismatches": 3,
+        "subject_convention_mismatches": 0,
+        "ci95": {
+          "precision": null,
+          "recall": [
+            0.0,
+            0.0
+          ]
+        },
+        "dialogues": 15
+      },
+      "pronoun_contradiction": {
+        "positives": 2,
+        "tp": 0,
+        "fp": 0,
+        "precision": null,
+        "recall": 0.0,
+        "f1": 0.0,
+        "abstention_rate": 1.0,
+        "extra_detector_flags": 1,
+        "convention_mismatches": 3,
+        "subject_convention_mismatches": 0,
+        "ci95": {
+          "precision": null,
+          "recall": [
+            0.0,
+            0.0
+          ]
+        },
+        "dialogues": 15
+      },
+      "race_contradiction": {
+        "positives": 0,
+        "tp": 0,
+        "fp": 0,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "abstention_rate": null,
+        "extra_detector_flags": 0,
+        "convention_mismatches": 3,
+        "subject_convention_mismatches": 0,
+        "ci95": {
+          "precision": null,
+          "recall": null
+        },
+        "dialogues": 15
+      },
+      "race_inserted": {
+        "positives": 0,
+        "tp": 0,
+        "fp": 0,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "abstention_rate": null,
+        "extra_detector_flags": 0,
+        "convention_mismatches": 3,
+        "subject_convention_mismatches": 0,
+        "ci95": {
+          "precision": null,
+          "recall": null
+        },
+        "dialogues": 15
+      },
+      "sex_contradiction": {
+        "positives": 3,
+        "tp": 0,
+        "fp": 0,
+        "precision": null,
+        "recall": 0.0,
+        "f1": 0.0,
+        "abstention_rate": 1.0,
+        "extra_detector_flags": 0,
+        "convention_mismatches": 3,
+        "subject_convention_mismatches": 0,
+        "ci95": {
+          "precision": null,
+          "recall": [
+            0.0,
+            0.0
+          ]
+        },
+        "dialogues": 15
+      },
+      "unsupported_claim": {
+        "positives": 16,
+        "tp": 0,
+        "fp": 0,
+        "precision": null,
+        "recall": 0.0,
+        "f1": 0.0,
+        "abstention_rate": 1.0,
+        "extra_detector_flags": 0,
+        "convention_mismatches": 3,
+        "subject_convention_mismatches": 0,
+        "ci95": {
+          "precision": null,
+          "recall": [
+            0.0,
+            0.0
+          ]
+        },
+        "dialogues": 15
+      }
+    },
+    "claude": {
+      "age_contradiction": {
+        "positives": 6,
+        "tp": 6,
+        "fp": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "abstention_rate": 0.0,
+        "extra_detector_flags": 0,
+        "convention_mismatches": 31,
+        "subject_convention_mismatches": 0,
+        "ci95": {
+          "precision": [
+            1.0,
+            1.0
+          ],
+          "recall": [
+            1.0,
+            1.0
+          ]
+        },
+        "dialogues": 15
+      },
+      "cross_dimension_inconsistency": {
+        "positives": 3,
+        "tp": 3,
+        "fp": 2,
+        "precision": 0.6,
+        "recall": 1.0,
+        "f1": 0.75,
+        "abstention_rate": 0.0,
+        "extra_detector_flags": 0,
+        "convention_mismatches": 31,
+        "subject_convention_mismatches": 0,
+        "ci95": {
+          "precision": [
+            0.0,
+            1.0
+          ],
+          "recall": [
+            1.0,
+            1.0
+          ]
+        },
+        "dialogues": 15
+      },
+      "omission": {
+        "positives": 69,
+        "tp": 56,
+        "fp": 6,
+        "precision": 0.9032258064516129,
+        "recall": 0.8115942028985508,
+        "f1": 0.8549618320610687,
+        "abstention_rate": 0.13043478260869565,
+        "extra_detector_flags": 0,
+        "convention_mismatches": 0,
+        "subject_convention_mismatches": 0,
+        "ci95": {
+          "precision": [
+            0.7872340425531915,
+            0.9814814814814815
+          ],
+          "recall": [
+            0.6440677966101694,
+            0.9142857142857143
+          ]
+        },
+        "dialogues": 15
+      },
+      "pronoun_contradiction": {
+        "positives": 2,
+        "tp": 1,
+        "fp": 0,
+        "precision": 1.0,
+        "recall": 0.5,
+        "f1": 0.6666666666666666,
+        "abstention_rate": 0.5,
+        "extra_detector_flags": 1,
+        "convention_mismatches": 31,
+        "subject_convention_mismatches": 0,
+        "ci95": {
+          "precision": [
+            1.0,
+            1.0
+          ],
+          "recall": [
+            0.0,
+            1.0
+          ]
+        },
+        "dialogues": 15
+      },
+      "race_contradiction": {
+        "positives": 0,
+        "tp": 0,
+        "fp": 0,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "abstention_rate": null,
+        "extra_detector_flags": 0,
+        "convention_mismatches": 31,
+        "subject_convention_mismatches": 0,
+        "ci95": {
+          "precision": null,
+          "recall": null
+        },
+        "dialogues": 15
+      },
+      "race_inserted": {
+        "positives": 0,
+        "tp": 0,
+        "fp": 0,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "abstention_rate": null,
+        "extra_detector_flags": 0,
+        "convention_mismatches": 31,
+        "subject_convention_mismatches": 0,
+        "ci95": {
+          "precision": null,
+          "recall": null
+        },
+        "dialogues": 15
+      },
+      "sex_contradiction": {
+        "positives": 3,
+        "tp": 2,
+        "fp": 0,
+        "precision": 1.0,
+        "recall": 0.6666666666666666,
+        "f1": 0.8,
+        "abstention_rate": 0.0,
+        "extra_detector_flags": 0,
+        "convention_mismatches": 31,
+        "subject_convention_mismatches": 0,
+        "ci95": {
+          "precision": [
+            1.0,
+            1.0
+          ],
+          "recall": [
+            0.0,
+            1.0
+          ]
+        },
+        "dialogues": 15
+      },
+      "unsupported_claim": {
+        "positives": 16,
+        "tp": 6,
+        "fp": 5,
+        "precision": 0.5454545454545454,
+        "recall": 0.375,
+        "f1": 0.4444444444444444,
+        "abstention_rate": 0.375,
+        "extra_detector_flags": 2,
+        "convention_mismatches": 31,
+        "subject_convention_mismatches": 0,
+        "ci95": {
+          "precision": [
+            0.2,
+            0.875
+          ],
+          "recall": [
+            0.125,
+            0.6875
+          ]
+        },
+        "dialogues": 15
+      }
+    },
+    "note": "Calibration split was used to revise the judge prompt; not an independent estimate."
+  },
+  "agreement": {
+    "rules_vs_human": {
+      "n": 42,
+      "raw": 1.0,
+      "kappa": null
+    },
+    "claude_vs_human": {
+      "n": 1746,
+      "raw": 0.9919816723940436,
+      "kappa": 0.8829400045973491
+    },
+    "claude_trials": {
+      "n": 1798,
+      "raw": 0.9955506117908788,
+      "kappa": null
+    }
+  },
+  "summarizer_rates": {
+    "bart-lora-flask-2026-10-17": {
+      "contradiction": {
+        "numerator": 30,
+        "denominator": 232,
+        "rate": 0.12931034482758622,
+        "ci95": [
+          0.0782122905027933,
+          0.18614718614718614
+        ]
+      },
+      "unsupported": {
+        "numerator": 19,
+        "denominator": 232,
+        "rate": 0.08189655172413793,
+        "ci95": [
+          0.04455445544554455,
+          0.12195121951219512
+        ]
+      },
+      "omission": {
+        "numerator": 46,
+        "denominator": 148,
+        "rate": 0.3108108108108108,
+        "ci95": [
+          0.22627737226277372,
+          0.4
+        ]
+      },
+      "dialogues": 46
+    },
+    "biobart-flask-2026-10-17": {
+      "contradiction": {
+        "numerator": 18,
+        "denominator": 226,
+        "rate": 0.07964601769911504,
+        "ci95": [
+          0.03910614525139665,
+          0.13245033112582782
+        ]
+      },
+      "unsupported": {
+        "numerator": 8,
+        "denominator": 226,
+        "rate": 0.035398230088495575,
+        "ci95": [
+          0.0125,
+          0.06217616580310881
+        ]
+      },
+      "omission": {
+        "numerator": 40,
+        "denominator": 139,
+        "rate": 0.28776978417266186,
+        "ci95": [
+          0.18243243243243243,
+          0.3902439024390244
+        ]
+      },
+      "dialogues": 46
+    }
+  },
+  "counterfactual": {
+    "rules_view": {
+      "cf-biobart": {
+        "families": {
+          "race_injection": {
+            "faithful": 31,
+            "contradicted": 0,
+            "inserted": 0,
+            "omitted": 66,
+            "invalid": 0,
+            "n": 97
+          },
+          "race_removal": {
+            "faithful": 3,
+            "contradicted": 0,
+            "inserted": 0,
+            "omitted": 0,
+            "invalid": 0,
+            "n": 3
+          },
+          "age_shift": {
+            "faithful": 9,
+            "contradicted": 1,
+            "inserted": 0,
+            "omitted": 0,
+            "invalid": 0,
+            "n": 10,
+            "reverted_to_original": 0
+          },
+          "pronoun_swap": {
+            "faithful": 3,
+            "contradicted": 0,
+            "inserted": 0,
+            "omitted": 1,
+            "invalid": 0,
+            "n": 4
+          }
+        },
+        "race_by_group": {
+          "white": {
+            "faithful": 4,
+            "contradicted": 0,
+            "omitted": 8,
+            "n": 12
+          },
+          "black": {
+            "faithful": 3,
+            "contradicted": 0,
+            "omitted": 9,
+            "n": 12
+          },
+          "hispanic_latino": {
+            "faithful": 5,
+            "contradicted": 0,
+            "omitted": 7,
+            "n": 12
+          },
+          "asian": {
+            "faithful": 3,
+            "contradicted": 0,
+            "omitted": 9,
+            "n": 12
+          },
+          "american_indian_alaska_native": {
+            "faithful": 6,
+            "contradicted": 0,
+            "omitted": 6,
+            "n": 12
+          },
+          "nhpi": {
+            "faithful": 3,
+            "contradicted": 0,
+            "omitted": 9,
+            "n": 12
+          },
+          "mena": {
+            "faithful": 6,
+            "contradicted": 0,
+            "omitted": 7,
+            "n": 13
+          },
+          "multiracial": {
+            "faithful": 1,
+            "contradicted": 0,
+            "omitted": 11,
+            "n": 12
+          },
+          "underpowered": true
+        },
+        "note": "Construction gold covers only the edited attribute."
+      },
+      "cf-bart-lora": {
+        "families": {
+          "race_injection": {
+            "faithful": 44,
+            "contradicted": 1,
+            "inserted": 0,
+            "omitted": 52,
+            "invalid": 0,
+            "n": 97
+          },
+          "race_removal": {
+            "faithful": 3,
+            "contradicted": 0,
+            "inserted": 0,
+            "omitted": 0,
+            "invalid": 0,
+            "n": 3
+          },
+          "age_shift": {
+            "faithful": 3,
+            "contradicted": 7,
+            "inserted": 0,
+            "omitted": 0,
+            "invalid": 0,
+            "n": 10,
+            "reverted_to_original": 1
+          },
+          "pronoun_swap": {
+            "faithful": 2,
+            "contradicted": 0,
+            "inserted": 0,
+            "omitted": 2,
+            "invalid": 0,
+            "n": 4
+          }
+        },
+        "race_by_group": {
+          "white": {
+            "faithful": 5,
+            "contradicted": 0,
+            "omitted": 7,
+            "n": 12
+          },
+          "black": {
+            "faithful": 4,
+            "contradicted": 0,
+            "omitted": 8,
+            "n": 12
+          },
+          "hispanic_latino": {
+            "faithful": 5,
+            "contradicted": 0,
+            "omitted": 7,
+            "n": 12
+          },
+          "asian": {
+            "faithful": 8,
+            "contradicted": 0,
+            "omitted": 4,
+            "n": 12
+          },
+          "american_indian_alaska_native": {
+            "faithful": 7,
+            "contradicted": 0,
+            "omitted": 5,
+            "n": 12
+          },
+          "nhpi": {
+            "faithful": 6,
+            "contradicted": 0,
+            "omitted": 6,
+            "n": 12
+          },
+          "mena": {
+            "faithful": 7,
+            "contradicted": 0,
+            "omitted": 6,
+            "n": 13
+          },
+          "multiracial": {
+            "faithful": 2,
+            "contradicted": 1,
+            "omitted": 9,
+            "n": 12
+          },
+          "underpowered": true
+        },
+        "note": "Construction gold covers only the edited attribute."
+      }
+    },
+    "judge_on_construction_gold": {
+      "race_injection": {
+        "n": 76,
+        "correct": 75,
+        "missed": 0,
+        "wrong_label": 1
+      },
+      "race_removal": {
+        "n": 0,
+        "correct": 0,
+        "missed": 0,
+        "wrong_label": 0
+      },
+      "age_shift": {
+        "n": 20,
+        "correct": 20,
+        "missed": 0,
+        "wrong_label": 0
+      },
+      "pronoun_swap": {
+        "n": 5,
+        "correct": 5,
+        "missed": 0,
+        "wrong_label": 0
+      }
+    }
+  },
+  "validity": {
+    "biobart-flask-2026-10-17": {
+      "summary": 100,
+      "prompt_echo": 0,
+      "empty": 0,
+      "degenerate": 0
+    },
+    "bart-lora-flask-2026-10-17": {
+      "summary": 100,
+      "prompt_echo": 0,
+      "empty": 0,
+      "degenerate": 0
+    },
+    "bart-base-flask-2026-10-17": {
+      "summary": 0,
+      "prompt_echo": 100,
+      "empty": 0,
+      "degenerate": 0
+    }
+  },
+  "limits": [
+    "Single non-clinician annotator; no inter-annotator agreement",
+    "Validation dialogues were already used for summarizer model selection",
+    "Claude Code exposes no temperature setting; held-out uses two trials, disagreements are unclear",
+    "Enrichment dialogues contribute to detector sensitivity only, never to prevalence"
+  ]
+}

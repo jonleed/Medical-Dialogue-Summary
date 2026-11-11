@@ -6,7 +6,7 @@ from pathlib import Path
 
 from factuality.claude_code_backend import CallLedger
 from factuality.judge_run import freeze_judge, merge_trials, opaque_id, run_judge
-from factuality.judge_v3 import rubric_hash, schema_hash
+from factuality.judge import rubric_hash, schema_hash
 
 DIALOGUE = 'Patient: I am 40 years old. I have a cough.'
 
@@ -140,7 +140,7 @@ class Runner(unittest.TestCase):
 
 class Merge(unittest.TestCase):
     def result(self, label):
-        from factuality.judge_v3 import build_payload, validate_judge_output
+        from factuality.judge import build_payload, validate_judge_output
         return validate_judge_output(build_payload(case(0), 'x'), judged(label))
 
     def test_agreement(self):

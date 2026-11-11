@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from factuality.v3_cli import latest_round_dir, round_split
+from factuality.cli import latest_round_dir, round_split
 
 
 class Rounds(unittest.TestCase):

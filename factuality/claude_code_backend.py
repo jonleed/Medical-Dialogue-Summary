@@ -161,7 +161,7 @@ def _classify(code, stdout, stderr):
 
 
 def call(payload, *, exe, ledger, job_id, timeout=300, system_prompt=None, schema=None):
-    from .judge_v3 import OUTPUT_SCHEMA, rubric_text
+    from .judge import OUTPUT_SCHEMA, rubric_text
     system_prompt = rubric_text() if system_prompt is None else system_prompt
     schema = OUTPUT_SCHEMA if schema is None else schema
     ledger.reserve(job_id)

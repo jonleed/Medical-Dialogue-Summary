@@ -1,7 +1,7 @@
 """Case export and Flask-route generation: python -m factuality {export,generate} --help.
 
 The evaluation stages (screening, counterfactuals, annotation, judging, scoring) live in
-`python -m factuality.v3_cli`.
+`python -m factuality.cli`.
 """
 import argparse
 

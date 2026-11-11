@@ -10,7 +10,7 @@ from pathlib import Path
 
 from .claude_code_backend import MODEL, CallLedger, build_command
 from .io import digest
-from .judge_v3 import (OUTPUT_SCHEMA, JudgeOutputError, build_payload, rubric_hash, rubric_text, schema_hash,
+from .judge import (OUTPUT_SCHEMA, JudgeOutputError, build_payload, rubric_hash, rubric_text, schema_hash,
                        validate_judge_output)
 
 STOP_STATUSES = ('usage_limited', 'auth_failed')

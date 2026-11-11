@@ -2,7 +2,7 @@
 import unittest
 
 from factuality.checks import demographic_suggestions
-from factuality.checks_v3 import CHECKER_VERSION, automatic_summary_v3, suggestions_v3
+from factuality.rules import CHECKER_VERSION, automatic_summary_v3, suggestions_v3
 from test_factuality import case
 
 

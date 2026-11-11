@@ -205,7 +205,7 @@ _EXPECTED_LABEL = {'contradicted': 'contradicted', 'faithful': 'supported', 'ins
 
 def judge_on_counterfactual(items, judged):
     """Did the judge label the edited attribute's summary claim as construction gold implies?"""
-    from .checks_v3 import sex_claims_v3
+    from .rules import sex_claims_v3
     from .counterfactual import FAMILIES, _outcome
     from .demographics import age_claims, pronoun_claims
     from .race import race_claims

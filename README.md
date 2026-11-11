@@ -106,11 +106,11 @@ The BART models I worked with kept getting patient demographics wrong. They cont
 | BioBART-large + LoRA |          11% of summaries |                  8% |                 4% |                    29% |
 | BART-base + LoRA     |          28% of summaries |                 13% |                 8% |                    31% |
 
-Claim and fact rates are per labelled claim or planned fact, on the same 46 dialogues (intervals in the report). Without fine-tuning, BART-base only echoes its prompt, so it has no factuality row.
+Claim and fact rates are per labelled claim or planned fact, on the same 46 dialogues ([intervals in the report](docs/factuality_results.md#summarizer-error-rates)). Without fine-tuning, BART-base only echoes its prompt, so it has no factuality row.
 
 **How it works**
 
-1. **Write the answer key first.** For each dialogue, the facts its requested note section should contain are listed before any summary is seen. This defines what counts as an omission (plan guide).
+1. **Write the answer key first.** For each dialogue, the facts its requested note section should contain are listed before any summary is seen. This defines what counts as an omission ([plan guide](docs/factuality_annotation_guide.md)).
 2. **Label every claim.** Each claim in 100 summaries is labelled supported, contradicted, unsupported or unclear, with the source model hidden. Claude Sonnet drafted the labels from the blind labeling sheets, and I (a non-clinician) checked every item against the dialogue.
 3. **Run two automatic detectors.** One is a rule checker for patient age, sex, pronouns and race. The other is an LLM judge (Claude Sonnet 5.5), isolated so it never sees the rule checker's answers, the reference labels or which model wrote the summary.
 4. **Score the detectors against the reference labels.** Headline numbers use 35 held-out dialogues the judge was never tuned on, with confidence intervals from resampling whole dialogues.
@@ -125,14 +125,14 @@ Claim and fact rates are per labelled claim or planned fact, on the same 46 dial
 
 On the edited dialogues, the judge labelled the summary's demographic claim correctly in 100 of 101 cases.
 
-Reference labels are AI-drafted and human-reviewed: Claude Sonnet drafted them from the blind labeling sheets, and the author, a non-clinician, checked every item. The reviewer saw the drafts, so this is not an independent second label. Dialogues are from the MTS-Dialog validation split. [Metrics](results/factuality/v3-2026-11-09/metrics.json)
+Reference labels are AI-drafted and human-reviewed: Claude Sonnet drafted them from the blind labeling sheets, and the author, a non-clinician, checked every item. The reviewer saw the drafts, so this is not an independent second label. Dialogues are from the MTS-Dialog validation split. [Full report](docs/factuality_results.md) · [Design](docs/factuality_design.md) · [Metrics](results/factuality/metrics.json)
 
 ```bash
 # Offline tests; no model inference or downloads.
 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m pytest -q tests
 
 # Evaluation stages (need the local artifacts).
-.venv/bin/python -m factuality.v3_cli --help
+.venv/bin/python -m factuality.cli --help
 ```
 
 ## Setup

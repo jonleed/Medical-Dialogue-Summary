@@ -5,7 +5,7 @@ written locally because they drive enrichment sampling; the reviewer must not re
 """
 from collections import Counter, defaultdict
 
-from .checks_v3 import automatic_summary_v3, suggestions_v3
+from .rules import automatic_summary_v3, suggestions_v3
 from .sections import canonical_section
 from .validity import LABELS, classify_output
 

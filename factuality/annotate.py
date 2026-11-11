@@ -12,7 +12,7 @@ from .io import case_hash, file_hash, read_jsonl, source_plan_hash, write_jsonl
 from .review import blank_annotation, blind_plans
 from .scoring import SUBJECTS, TYPES, validate_annotation, validate_span
 
-TEMPLATE = Path(__file__).with_name('templates_v3') / 'label.html'
+TEMPLATE = Path(__file__).with_name('templates') / 'label.html'
 FREEZE_FIELDS = ('expected_facts_frozen', 'expected_facts_blind')
 
 

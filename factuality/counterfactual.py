@@ -7,7 +7,7 @@ rejected if the edited dialogue no longer yields exactly the intended value.
 import random
 import re
 
-from .checks_v3 import sex_claims_v3
+from .rules import sex_claims_v3
 from .demographics import (NUMBER, SMALL, TENS, address_evidence, age_claims, age_evidence, number_value,
                            pronoun_claims, pronoun_evidence)
 from .io import digest

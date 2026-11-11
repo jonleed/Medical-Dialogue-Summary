@@ -2,7 +2,7 @@
 import json
 import unittest
 
-from factuality.v3_screen import per_case_local, screen_runs
+from factuality.screening import per_case_local, screen_runs
 
 DIALOGUE = 'Doctor: How old are you? Patient: I am 40 years old. I have a cough.'
 

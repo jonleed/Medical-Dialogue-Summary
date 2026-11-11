@@ -1,4 +1,4 @@
-"""v3 factuality pipeline stages: python -m factuality.v3_cli <stage> --help."""
+"""v3 factuality pipeline stages: python -m factuality.cli <stage> --help."""
 import argparse
 import json
 from pathlib import Path
@@ -68,7 +68,7 @@ def _screen_parser(subs):
 @stage('screen', 'Validity-gated v3 rule screening of the saved runs')
 def cmd_screen(args):
     from .io import write_jsonl
-    from .v3_screen import per_case_local, screen_runs
+    from .screening import per_case_local, screen_runs
     runs = [(r, label, load_run(LOCAL / r)) for r, label in RUNS]
     report = screen_runs(runs)
     dump(args.out, report)
@@ -361,10 +361,10 @@ def _score_parser(subs):
 
 @stage('score', 'Score rules and judges against reference labels; write public metrics (counts and rates only)')
 def cmd_score(args):
-    from .checks_v3 import suggestions_v3
+    from .rules import suggestions_v3
     from .counterfactual import score_counterfactual
     from .judge_run import load_judge
-    from .v3_scoring import assemble_metrics, judge_on_counterfactual
+    from .metrics import assemble_metrics, judge_on_counterfactual
     annotations = read_jsonl(args.annotations)
     sample = json.loads(Path(args.sample).read_text())
     cases = {(run, c['case_id']): c for run, _ in FINE_TUNED for c in load_run(LOCAL / run)}

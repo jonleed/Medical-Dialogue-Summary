@@ -1,102 +1,108 @@
-# Factuality evaluation v3: results
+# Factuality results
 
-Run 2026-11-09. Public aggregates (counts and rates only, no clinical text) are in [`results/factuality/`](../results/factuality/). The raw dialogues, summaries, labels and judge responses stay local.
+This page reports how often the summarizers make factual errors, and how well the two automatic detectors find those errors. Every number here is rebuilt from the published benchmark in [`data/factuality_benchmark/`](../data/factuality_benchmark/) by `python -m factuality.cli rebuild`. The aggregates are in [`results/factuality/`](../results/factuality/).
 
-**Caveat on every number below:** single non-clinician reviewer, 35 held-out dialogues. The dialogues come from the MTS-Dialog validation split, which was already used to select the summarizer checkpoint.
+Reference labels are AI-drafted and human-reviewed: Claude Sonnet drafted them from the blind labeling sheets, and one non-clinician human reviewer checked every item. The dialogues are from the MTS-Dialog validation split, which was also used to select the summarizer checkpoint.
 
-## What was measured
+## What is measured
 
-Two summarizers were evaluated, BioBART-large + LoRA and BART-base + LoRA, on 100 validation dialogues each. Two detectors look for factual errors in their summaries:
+Two summarizers, BioBART-large + LoRA and BART-base + LoRA, each summarize 100 validation dialogues. Two detectors look for factual errors in the summaries:
 
-- **Rules:** `patient_demographics_v3`, a deterministic checker. It covers patient age, sex, pronouns, gender identity and race/ethnicity. Race claims that appear nowhere in the source are flagged as possible insertions.
-- **Judge:** Claude Sonnet 5.5 (`claude-sonnet-5-5`), run in headless Claude Code 2.1.311 with no tools beyond schema output, and no plugins, hooks or memory. An isolation probe verified this before each run. The judge received only the dialogue, the model-visible input, the requested section and the summary. It never saw rule output, plans, model identity or construction labels.
+- **Rule checker.** A deterministic checker for the patient's age, sex, pronouns, gender identity and race/ethnicity. A race claim with no race statement anywhere in the dialogue is flagged as a possible insertion.
+- **LLM judge.** Claude Sonnet 5.5 (`claude-sonnet-5-5`) runs in headless Claude Code with no tools beyond structured output, and no plugins, hooks or memory; an isolation probe checks this before every run. The judge sees only the dialogue, the text the summarizer could see, the requested section and the summary. It never sees rule output, the expected-fact plans, the model's identity or the construction labels.
 
-Both detectors are scored against the owner's labels:
+Both detectors are scored against the reference labels, built in three steps:
 
-1. **Blind plans.** Before seeing any summary, the owner wrote and froze a plan for each of 50 dialogues: the facts the requested section should contain (243 facts, 189 expected, 54 excluded).
-2. **Labels.** The owner then labelled every claim and every planned fact in the 100 summaries of those dialogues. The summaries were shown in shuffled order with the model hidden.
-3. **Split.** 15 dialogues were used for calibration and 35 held out. The 8 dialogues the owner had already seen during the audit were barred from held-out.
+1. **Plans before summaries.** For each of 50 dialogues, the drafter lists the facts the requested section should contain, from the dialogue alone, and the list is frozen before any summary is shown: 243 facts in all, 189 expected and 54 excluded ([annotation guide](factuality_annotation_guide.md)).
+2. **Claim labels.** The drafter then labels every claim and every planned fact in the 100 summaries of those dialogues. The summaries appear in shuffled order with the model hidden.
+3. **Split.** 15 dialogues are used to calibrate the judge rubric, and 35 are held out. Dialogues the reviewer had seen before labelling started are kept out of the held-out set.
 
-**Headline numbers use held-out only.** The judge rubric was revised once on calibration (two rounds; see the rubric log) and frozen before any held-out call.
+**Headline figures use the held-out dialogues only.** The judge rubric is calibrated on the other 15 and frozen before any held-out call ([rubric calibration](../data/factuality_benchmark/rubric_revisions.md)). Intervals are 95% intervals from 2,000 bootstrap resamples of whole dialogues, with both summarizers' outputs pooled per dialogue. When a detector abstains (`unclear`) or doesn't produce a matching claim, that counts as a miss.
 
-Uncertainty intervals are 95% intervals from 2,000 bootstrap resamples of whole dialogues, with both summarizers' outputs pooled per dialogue. Where a detector abstained (`unclear`) or didn't match a labelled claim, that counts as a miss.
+## Detector results on held-out dialogues
 
-## Held-out detector results
+The status column follows reporting rules fixed before the held-out run. "Detects" needs at least 10 labelled positives, with precision and recall of at least 0.80. Error types with fewer than 5 positives are reported as counts only.
 
-Each status is fixed by a reporting rule written before the held-out run. "Detects" requires at least 10 labelled positives with precision and recall of at least 0.80. Error types with fewer than 5 positives are reported only as counts.
-
-| Error type | Labelled positives | Judge precision (95% CI) | Judge recall (95% CI) | Rules recall | Status |
+| Error type | Labelled positives | Judge precision (95% CI) | Judge recall (95% CI) | Rule checker recall | Status |
 |---|---:|---|---|---|---|
 | Expected fact omitted | 46 | 0.93 (0.81–1.00) | 0.87 (0.72–1.00) | not applicable | **judge detects omissions** |
 | Unsupported claim | 16 | 0.82 (0.50–1.00) | 0.56 (0.32–0.91) | 0.00 | **judge screens for unsupported claims** |
-| Age contradiction | 3 | 3 of 3 found, 0 false | — | 0 of 3 | insufficient positives |
-| Sex-reference inconsistency | 4 | 3 of 4 found, 1 false | — | 0 of 4 | insufficient positives |
-| Sex contradiction | 1 | 0 of 1 | — | 0 of 1 | insufficient positives |
+| Age contradiction | 3 | 3 of 3 found, 0 false | — | 0 of 3 | too few positives |
+| Sex-reference inconsistency | 4 | 3 of 4 found, 1 false | — | 0 of 4 | too few positives |
+| Sex contradiction | 1 | 0 of 1 | — | 0 of 1 | too few positives |
 | Pronoun contradiction | 0 | 1 false flag | — | — | no positives |
-| Race contradiction / inserted race | 0 | none flagged | — | none flagged | no positives |
+| Race contradiction or inserted race | 0 | none flagged | — | none flagged | no positives |
 
-**Notes:**
+- **The 3 held-out age contradictions are all relatives' ages**, such as a parent's age at death. The rule checker looks only at the patient's own age, so it can't catch them.
+  - Matching pairs claims on the same summary span even when the labels name a different subject or fact type, and counts those differences separately. 36 matched held-out claims differ only in subject.
+- **On the calibration dialogues, the rule checker finds all 6 patient-age contradictions** with no false flags. These are the errors it was designed around, so this confirms behavior rather than estimating it independently.
+- **Unsupported claims are the judge's weakest category.** It abstains or produces no matching claim for 31% of them. 1 unsupported flag falls on a claim the reference labels don't split out separately, and isn't counted as a false positive.
+- **Omission scores cover the facts in the plans.** The judge builds its own list of expected facts, and facts it lists that aren't in a plan aren't scored either way.
+- **The rule checker doesn't look for unsupported claims or omissions.** Its 0.00 recall there reflects its scope.
 
-- **The 3 held-out age contradictions are all relatives' ages** (for example, a parent's age at death). The rules check only the patient's own age, so they can't catch these.
-  - The labels record these claims with the page's default subject, `patient`, while the judge labelled them `relative`. Scoring matches claims on the same summary span even when the subject or fact type differs, and counts those differences separately.
-  - Across all matched held-out claims, 36 differ only in subject.
-  - On the **calibration** split, the rules found all 6 patient-age contradictions with no false flags. This confirms the rules work on the errors they were designed around, not an independent estimate: the v2 checker was developed on these same saved summaries, and the 6 cases are the ones it was built to catch.
-- **Unsupported claims** are the judge's weakest category. In 31% of these cases it abstained or didn't produce a matching claim. 1 unsupported flag fell on a claim the owner hadn't split out separately; it isn't counted as a false positive.
-- **Omission scores cover the facts in the owner's plans.** The judge builds its own list of expected facts. Facts it lists that aren't in a plan aren't scored either way.
-- **The rules flag no unsupported or omission errors by design.** Their 0.00 recall on unsupported claims reflects scope, not failure.
-
-**Trial stability.** Claude Code exposes no temperature setting, so each held-out summary was judged twice. Claims are kept only when both trials agree; otherwise they become `unclear`. The two trials were separate calls. 29 of 70 summaries differed between trials in how claims were split or worded. On every error decision that lines up with a labelled claim, the two trials agreed.
+**Trial stability.** Claude Code has no temperature setting, so each held-out summary is judged twice, in separate calls. A claim keeps its label only when both trials agree; otherwise it becomes `unclear`. 29 of the 70 summaries differ between trials in how claims are split or worded. On every error decision that lines up with a labelled claim, the two trials agree.
 
 ## Summarizer error rates
 
-These rates come from the 46 randomly sampled dialogues: 40 random, plus 6 random dialogues added to bring held-out up to 35. The 4 enrichment dialogues are excluded.
+These rates use the 46 randomly sampled dialogues. The 4 dialogues added because they had automatic flags are left out.
 
-| Summarizer | Contradicted claims | Unsupported claims | Expected facts omitted |
-|---|---|---|---|
-| BioBART-large + LoRA | 18 / 226 = 8% (4–13%) | 8 / 226 = 4% (1–6%) | 40 / 139 = 29% (18–39%) |
-| BART-base + LoRA | 30 / 232 = 13% (8–19%) | 19 / 232 = 8% (4–12%) | 46 / 148 = 31% (23–40%) |
+| Summarizer | Patient demographic error | Contradicted claims | Unsupported claims | Expected facts omitted |
+|---|---|---|---|---|
+| BioBART-large + LoRA | 5 / 46 summaries = 11% (2–20%) | 18 / 226 = 8% (4–13%) | 8 / 226 = 4% (1–6%) | 40 / 139 = 29% (18–39%) |
+| BART-base + LoRA | 13 / 46 summaries = 28% (15–41%) | 30 / 232 = 13% (8–19%) | 19 / 232 = 8% (4–12%) | 46 / 148 = 31% (23–40%) |
 
-**Output validity.** All 200 fine-tuned outputs are real summaries. All 100 BART-base outputs without an adapter echo the prompt and dialogue, so BART-base is reported only as an echo rate, not as a factuality row.
+A patient demographic error is a contradicted or unsupported claim about the patient's age, sex, gender identity, pronouns or race/ethnicity. Claims about relatives aren't counted.
 
-## Race/ethnicity
+**Output validity.** All 200 fine-tuned outputs are real summaries. Without an adapter, BART-base echoes its prompt and the dialogue in all 100 outputs, so it's reported as invalid output rather than scored for factuality.
 
-**No inserted race was found anywhere:**
+## Race and ethnicity
 
-- **Real summaries:** across all 200 fine-tuned summaries, the rules flagged no race claim without source support. 3 dialogues state the patient's race, and both models repeat it correctly in all 3.
-- **Held-out labels:** the owner labelled no race error in held-out.
-- **Race removed:** when the race statement was edited out of those 3 dialogues, neither model added a race (6 of 6 faithful).
+**No inserted race appears anywhere:**
 
-**Injected race** (97 dialogues, rotated across 8 groups):
+- **Real summaries:** across all 200 fine-tuned summaries, race appears only where the dialogue states it. 3 dialogues state the patient's race, and both models repeat it correctly.
+- **Held-out labels:** none of the held-out summaries has a race error.
+- **Race removed:** when the race statement is removed from those 3 dialogues, neither model adds a race (6 of 6).
 
-- **Summarizers:** BioBART-large carried the injected race into the summary 31 times and left it out 66 times, with no wrong race. BART-base + LoRA carried it 44 times, left it out 52 times and gave the wrong race once. Per-group counts are in the aggregate. With about 12 dialogues per group they're underpowered, and this isn't a fairness claim.
-- **Judge:** checked against the injected race, it labelled the summary's race claim correctly 75 of 76 times.
+**Race added to 97 dialogues** (rotated across 8 groups):
 
-## Counterfactual edits
+- **Summarizers:** BioBART-large carries the added race into the summary 31 times and leaves it out 66 times, never giving a wrong race. BART-base + LoRA carries it 44 times, leaves it out 52 times, and gives the wrong race once. Per-group counts are in [`counterfactual.json`](../results/factuality/counterfactual.json). With about 12 dialogues per group, they're too small to support a fairness claim.
+- **Judge:** checked against the added race, it labels the summary's race claim correctly 75 of 76 times.
 
-These are rule-side outcomes. Construction gold covers only the edited attribute.
+## Edited dialogues
+
+Rule-checker outcomes. The expected answer covers only the edited attribute.
 
 | Edit | BioBART-large + LoRA | BART-base + LoRA | Judge on these cases |
 |---|---|---|---|
-| Patient age +7 years (10) | 9 followed the new age, 1 wrong | **3 followed, 7 wrong** (1 reverted to the original age) | 20 / 20 correct |
-| Patient pronouns → feminine (4) | 3 followed, 1 left out | 2 followed, 2 left out | 5 / 5 correct |
+| Patient age +7 years (10) | 9 follow the new age, 1 wrong | **3 follow, 7 wrong** (1 reverts to the original age) | 20 / 20 correct |
+| Patient pronouns → feminine (4) | 3 follow, 1 leaves them out | 2 follow, 2 leave them out | 5 / 5 correct |
 
-The age and pronoun sets are small because few dialogues met the eligibility rules. 3 pronoun swaps were discarded after review because masculine references to the patient remained.
+Few dialogues meet the eligibility rules for the age and pronoun edits, so these sets are small. Pronoun swaps that would leave a masculine reference to the patient in the dialogue are rejected.
 
-## Limitations and provenance
+## Scope
 
-- **One reviewer, not a clinician.** No inter-reviewer agreement is available. Relevance and atomicity decisions follow the written [plan guide](factuality_annotation_guide.md).
-- **Prompt revision.** The judge rubric was revised once on 30 calibration summaries: contradicted vs. unsupported, claim granularity, and the quote rule. It was then frozen. Calibration figures are not independent estimates.
-- **Scoring fixes after the first held-out scoring.** Two matching bugs surfaced when the held-out results were first scored, and both were fixed before these numbers were written up:
-  - Claims on the same span are now matched even when the subject label differs (the relative-age cases). This moved age contradictions from 0 of 3 to 3 of 3, and unsupported-claim recall from 0.50 to 0.56.
-  - Counterfactual summaries with no attribute claim are no longer scored as judge misses.
-- **No second judge.** No second judge model family was run. It was planned as an optional sensitivity check and dropped after its API key was rejected.
-- **Development data.** These validation dialogues were already used for model selection. The MTS-Dialog test splits were not used.
-- **Not for patient care.** No patient-care recommendations follow from this study.
+- **Labels.** Plans and labels are AI-drafted and human-reviewed. Claude Sonnet drafted them in a separate isolated session that sees only the labeling sheets, and one non-clinician human reviewer checked every item. The reviewer saw the drafts, so there is no independent second label, and the drafter and the LLM judge are both Claude models. The published files keep the reviewed labels, not the drafter's first output, so the rate of reviewer corrections is not reported. Relevance and claim-splitting decisions follow the [annotation guide](factuality_annotation_guide.md).
+- **Calibration.** The judge rubric is revised once on the 30 calibration summaries, so calibration figures aren't independent estimates.
+- **Matching.** Two matching rules were settled while the held-out set was first scored: claims on the same span match across subject labels, and edited-dialogue summaries without the edited attribute aren't scored as judge misses. Without the first rule, age contradictions would read 0 of 3 and unsupported-claim recall 0.50.
+- **One judge family.** No second judge model family is run.
+- **Data.** These validation dialogues were used for model selection. The MTS-Dialog test splits aren't used.
+- **Not for patient care.** Nothing here is a clinical recommendation.
 
-## Reproduction
-
-Raw artifacts are local. With them, each stage runs through `python -m factuality.cli <stage>`: validity, screen, cf-build, cf-score, sample, plans, freeze-plans, label-packet, import-labels, probe, judge, judge-freeze, score. The offline test suite needs no artifacts:
+## Reproducing and extending
 
 ```bash
-HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m pytest -q
+# Rebuild every number on this page from the published benchmark (offline, a few seconds).
+.venv/bin/python -m factuality.cli rebuild --check
+
+# Summarize the benchmark dialogues with a model declared in factuality.toml.
+.venv/bin/python -m factuality.cli generate --model biobart-large-lora
+.venv/bin/python -m factuality.cli generate --model biobart-large-lora --counterfactual
+
+# Score any model's summaries: validity, rule checker and edited dialogues, plus the frozen judge.
+.venv/bin/python -m factuality.cli evaluate --model my-model --summaries summaries.jsonl \
+  --counterfactual-summaries summaries-counterfactual.jsonl --no-judge
 ```
+
+**Deterministic:** generation (fixed decoding settings, pinned model revisions), the rule checker, sampling and scoring (fixed seeds). Regenerating benchmark summaries at the pinned revisions reproduces the published summaries exactly.
+
+**Not deterministic:** the judge. A new judge run won't reproduce the published judge outputs word for word, so those outputs are published as the record. Judge runs (dropping `--no-judge`) need a signed-in Claude Code CLI and `python -m factuality.cli probe --confirm-terms`. A new model's judge-based rates are reported next to the judge's held-out precision and recall above, but only when its judge setup (model, Claude Code version, flags, rubric and schema) matches the published freeze. With `--accept-judge-drift`, the judge runs but those reliability figures are left out.

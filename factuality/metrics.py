@@ -1,7 +1,7 @@
-"""v3 scoring: detectors vs reference labels, summarizer rates, agreement, reporting rules.
+"""Scoring: detectors vs reference labels, summarizer rates, agreement, reporting rules.
 
-Abstentions and unmatched human items stay in recall denominators as misses.
-Detector claims the human did not atomize are 'extra' and kept out of precision.
+Abstentions and unmatched reference items stay in recall denominators as misses.
+Detector claims the reference labels do not atomize are 'extra' and kept out of precision.
 """
 import random
 from collections import defaultdict
@@ -280,7 +280,7 @@ def assemble_metrics(annotations, sample, detectors, *, trials=None, secondary=N
     return {'heldout': held, 'calibration': cal, 'agreement': agree,
             'summarizer_rates': summarizer_rates(annotations, set(sample['random']) | set(sample.get('top_up', [])), resamples, seed),
             'counterfactual': counterfactual, 'validity': validity,
-            'limits': ['Single non-clinician reviewer; no inter-reviewer agreement',
+            'limits': ['Model-drafted labels reviewed by a single non-clinician; no independent second label; drafter and judge are both Claude models',
                        'Validation dialogues were already used for summarizer model selection',
                        'Claude Code exposes no temperature setting; held-out uses two trials, disagreements are unclear',
                        'Enrichment dialogues contribute to detector sensitivity only, never to prevalence']}

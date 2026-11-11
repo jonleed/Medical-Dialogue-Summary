@@ -1469,7 +1469,7 @@
     "summaries": 70
   },
   "limits": [
-    "Single non-clinician reviewer; no inter-reviewer agreement",
+    "Model-drafted labels reviewed by a single non-clinician; no independent second label; drafter and judge are both Claude models",
     "Validation dialogues were already used for summarizer model selection",
     "Claude Code exposes no temperature setting; held-out uses two trials, disagreements are unclear",
     "Enrichment dialogues contribute to detector sensitivity only, never to prevalence"

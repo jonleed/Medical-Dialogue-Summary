@@ -53,5 +53,5 @@ def screen_runs(runs):
     return {'checker_version': models[0]['automatic']['checker_version'] if models else None,
             'models': models,
             'limits': ['Automatic rule suggestions, not annotated error rates',
-                       'Checker precision/recall are measured separately against reference labels (v3 metrics)',
+                       'Checker precision/recall are measured separately against reference labels (see metrics.json)',
                        'Non-summary outputs (validity gate) are excluded from all suggestion counts']}

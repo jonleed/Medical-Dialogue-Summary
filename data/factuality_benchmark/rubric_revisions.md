@@ -7,7 +7,7 @@ The judge rubric (`factuality/prompts/judge.txt`) was calibrated on the 30 calib
 Compared with the reference labels:
 
 - **Unsupported claims (recall 0.31, precision 0.42).** The judge labelled 5 unsupported claims as contradicted because the dialogue described a *different* event (for example "punched a glass" against a summary saying "punched another guy"). A statement about a different event leaves the claim unsupported, not contradicted.
-- **Claim granularity.** The judge often bundled several facts that the reference labels list separately. Claims are matched one to one, so about 24 human claims went unmatched.
+- **Claim granularity.** The judge often bundled several facts that the reference labels list separately. Claims are matched one to one, so about 24 reference claims went unmatched.
 - **Quotes.** One review failed validation because a quote spanned two speaker turns and changed the original spacing.
 
 ## What the rubric clarifies
@@ -22,7 +22,7 @@ These clarify rules the annotation protocol already states. They aren't answers 
 
 | Measure | First round | Frozen rubric |
 |---|---:|---:|
-| Human claims the judge didn't match | 45 | 32 |
+| Reference claims the judge didn't match | 45 | 32 |
 | Unsupported claims, precision / recall | 0.42 / 0.31 | 0.55 / 0.38 |
 | Omissions, precision / recall | 0.93 / 0.74 | 0.90 / 0.81 |
 | Pronoun contradictions found | 0 of 2 | 1 of 2 |

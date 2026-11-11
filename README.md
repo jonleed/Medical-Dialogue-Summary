@@ -127,13 +127,25 @@ On the edited dialogues, the judge labelled the summary's demographic claim corr
 
 Reference labels are AI-drafted and human-reviewed: Claude Sonnet drafted them from the blind labeling sheets, and the author, a non-clinician, checked every item. The reviewer saw the drafts, so this is not an independent second label. Dialogues are from the MTS-Dialog validation split. [Full report](docs/factuality_results.md) · [Design](docs/factuality_design.md) · [Metrics](results/factuality/metrics.json)
 
-```bash
-# Offline tests; no model inference or downloads.
-HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m pytest -q tests
+**Reproduce it, or use it on your own model**
 
-# Evaluation stages (need the local artifacts).
-.venv/bin/python -m factuality.cli --help
+The full benchmark is published in [`data/factuality_benchmark/`](data/factuality_benchmark/): dialogues, summaries, expected-fact plans, labels and judge outputs, under MTS-Dialog's CC BY 4.0 license. Every number above rebuilds from it offline, and CI checks that they match:
+
+```bash
+.venv/bin/python -m factuality.cli rebuild --check
 ```
+
+To evaluate another summarizer, declare it in [`factuality.toml`](factuality.toml) with a pinned revision (a Hugging Face seq2seq model, or any command that reads dialogues as JSONL and prints summaries), then:
+
+```bash
+.venv/bin/python -m factuality.cli generate --model my-model
+.venv/bin/python -m factuality.cli generate --model my-model --counterfactual
+.venv/bin/python -m factuality.cli evaluate --model my-model \
+  --summaries results/factuality/local/my-model/summaries.jsonl \
+  --counterfactual-summaries results/factuality/local/my-model/summaries-counterfactual.jsonl
+```
+
+`evaluate` reports output validity, rule-checker results and the edited-dialogue outcomes. It also runs the frozen judge, unless you pass `--no-judge`. Judge-based rates come with the judge's measured precision and recall, so you know how far to trust them. Generation and scoring are deterministic: regenerating the benchmark summaries at the pinned revisions reproduces them exactly. Be aware an LLM judge isn't deterministic.
 
 ## Setup
 
@@ -148,11 +160,15 @@ python app.py
 
 ### Configuration
 
-| Environment variable | Default                    | Purpose                              |
-| -------------------- | -------------------------- | ------------------------------------ |
-| `BASE_MODEL_ID`      | `GanjinZero/biobart-large` | Base seq2seq model                   |
-| `ADAPTER_MODEL_ID`   | `./biobart-large-lora`     | Local or Hugging Face LoRA adapter   |
-| `HF_TOKEN`           | unset                      | Optional Hugging Face authentication |
+| Environment variable  | Default                    | Purpose                                                                                                                |
+| --------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `BASE_MODEL_ID`       | `GanjinZero/biobart-large` | Base seq2seq model                                                                                                     |
+| `ADAPTER_MODEL_ID`    | `./biobart-large-lora`     | Local or Hugging Face LoRA adapter                                                                                     |
+| `BASE_MODEL_REVISION` | unset (latest)             | Pin the base model to a commit; the published results use `47c968d3aba260d5737fda6f5b2ad3aa35ce75e8` for BioBART-large |
+| `ADAPTER_REVISION`    | unset (latest)             | Pin a Hugging Face adapter to a commit                                                                                 |
+| `HF_TOKEN`            | unset                      | Optional Hugging Face authentication                                                                                   |
+
+For exact reproduction, install the recorded environment with `pip install -r requirements-lock.txt`.
 
 ## Reproducing Training
 
@@ -191,10 +207,6 @@ The original project used BART-base with LoRA. The restoration preserves that ap
 - Providing clinician-selected section generation in demo
 
 This project is educational and is not a medical device.
-
-## Future Plans
-
-Evaluate whether supplying verified EHR metadata alongside the transcript reduces demographic contradictions and unsupported demographic assertions. This is a proposed experiment; it has not been implemented or measured. Metadata would need provenance and conflict handling, and its input-token cost should be included in the evaluation.
 
 ## Credits
 

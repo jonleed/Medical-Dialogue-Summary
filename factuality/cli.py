@@ -432,6 +432,29 @@ def cmd_rebuild(args):
 EXTENSIONS.append(_rebuild_parser)
 
 
+def _generate_parser(subs):
+    g = subs.add_parser('generate', help=STAGES['generate'][1])
+    g.add_argument('--model', required=True, help='model name from factuality.toml')
+    g.add_argument('--counterfactual', action='store_true', help='summarize the edited dialogues instead')
+    g.add_argument('--out', default=None, help='default: <work>/<model>/summaries[-counterfactual].jsonl')
+
+
+@stage('generate', "Summarize the benchmark dialogues with a configured model (downloads the model if needed)")
+def cmd_generate(args):
+    from .generators import generate_summaries
+    from .rebuild import load_bundle
+    if args.model not in CONFIG.models:
+        raise SystemExit(f'unknown model {args.model!r}; add it to factuality.toml')
+    bundle = load_bundle(CONFIG.benchmark)
+    cases = bundle.cf_cases if args.counterfactual else sorted(bundle.cases.values(), key=lambda c: c['case_id'])
+    name = 'summaries-counterfactual.jsonl' if args.counterfactual else 'summaries.jsonl'
+    out = Path(args.out) if args.out else CONFIG.work / args.model / name
+    print(generate_summaries(CONFIG.models[args.model], cases, out), 'summaries ->', out)
+
+
+EXTENSIONS.append(_generate_parser)
+
+
 def main(argv=None):
     args = build_parser().parse_args(argv)
     STAGES[args.stage][0](args)

@@ -85,8 +85,9 @@ def generate(cases_path, out_dir, threads=4, base_model=None, adapter=None):
             # Same Flask route and decode; substitute only the baseline weight loader.
             def load_base_only():
                 if serving.model is None:
-                    serving.tokenizer = serving.AutoTokenizer.from_pretrained(serving.BASE_MODEL_ID, token=serving.HF_TOKEN)
-                    serving.model = serving.AutoModelForSeq2SeqLM.from_pretrained(serving.BASE_MODEL_ID, token=serving.HF_TOKEN).eval()
+                    rev = getattr(serving, 'BASE_MODEL_REVISION', None)
+                    serving.tokenizer = serving.AutoTokenizer.from_pretrained(serving.BASE_MODEL_ID, token=serving.HF_TOKEN, revision=rev)
+                    serving.model = serving.AutoModelForSeq2SeqLM.from_pretrained(serving.BASE_MODEL_ID, token=serving.HF_TOKEN, revision=rev).eval()
             serving.load_model = load_base_only
         serving.load_model()
         tokenizer = serving.tokenizer

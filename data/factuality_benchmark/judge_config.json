@@ -1,0 +1,32 @@
+{
+  "probe": {
+    "passed": true,
+    "failures": [],
+    "cli_version": "2.1.311 (Claude Code)",
+    "init_event_hash": "16b4be4d58ebee472779eafb8713ca39fab3421fc1d5a0e8113a63b285d902c7",
+    "checked_at": 1794260809.098507
+  },
+  "freeze": {
+    "model": "claude-sonnet-5-5",
+    "cli_version": "2.1.311 (Claude Code)",
+    "flags": [
+      "-p",
+      "--model",
+      "claude-sonnet-5-5",
+      "--output-format",
+      "json",
+      "--json-schema",
+      "--tools",
+      "--strict-mcp-config",
+      "--disable-slash-commands",
+      "--no-session-persistence",
+      "--setting-sources",
+      "project",
+      "--system-prompt"
+    ],
+    "rubric_hash": "b6031aa72a9adcea0a87d44b7a77ea38faab986ce697a12a173a4a87cfbe2768",
+    "schema_hash": "9e7fb29fd42cb441c41262c21bc5fa22e8c2b49688fc091be3fc42794590421d",
+    "probe_hash": "16b4be4d58ebee472779eafb8713ca39fab3421fc1d5a0e8113a63b285d902c7",
+    "frozen_at": "2026-11-09T22:48:42Z"
+  }
+}

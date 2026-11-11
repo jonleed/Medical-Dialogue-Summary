@@ -284,3 +284,29 @@ def assemble_metrics(annotations, sample, detectors, *, trials=None, secondary=N
                        'Validation dialogues were already used for summarizer model selection',
                        'Claude Code exposes no temperature setting; held-out uses two trials, disagreements are unclear',
                        'Enrichment dialogues contribute to detector sensitivity only, never to prevalence']}
+
+
+DEMOGRAPHIC_TYPES = ('age', 'sex', 'gender', 'pronoun', 'race_ethnicity')
+_RELATIVE_WORDS = ('father', 'mother', 'brother', 'sister', 'son', 'daughter', 'wife', 'husband', 'grand', 'aunt', 'uncle')
+DEMOGRAPHIC_DEFINITION = (
+    "Share of summaries with at least one reference-labelled contradicted or unsupported claim about the patient's "
+    "age, sex, gender identity, pronouns or race/ethnicity; claims whose text names a relative are excluded. "
+    "Randomly sampled dialogues only; 95% CI from 2,000 dialogue resamples (seed 20261109).")
+
+
+def demographic_error_rates(labels, random_ids, resamples=RESAMPLES, seed=SEED):
+    """Per model: share of summaries with a patient demographic error, on randomly sampled dialogues."""
+    by_model = defaultdict(dict)
+    for a in labels:
+        if a['case_id'] in random_ids:
+            by_model[a.get('model', a.get('run'))][a['case_id']] = any(
+                c['fact_type'] in DEMOGRAPHIC_TYPES and c['label'] in ('contradicted', 'unsupported')
+                and not any(w in c['text'].lower() for w in _RELATIVE_WORDS) for c in a['claims'])
+    models = {}
+    for model, flags in by_model.items():
+        keys = sorted(flags)
+        rng = random.Random(seed)
+        boots = sorted(sum(flags[k] for k in rng.choices(keys, k=len(keys))) / len(keys) for _ in range(resamples))
+        models[model] = {'summaries_with_patient_demographic_error': sum(flags.values()), 'summaries': len(keys),
+                         'rate': sum(flags.values()) / len(keys), 'ci95': _interval(boots)}
+    return {'definition': DEMOGRAPHIC_DEFINITION, 'models': models}

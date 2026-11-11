@@ -410,6 +410,28 @@ def cmd_export_benchmark(args):
 EXTENSIONS.append(_export_parser)
 
 
+def _rebuild_parser(subs):
+    rb = subs.add_parser('rebuild', help=STAGES['rebuild'][1])
+    rb.add_argument('--out', default=None, help='write here instead of the published folder')
+    rb.add_argument('--check', action='store_true', help='exit 1 if the published files differ from a fresh rebuild')
+
+
+@stage('rebuild', 'Rebuild every published aggregate offline from the benchmark data (no model or judge calls)')
+def cmd_rebuild(args):
+    from .rebuild import check, rebuild
+    if args.check:
+        differing = check(CONFIG.benchmark, CONFIG.published)
+        if differing:
+            raise SystemExit('differs from a fresh rebuild: ' + ', '.join(differing))
+        print('published factuality results reproduce exactly from', CONFIG.benchmark)
+        return
+    for name, path in rebuild(CONFIG.benchmark, args.out or CONFIG.published).items():
+        print(name, '->', path)
+
+
+EXTENSIONS.append(_rebuild_parser)
+
+
 def main(argv=None):
     args = build_parser().parse_args(argv)
     STAGES[args.stage][0](args)

@@ -395,6 +395,21 @@ def cmd_score(args):
 EXTENSIONS.append(_score_parser)
 
 
+def _export_parser(subs):
+    ex = subs.add_parser('export-benchmark', help=STAGES['export-benchmark'][1])
+    ex.add_argument('--out', required=True, help='new directory to write the benchmark bundle into')
+
+
+@stage('export-benchmark', 'Export cases, summaries, plans, labels and judge outputs as the published benchmark')
+def cmd_export_benchmark(args):
+    from .benchmark import export_from_config
+    out = export_from_config(CONFIG, args.out)
+    print(f'benchmark written to {out}')
+
+
+EXTENSIONS.append(_export_parser)
+
+
 def main(argv=None):
     args = build_parser().parse_args(argv)
     STAGES[args.stage][0](args)

@@ -1,4 +1,4 @@
-"""Blind planning and local, escaped review formats. No automatic human labels."""
+"""Blind planning and local, escaped review formats. No automatic reference labels."""
 import csv
 import html
 from pathlib import Path
@@ -72,6 +72,6 @@ def write_queue(cases, out_dir, plans=None):
     (out/'review.html').write_text('<!doctype html><html lang="en"><meta charset="utf-8"><title>Factuality review queue</title>'
       '<style>body{font:16px system-ui;max-width:1100px;margin:2rem auto;padding:1rem}pre{white-space:pre-wrap;overflow-wrap:anywhere}details{border:1px solid #aaa;padding:1rem;margin:1rem 0}summary{cursor:pointer}</style>'
       '<h1>Pending factuality review</h1><p>Complete and freeze the separate source-only plan before opening any predictions. '
-      f'Checker: {CHECKER_VERSION}. Suggestions are automatic, not human labels. Edit atomic annotations in annotations.jsonl; score validates evidence spans and hashes.</p>'
+      f'Checker: {CHECKER_VERSION}. Suggestions are automatic, not reference labels. Edit atomic annotations in annotations.jsonl; score validates evidence spans and hashes.</p>'
       + ''.join(cards)+'</html>', encoding='utf-8')
     return {'cases':len(cases), **automatic_summary(suggestions), 'human_reviewed_cases':0}

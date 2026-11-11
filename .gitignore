@@ -196,4 +196,7 @@ tests/test_semantic_execution.py
 
 # Publish current aggregate results only; raw exports/caches remain local.
 results/factuality/*
-!results/factuality/v3-*/
+!results/factuality/metrics.json
+!results/factuality/screening.json
+!results/factuality/counterfactual.json
+!results/factuality/demographic_error_rates.json

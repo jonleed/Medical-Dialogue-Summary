@@ -67,10 +67,10 @@ The evaluation output is checked in at [`results/eval-biobart-large-2026-08.json
 
 Using the same validation split, seed, prompt construction, token limits, deterministic decoding, and ROUGE scorer:
 
-| Model | ROUGE-1 | ROUGE-2 | ROUGE-L | ROUGE-Lsum |
-|---|---:|---:|---:|---:|
-| BART-base, no adapter | 0.2195 | 0.0746 | 0.1673 | 0.1671 |
-| BART-base with LoRA | 0.4987 | 0.2858 | 0.4342 | 0.4336 |
+| Model                   |    ROUGE-1 |    ROUGE-2 |    ROUGE-L | ROUGE-Lsum |
+| ----------------------- | ---------: | ---------: | ---------: | ---------: |
+| BART-base, no adapter   |     0.2195 |     0.0746 |     0.1673 |     0.1671 |
+| BART-base with LoRA     |     0.4987 |     0.2858 |     0.4342 |     0.4336 |
 | BioBART-large with LoRA | **0.5589** | **0.3334** | **0.4803** | **0.4803** |
 
 The complete study record is [`results/model-study-2026-08.json`](results/model-study-2026-08.json). The results show the value of the original LoRA fine-tuning approach and support BioBART-large as the project's selected backbone.
@@ -101,46 +101,51 @@ The BART models I worked with kept getting patient demographics wrong. They cont
 - **Race was never invented.** Across all 200 summaries, race only appeared when the dialogue stated it. When I added a race statement to 97 dialogues, both models usually left it out.
 - **Omissions are the biggest error overall.** Both models leave out about 30% of the facts a section should contain.
 
-| Summarizer | Patient demographic error | Contradicted claims | Unsupported claims | Expected facts omitted |
-|---|---:|---:|---:|---:|
-| BioBART-large + LoRA | 11% of summaries | 8% | 4% | 29% |
-| BART-base + LoRA | 28% of summaries | 13% | 8% | 31% |
+| Summarizer           | Patient demographic error | Contradicted claims | Unsupported claims | Expected facts omitted |
+| -------------------- | ------------------------: | ------------------: | -----------------: | ---------------------: |
+| BioBART-large + LoRA |          11% of summaries |                  8% |                 4% |                    29% |
+| BART-base + LoRA     |          28% of summaries |                 13% |                 8% |                    31% |
 
-Claim and fact rates are per labelled claim or planned fact, on the same 46 dialogues ([intervals in the report](docs/factuality_v3_report.md#summarizer-error-rates)). Without fine-tuning, BART-base only echoes its prompt, so it has no factuality row.
+Claim and fact rates are per labelled claim or planned fact, on the same 46 dialogues ([intervals in the report](docs/factuality_results.md#summarizer-error-rates)). Without fine-tuning, BART-base only echoes its prompt, so it has no factuality row.
 
 **How it works**
 
-1. **Write the answer key first.** For each dialogue, I wrote down the facts its requested note section should contain, before seeing any summary. This defines what counts as an omission ([plan guide](docs/factuality_v3_plan_guide.md)).
-2. **Label every claim.** I labelled each claim in 100 summaries as supported, contradicted, unsupported or unclear, with the source model hidden.
-3. **Run two automatic detectors.** One is a rule checker for patient age, sex, pronouns and race. The other is an LLM judge (Claude Sonnet 5.5), isolated so it never sees the rule checker's answers, my labels or which model wrote the summary.
-4. **Score the detectors against my labels.** Headline numbers use 35 held-out dialogues the judge was never tuned on, with confidence intervals from resampling whole dialogues.
+1. **Write the answer key first.** For each dialogue, the facts its requested note section should contain are listed before any summary is seen. This defines what counts as an omission ([plan guide](docs/factuality_annotation_guide.md)).
+2. **Label every claim.** Each claim in 100 summaries is labelled supported, contradicted, unsupported or unclear, with the source model hidden. Claude Sonnet drafted the labels from the blind labeling sheets and I reviewed every item.
+3. **Run two automatic detectors.** One is a rule checker for patient age, sex, pronouns and race. The other is an LLM judge (Claude Sonnet 5.5), isolated so it never sees the rule checker's answers, the reference labels or which model wrote the summary.
+4. **Score the detectors against the reference labels.** Headline numbers use 35 held-out dialogues the judge was never tuned on, with confidence intervals from resampling whole dialogues.
 5. **Edit dialogues to create rare errors on purpose.** Demographic errors are too rare in real data to measure reliably, so I changed ages, swapped pronouns, and added or removed race statements, then checked whether the summaries followed.
 
 **How well the automatic judge works**
 
-| Error type | Judge precision | Judge recall |
-|---|---:|---:|
-| Omitted facts (46 held-out) | 0.93 | 0.87 |
-| Unsupported claims (16 held-out) | 0.82 | 0.56 |
+| Error type                       | Judge precision | Judge recall |
+| -------------------------------- | --------------: | -----------: |
+| Omitted facts (46 held-out)      |            0.93 |         0.87 |
+| Unsupported claims (16 held-out) |            0.82 |         0.56 |
 
-On the edited dialogues, the judge labelled the summary's demographic claim correctly in 100 of 101 cases. Held-out data has too few real demographic errors to estimate the judge's recall for them.
+On the edited dialogues, the judge labelled the summary's demographic claim correctly in 100 of 101 cases.
 
-**What I learned building it**
+Reference labels were drafted by Claude Sonnet from the blind labeling sheets and reviewed item by item by the author, a non-clinician, on the MTS-Dialog validation split. [Full report](docs/factuality_results.md) · [Design](docs/factuality_design.md) · [Metrics](results/factuality/metrics.json)
 
-- **An LLM judge can look accurate for the wrong reason.** In an early pilot, the judge was shown the rule checker's suggestions and simply copied them. Isolating the judge is what made its scores meaningful.
-- **Deciding what counts as one claim is half the work.** The first judge rubric bundled facts that I had labelled separately. Spelling out what a single claim is, along with two other rubric fixes, cut the claims the judge failed to match from 45 to 32 on calibration.
-- **Rare errors need constructed tests.** Real dialogues contained only 3 race statements, so editing dialogues was the only way to test race handling at all.
-- **Writing the answer key before reading outputs matters.** Omission rates depend on it, and it's easy to bias without noticing.
+**Reproduce it, or use it on your own model**
 
-All labels are mine (one non-clinician annotator) on the MTS-Dialog validation split. [Full report](docs/factuality_v3_report.md) · [Design](docs/factuality_v3_design.md) · [Metrics](results/factuality/v3-2026-11-09/metrics.json)
+The full benchmark is published in [`data/factuality_benchmark/`](data/factuality_benchmark/): dialogues, summaries, expected-fact plans, labels and judge outputs, under MTS-Dialog's CC BY 4.0 license. Every number above rebuilds from it offline, and CI checks that they match:
 
 ```bash
-# Offline tests; no model inference or downloads.
-HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m pytest -q tests
-
-# Evaluation stages (need the local artifacts).
-.venv/bin/python -m factuality.v3_cli --help
+.venv/bin/python -m factuality.cli rebuild --check
 ```
+
+To evaluate another summarizer, declare it in [`factuality.toml`](factuality.toml) with a pinned revision (a Hugging Face seq2seq model, or any command that reads dialogues as JSONL and prints summaries), then:
+
+```bash
+.venv/bin/python -m factuality.cli generate --model my-model
+.venv/bin/python -m factuality.cli generate --model my-model --counterfactual
+.venv/bin/python -m factuality.cli evaluate --model my-model \
+  --summaries results/factuality/local/my-model/summaries.jsonl \
+  --counterfactual-summaries results/factuality/local/my-model/summaries-counterfactual.jsonl
+```
+
+`evaluate` reports output validity, rule-checker results and the edited-dialogue outcomes. It also runs the frozen judge, unless you pass `--no-judge`. Judge-based rates come with the judge's measured precision and recall, so you know how far to trust them. Generation and scoring are deterministic: regenerating the benchmark summaries at the pinned revisions reproduces them exactly. Be aware an LLM judge isn't deterministic.
 
 ## Setup
 
@@ -155,11 +160,15 @@ python app.py
 
 ### Configuration
 
-| Environment variable | Default                    | Purpose                              |
-| -------------------- | -------------------------- | ------------------------------------ |
-| `BASE_MODEL_ID`      | `GanjinZero/biobart-large` | Base seq2seq model                   |
-| `ADAPTER_MODEL_ID`   | `./biobart-large-lora`     | Local or Hugging Face LoRA adapter   |
-| `HF_TOKEN`           | unset                      | Optional Hugging Face authentication |
+| Environment variable  | Default                    | Purpose                                                                                                                |
+| --------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `BASE_MODEL_ID`       | `GanjinZero/biobart-large` | Base seq2seq model                                                                                                     |
+| `ADAPTER_MODEL_ID`    | `./biobart-large-lora`     | Local or Hugging Face LoRA adapter                                                                                     |
+| `BASE_MODEL_REVISION` | unset (latest)             | Pin the base model to a commit; the published results use `47c968d3aba260d5737fda6f5b2ad3aa35ce75e8` for BioBART-large |
+| `ADAPTER_REVISION`    | unset (latest)             | Pin a Hugging Face adapter to a commit                                                                                 |
+| `HF_TOKEN`            | unset                      | Optional Hugging Face authentication                                                                                   |
+
+For exact reproduction, install the recorded environment with `pip install -r requirements-lock.txt`.
 
 ## Reproducing Training
 
@@ -198,10 +207,6 @@ The original project used BART-base with LoRA. The restoration preserves that ap
 - Providing clinician-selected section generation in demo
 
 This project is educational and is not a medical device.
-
-## Future Plans
-
-Evaluate whether supplying verified EHR metadata alongside the transcript reduces demographic contradictions and unsupported demographic assertions. This is a proposed experiment; it has not been implemented or measured. Metadata would need provenance and conflict handling, and its input-token cost should be included in the evaluation.
 
 ## Credits
 

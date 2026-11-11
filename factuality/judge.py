@@ -11,7 +11,7 @@ from .scoring import SUBJECTS, TYPES
 
 ALLOWED_FIELDS = ('case_id', 'dialogue', 'visible_input', 'truncated', 'requested_section', 'prediction')
 LABELS = ('supported', 'contradicted', 'unsupported', 'unclear')
-RUBRIC_PATH = Path(__file__).with_name('prompts') / 'judge_v3.txt'
+RUBRIC_PATH = Path(__file__).with_name('prompts') / 'judge.txt'
 
 _STR = {'type': 'string'}
 OUTPUT_SCHEMA = {

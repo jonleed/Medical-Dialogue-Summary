@@ -5,7 +5,7 @@ written locally because they drive enrichment sampling; the annotator must not r
 """
 from collections import Counter, defaultdict
 
-from .checks_v3 import automatic_summary_v3, suggestions_v3
+from .rules import automatic_summary_v3, suggestions_v3
 from .sections import canonical_section
 from .validity import LABELS, classify_output
 
@@ -53,5 +53,5 @@ def screen_runs(runs):
     return {'checker_version': models[0]['automatic']['checker_version'] if models else None,
             'models': models,
             'limits': ['Automatic rule suggestions, not annotated error rates',
-                       'Checker precision/recall are measured separately against human labels (v3 metrics)',
+                       'Checker precision/recall are measured separately against reference labels (see metrics.json)',
                        'Non-summary outputs (validity gate) are excluded from all suggestion counts']}

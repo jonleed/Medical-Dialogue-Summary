@@ -1,0 +1,295 @@
+{
+  "checker_version": "patient_demographics_v3",
+  "limits": [
+    "Automatic rule suggestions, not annotated error rates",
+    "Checker precision/recall are measured separately against reference labels (see metrics.json)",
+    "Non-summary outputs (validity gate) are excluded from all suggestion counts"
+  ],
+  "models": [
+    {
+      "automatic": {
+        "checker_precision": null,
+        "checker_recall": null,
+        "checker_version": "patient_demographics_v3",
+        "contradiction_flagged_cases": 3,
+        "contradiction_suggestions": 3,
+        "cross_dimension_inconsistencies": 0,
+        "flagged_cases": 27,
+        "model_visible_contradictions": 2,
+        "race_inserted": 0,
+        "status": "unreviewed suggestions, excluded from annotated rates",
+        "suggestions": 61,
+        "supported_suggestions": 23,
+        "truncated_source_contradictions": 1,
+        "unclear_suggestions": 35,
+        "unsupported_suggestions": 0
+      },
+      "by_section": {
+        "allergies": {
+          "review_required": 2,
+          "suggestions": 2,
+          "unclear": 2
+        },
+        "assessment": {
+          "review_required": 0,
+          "suggestions": 0
+        },
+        "chief complaint": {
+          "review_required": 0,
+          "suggestions": 0
+        },
+        "disposition": {
+          "review_required": 0,
+          "suggestions": 0
+        },
+        "educational courses": {
+          "review_required": 0,
+          "suggestions": 1,
+          "supported": 1
+        },
+        "history of present illness": {
+          "contradicted": 3,
+          "review_required": 28,
+          "suggestions": 47,
+          "supported": 19,
+          "unclear": 25
+        },
+        "labs": {
+          "review_required": 0,
+          "suggestions": 0
+        },
+        "medications": {
+          "review_required": 0,
+          "suggestions": 1,
+          "supported": 1
+        },
+        "past medical history": {
+          "review_required": 0,
+          "suggestions": 0
+        },
+        "past surgeries": {
+          "review_required": 0,
+          "suggestions": 0
+        },
+        "physical exam": {
+          "review_required": 0,
+          "suggestions": 0
+        },
+        "plan": {
+          "review_required": 0,
+          "suggestions": 0
+        },
+        "procedures": {
+          "review_required": 0,
+          "suggestions": 0
+        },
+        "review of systems": {
+          "review_required": 4,
+          "suggestions": 5,
+          "supported": 1,
+          "unclear": 4
+        },
+        "social history": {
+          "review_required": 4,
+          "suggestions": 5,
+          "supported": 1,
+          "unclear": 4
+        }
+      },
+      "by_type": {
+        "age": {
+          "contradicted": 2,
+          "review_required": 2,
+          "suggestions": 13,
+          "supported": 11
+        },
+        "pronoun": {
+          "contradicted": 1,
+          "review_required": 24,
+          "suggestions": 33,
+          "supported": 9,
+          "unclear": 23
+        },
+        "race_ethnicity": {
+          "review_required": 0,
+          "suggestions": 3,
+          "supported": 3
+        },
+        "sex": {
+          "review_required": 12,
+          "suggestions": 12,
+          "unclear": 12
+        }
+      },
+      "cases": 100,
+      "model": "biobart-large-lora",
+      "run": "biobart-large-lora",
+      "valid_cases": 100,
+      "validity_counts": {
+        "degenerate": 0,
+        "empty": 0,
+        "prompt_echo": 0,
+        "summary": 100
+      }
+    },
+    {
+      "automatic": {
+        "checker_precision": null,
+        "checker_recall": null,
+        "checker_version": "patient_demographics_v3",
+        "contradiction_flagged_cases": 4,
+        "contradiction_suggestions": 4,
+        "cross_dimension_inconsistencies": 0,
+        "flagged_cases": 38,
+        "model_visible_contradictions": 4,
+        "race_inserted": 0,
+        "status": "unreviewed suggestions, excluded from annotated rates",
+        "suggestions": 78,
+        "supported_suggestions": 20,
+        "truncated_source_contradictions": 0,
+        "unclear_suggestions": 54,
+        "unsupported_suggestions": 0
+      },
+      "by_section": {
+        "allergies": {
+          "review_required": 2,
+          "suggestions": 2,
+          "unclear": 2
+        },
+        "assessment": {
+          "review_required": 2,
+          "suggestions": 2,
+          "unclear": 2
+        },
+        "chief complaint": {
+          "review_required": 0,
+          "suggestions": 0
+        },
+        "disposition": {
+          "review_required": 1,
+          "suggestions": 1,
+          "unclear": 1
+        },
+        "educational courses": {
+          "review_required": 0,
+          "suggestions": 0
+        },
+        "history of present illness": {
+          "contradicted": 4,
+          "review_required": 37,
+          "suggestions": 55,
+          "supported": 18,
+          "unclear": 33
+        },
+        "labs": {
+          "review_required": 1,
+          "suggestions": 1,
+          "unclear": 1
+        },
+        "medications": {
+          "review_required": 0,
+          "suggestions": 0
+        },
+        "past medical history": {
+          "review_required": 0,
+          "suggestions": 0
+        },
+        "past surgeries": {
+          "review_required": 1,
+          "suggestions": 1,
+          "unclear": 1
+        },
+        "physical exam": {
+          "review_required": 0,
+          "suggestions": 0
+        },
+        "plan": {
+          "review_required": 0,
+          "suggestions": 0
+        },
+        "procedures": {
+          "review_required": 0,
+          "suggestions": 0
+        },
+        "review of systems": {
+          "review_required": 4,
+          "suggestions": 5,
+          "supported": 1,
+          "unclear": 4
+        },
+        "social history": {
+          "review_required": 10,
+          "suggestions": 11,
+          "supported": 1,
+          "unclear": 10
+        }
+      },
+      "by_type": {
+        "age": {
+          "contradicted": 4,
+          "review_required": 8,
+          "suggestions": 17,
+          "supported": 9,
+          "unclear": 4
+        },
+        "pronoun": {
+          "review_required": 34,
+          "suggestions": 42,
+          "supported": 8,
+          "unclear": 34
+        },
+        "race_ethnicity": {
+          "review_required": 0,
+          "suggestions": 3,
+          "supported": 3
+        },
+        "sex": {
+          "review_required": 16,
+          "suggestions": 16,
+          "unclear": 16
+        }
+      },
+      "cases": 100,
+      "model": "bart-base-lora",
+      "run": "bart-base-lora",
+      "valid_cases": 100,
+      "validity_counts": {
+        "degenerate": 0,
+        "empty": 0,
+        "prompt_echo": 0,
+        "summary": 100
+      }
+    },
+    {
+      "automatic": {
+        "checker_precision": null,
+        "checker_recall": null,
+        "checker_version": "patient_demographics_v3",
+        "contradiction_flagged_cases": 0,
+        "contradiction_suggestions": 0,
+        "cross_dimension_inconsistencies": 0,
+        "flagged_cases": 0,
+        "model_visible_contradictions": 0,
+        "race_inserted": 0,
+        "status": "unreviewed suggestions, excluded from annotated rates",
+        "suggestions": 0,
+        "supported_suggestions": 0,
+        "truncated_source_contradictions": 0,
+        "unclear_suggestions": 0,
+        "unsupported_suggestions": 0
+      },
+      "by_section": {},
+      "by_type": {},
+      "cases": 100,
+      "model": "bart-base",
+      "run": "bart-base",
+      "valid_cases": 0,
+      "validity_counts": {
+        "degenerate": 0,
+        "empty": 0,
+        "prompt_echo": 100,
+        "summary": 0
+      }
+    }
+  ]
+}

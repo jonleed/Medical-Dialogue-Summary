@@ -2,7 +2,7 @@
 import json
 import unittest
 
-from factuality.judge_v3 import (ALLOWED_FIELDS, OUTPUT_SCHEMA, JudgeOutputError, build_payload, rubric_hash,
+from factuality.judge import (ALLOWED_FIELDS, OUTPUT_SCHEMA, JudgeOutputError, build_payload, rubric_hash,
                                  schema_hash, validate_judge_output)
 
 FULL = {'case_id': 'val:7', 'dataset_kind': 'counterfactual', 'dialogue': 'Patient: I am 40 years old. I have a cough.',

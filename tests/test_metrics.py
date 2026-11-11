@@ -1,7 +1,7 @@
 """v3 matching, dialogue-cluster bootstrap metrics, summarizer rates, agreement and reporting rules."""
 import unittest
 
-from factuality.v3_scoring import (ERROR_TYPES, agreement, detector_metrics, headline_caveat, headline_wording,
+from factuality.metrics import (ERROR_TYPES, agreement, detector_metrics, headline_caveat, headline_wording,
                                    match_claims, match_omissions, summarizer_rates)
 
 
@@ -160,7 +160,7 @@ class Wording(unittest.TestCase):
                          'insufficient positives to estimate detector recall')
 
     def test_caveat_uses_actual_heldout_count(self):
-        self.assertEqual(headline_caveat(29), 'single non-clinician annotator, 29 held-out dialogues')
+        self.assertEqual(headline_caveat(29), 'single non-clinician reviewer, 29 held-out dialogues')
 
 
 if __name__ == '__main__':
@@ -169,7 +169,7 @@ if __name__ == '__main__':
 
 class Assembly(unittest.TestCase):
     def test_rows_grouped_by_dialogue_across_runs(self):
-        from factuality.v3_scoring import rows_by_dialogue
+        from factuality.metrics import rows_by_dialogue
         anns = [{'case_id': 'val:1', 'run': 'a', 'claims': [human('contradicted')], 'expected_facts': []},
                 {'case_id': 'val:1', 'run': 'b', 'claims': [human('supported')], 'expected_facts': []}]
         detectors = {('a', 'val:1'): {'claims': [{'proposed_label': 'contradicted', 'fact_type': 'age',
@@ -181,7 +181,7 @@ class Assembly(unittest.TestCase):
         self.assertEqual([(r['human_positive'], r['detector_positive']) for r in age], [(True, True), (False, False)])
 
     def test_missing_detector_output_counts_as_misses(self):
-        from factuality.v3_scoring import rows_by_dialogue
+        from factuality.metrics import rows_by_dialogue
         anns = [{'case_id': 'val:1', 'run': 'a', 'claims': [human('contradicted')],
                  'expected_facts': [{'label': 'omitted', 'source_spans': [span(0, 5)]}]}]
         rows = rows_by_dialogue(anns, {})['val:1']
@@ -189,7 +189,7 @@ class Assembly(unittest.TestCase):
         self.assertIn('omission', {r['error_type'] for r in rows})
 
     def test_judge_on_counterfactual(self):
-        from factuality.v3_scoring import judge_on_counterfactual
+        from factuality.metrics import judge_on_counterfactual
         cf = {'case_id': 'cf:race_injection:val:1', 'dialogue': 'Patient: hi.',
               'prediction': 'This is a 40-year-old white male.',
               'counterfactual': {'family': 'race_injection', 'gold': {'race': 'black'}}}
@@ -199,7 +199,7 @@ class Assembly(unittest.TestCase):
         self.assertEqual(r['race_injection'], {'n': 1, 'correct': 1, 'missed': 0, 'wrong_label': 0})
 
     def test_faithful_race_removal_has_nothing_to_judge(self):
-        from factuality.v3_scoring import judge_on_counterfactual
+        from factuality.metrics import judge_on_counterfactual
         cf = {'case_id': 'cf:race_removal:val:1', 'dialogue': 'Patient: hi.', 'prediction': 'This is a 40-year-old male.',
               'counterfactual': {'family': 'race_removal', 'gold': {'race': None}}}
         r = judge_on_counterfactual([('cf-a', cf)], {('cf-a', cf['case_id']): {'claims': []}})
@@ -209,7 +209,7 @@ class Assembly(unittest.TestCase):
 class Assemble(unittest.TestCase):
     def test_public_metrics_shape_and_no_text(self):
         import json
-        from factuality.v3_scoring import assemble_metrics
+        from factuality.metrics import assemble_metrics
         anns = [{'case_id': f'val:{i}', 'run': 'a', 'claims': [dict(human('contradicted' if i % 2 else 'supported'), text='secret claim')],
                  'expected_facts': [{'label': 'omitted', 'source_spans': [span(0, 5)], 'text': 'secret fact'}]}
                 for i in range(6)]

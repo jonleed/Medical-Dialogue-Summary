@@ -8,6 +8,9 @@ from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, GenerationConfig
 
 BASE_MODEL_ID = os.environ.get("BASE_MODEL_ID", "GanjinZero/biobart-large")
 ADAPTER_MODEL_ID = os.environ.get("ADAPTER_MODEL_ID", "./biobart-large-lora")
+# Optional pins (commit hashes); unset loads the latest revision.
+BASE_MODEL_REVISION = os.environ.get("BASE_MODEL_REVISION") or None
+ADAPTER_REVISION = os.environ.get("ADAPTER_REVISION") or None
 HF_TOKEN = os.environ.get("HF_TOKEN")
 
 INPUT_MAX_LENGTH = 512
@@ -61,10 +64,10 @@ def load_model():
     global model, tokenizer
     if model is not None:
         return
-    tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL_ID, token=HF_TOKEN)
-    base = AutoModelForSeq2SeqLM.from_pretrained(BASE_MODEL_ID, token=HF_TOKEN)
+    tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL_ID, token=HF_TOKEN, revision=BASE_MODEL_REVISION)
+    base = AutoModelForSeq2SeqLM.from_pretrained(BASE_MODEL_ID, token=HF_TOKEN, revision=BASE_MODEL_REVISION)
     try:
-        peft_model = PeftModel.from_pretrained(base, ADAPTER_MODEL_ID, token=HF_TOKEN)
+        peft_model = PeftModel.from_pretrained(base, ADAPTER_MODEL_ID, token=HF_TOKEN, revision=ADAPTER_REVISION)
     except Exception:
         app.logger.exception(
             "Could not load adapter %s - refusing to fall back to a different model "

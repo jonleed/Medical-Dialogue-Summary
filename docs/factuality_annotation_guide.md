@@ -1,6 +1,6 @@
-# Writing source-only expected-fact plans (v3)
+# Writing expected-fact plans
 
-A plan lists the facts a competent clinician would put in **the requested section** of a note written from this dialogue. Plans are written from the dialogue alone, before you see any summary. Later, each summary is checked against its plan: a planned fact the summary leaves out is an **omission**. So the plan defines what "omitted" means. List what a good section *should* contain, not everything the dialogue says.
+A plan lists the facts a competent clinician would put in **the requested section** of a note written from this dialogue. Plans are drafted from the dialogue alone, before any summary is shown, and reviewed by the human reviewer. Later, each summary is checked against its plan: a planned fact the summary leaves out is an **omission**. So the plan defines what "omitted" means. List what a good section *should* contain, not everything the dialogue says.
 
 ## The decision for each candidate fact
 
@@ -47,8 +47,8 @@ Write the fact text in plain words: who, what, and any qualifier (negation, side
 
 - **How many:** usually 2–10 facts per dialogue; short sections have fewer. If nothing relevant is established, add no facts and freeze the plan. An empty plan is a valid answer.
 - **How long:** aim for 5–10 minutes per dialogue. If you agonise, pick one and note the reason in the rationale.
-- **Consistency:** keep a short notes file of any rule you settle while working, e.g. "vitals go in exam, not HPI". If a rule changes after the first ~5 dialogues, revisit those dialogues before freezing. Record the change; it becomes the pilot note in the report.
+- **Consistency:** keep a short notes file of any rule you settle while working, e.g. "vitals go in exam, not HPI". If a rule changes after the first ~5 dialogues, revisit those dialogues before freezing. Record the change, so the report can describe how the rules settled.
 
 ## Blinding
 
-Don't open any summary, and don't use what you remember of outputs from the audit. Tick *Plan complete and frozen* only for a dialogue you've finished. Then click **Export JSONL**, save it as `plans.jsonl` in `results/factuality/local/v3/plans/`, and run `python -m factuality.v3_cli freeze-plans`. Freezing checks every span and refuses incomplete plans.
+Don't open any summary, and don't rely on outputs you may have seen earlier. Tick *Plan complete and frozen* only for a dialogue you've finished. Then click **Export JSONL**, save it as `plans.jsonl` in the plans folder that `python -m factuality.cli plans` printed, and run `python -m factuality.cli freeze-plans`. Freezing checks every span and refuses incomplete plans.

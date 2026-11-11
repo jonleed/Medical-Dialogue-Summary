@@ -1,19 +1,19 @@
-"""v3 factuality pipeline stages: python -m factuality.v3_cli <stage> --help."""
+"""Factuality evaluation stages: python -m factuality.cli <stage> --help."""
 import argparse
 import json
 from pathlib import Path
 
 from .io import read_jsonl
 
-ROOT = Path(__file__).resolve().parents[1]
-LOCAL = ROOT / 'results' / 'factuality' / 'local'
-V3 = LOCAL / 'v3'
-RUNS = [
-    ('biobart-flask-2026-10-17', 'BioBART-large with LoRA'),
-    ('bart-lora-flask-2026-10-17', 'BART-base with LoRA'),
-    ('bart-base-flask-2026-10-17', 'BART-base, no adapter'),
-]
-FINE_TUNED = RUNS[:2]
+from .config import ROOT, load_config
+
+CONFIG = load_config()
+LOCAL = CONFIG.work
+V3 = CONFIG.study
+# (saved run folder, display label) for every configured model with a saved run.
+RUNS = [(m.run_dir, m.label) for m in CONFIG.models.values() if m.run_dir]
+# The labelled study covers the fine-tuned (adapter) models.
+FINE_TUNED = [(m.run_dir, m.label) for m in CONFIG.models.values() if m.run_dir and m.adapter]
 STAGES = {}
 
 
@@ -61,14 +61,14 @@ EXTENSIONS = []  # later stages append parser-builders here
 
 def _screen_parser(subs):
     sp = subs.add_parser('screen', help=STAGES['screen'][1])
-    sp.add_argument('--out', required=True, help='public aggregate path, e.g. results/factuality/v3-<date>/screening.json')
+    sp.add_argument('--out', required=True, help='public aggregate path, e.g. results/factuality/screening.json')
     sp.add_argument('--local-out', default=str(V3 / 'screen_per_case.jsonl'))
 
 
-@stage('screen', 'Validity-gated v3 rule screening of the saved runs')
+@stage('screen', 'Validity-gated rule screening of the saved runs')
 def cmd_screen(args):
     from .io import write_jsonl
-    from .v3_screen import per_case_local, screen_runs
+    from .screening import per_case_local, screen_runs
     runs = [(r, label, load_run(LOCAL / r)) for r, label in RUNS]
     report = screen_runs(runs)
     dump(args.out, report)
@@ -87,7 +87,8 @@ def cmd_screen(args):
 EXTENSIONS.append(_screen_parser)
 
 
-TOKENIZERS = ('GanjinZero/biobart-large', 'facebook/bart-base')  # app.py loads the tokenizer from the base model
+# app.py loads the tokenizer from the base model; edits must fit every configured model's window.
+TOKENIZERS = tuple(dict.fromkeys(m.base_model for m in CONFIG.models.values() if m.base_model))
 
 
 def _cf_parsers(subs):
@@ -241,6 +242,8 @@ def _read_manifest():
 def _probe_parser(subs):
     pr = subs.add_parser('probe', help=STAGES['probe'][1])
     pr.add_argument('--exe', default='claude')
+    pr.add_argument('--confirm-terms', action='store_true',
+                    help='also record that you checked your Claude plan allows personal batch evaluation')
 
 
 @stage('probe', 'Isolation probe for the headless Claude Code judge (one canary call)')
@@ -250,6 +253,10 @@ def cmd_probe(args):
     manifest = _read_manifest()
     manifest['probe'] = result
     dump(JUDGE_MANIFEST, manifest)
+    if args.confirm_terms:
+        from .claude_code_backend import confirm_terms
+        confirm_terms(JUDGE_MANIFEST)
+        print('terms confirmation recorded in', JUDGE_MANIFEST)
     print(json.dumps({k: result[k] for k in ('passed', 'failures', 'cli_version')}, indent=1))
 
 
@@ -257,10 +264,9 @@ EXTENSIONS.append(_probe_parser)
 
 
 JUDGE_LEDGER = V3 / 'judge_ledger.json'
-CF_RUNS = ('cf-biobart', 'cf-bart-lora')
-# v2 packet = v1 minus 3 pronoun swaps whose gold was unsound; surviving cases are byte-identical,
-# so v1 generations are reused, filtered to this packet by case ID and dialogue hash.
-CF_PACKET = V3 / 'cf_cases_v2.jsonl'
+CF_RUNS = tuple(m.counterfactual_run_dir for m in CONFIG.models.values() if m.counterfactual_run_dir)
+# Saved counterfactual generations are filtered to this packet by case ID and dialogue hash.
+CF_PACKET = CONFIG.counterfactual_packet
 
 
 def in_packet(cases, packet=CF_PACKET):
@@ -354,17 +360,17 @@ EXTENSIONS.append(_judge_parsers)
 
 def _score_parser(subs):
     sc = subs.add_parser('score', help=STAGES['score'][1])
-    sc.add_argument('--out', required=True, help='public metrics path, e.g. results/factuality/v3-<date>/metrics.json')
+    sc.add_argument('--out', required=True, help='public metrics path, e.g. results/factuality/metrics.json')
     sc.add_argument('--annotations', default=str(V3 / 'annotations.jsonl'))
     sc.add_argument('--sample', default=str(V3 / 'sample.json'))
 
 
-@stage('score', 'Score rules and judges against human labels; write public metrics (counts and rates only)')
+@stage('score', 'Score rules and judges against reference labels; write public metrics (counts and rates only)')
 def cmd_score(args):
-    from .checks_v3 import suggestions_v3
+    from .rules import suggestions_v3
     from .counterfactual import score_counterfactual
     from .judge_run import load_judge
-    from .v3_scoring import assemble_metrics, judge_on_counterfactual
+    from .metrics import assemble_metrics, judge_on_counterfactual
     annotations = read_jsonl(args.annotations)
     sample = json.loads(Path(args.sample).read_text())
     cases = {(run, c['case_id']): c for run, _ in FINE_TUNED for c in load_run(LOCAL / run)}
@@ -393,6 +399,108 @@ def cmd_score(args):
 
 
 EXTENSIONS.append(_score_parser)
+
+
+def _export_parser(subs):
+    ex = subs.add_parser('export-benchmark', help=STAGES['export-benchmark'][1])
+    ex.add_argument('--out', required=True, help='new directory to write the benchmark bundle into')
+
+
+@stage('export-benchmark', 'Export cases, summaries, plans, labels and judge outputs as the published benchmark')
+def cmd_export_benchmark(args):
+    from .benchmark import export_from_config
+    out = export_from_config(CONFIG, args.out)
+    print(f'benchmark written to {out}')
+
+
+EXTENSIONS.append(_export_parser)
+
+
+def _rebuild_parser(subs):
+    rb = subs.add_parser('rebuild', help=STAGES['rebuild'][1])
+    rb.add_argument('--out', default=None, help='write here instead of the published folder')
+    rb.add_argument('--check', action='store_true', help='exit 1 if the published files differ from a fresh rebuild')
+
+
+@stage('rebuild', 'Rebuild every published aggregate offline from the benchmark data (no model or judge calls)')
+def cmd_rebuild(args):
+    from .rebuild import check, rebuild
+    if args.check:
+        differing = check(CONFIG.benchmark, CONFIG.published)
+        if differing:
+            raise SystemExit('differs from a fresh rebuild: ' + ', '.join(differing))
+        print('published factuality results reproduce exactly from', CONFIG.benchmark)
+        return
+    for name, path in rebuild(CONFIG.benchmark, args.out or CONFIG.published).items():
+        print(name, '->', path)
+
+
+EXTENSIONS.append(_rebuild_parser)
+
+
+def _generate_parser(subs):
+    g = subs.add_parser('generate', help=STAGES['generate'][1])
+    g.add_argument('--model', required=True, help='model name from factuality.toml')
+    g.add_argument('--counterfactual', action='store_true', help='summarize the edited dialogues instead')
+    g.add_argument('--out', default=None, help='default: <work>/<model>/summaries[-counterfactual].jsonl')
+
+
+@stage('generate', "Summarize the benchmark dialogues with a configured model (downloads the model if needed)")
+def cmd_generate(args):
+    from .generators import generate_summaries
+    from .rebuild import load_bundle
+    if args.model not in CONFIG.models:
+        raise SystemExit(f'unknown model {args.model!r}; add it to factuality.toml')
+    bundle = load_bundle(CONFIG.benchmark)
+    cases = bundle.cf_cases if args.counterfactual else sorted(bundle.cases.values(), key=lambda c: c['case_id'])
+    name = 'summaries-counterfactual.jsonl' if args.counterfactual else 'summaries.jsonl'
+    out = Path(args.out) if args.out else CONFIG.work / args.model / name
+    print(generate_summaries(CONFIG.models[args.model], cases, out), 'summaries ->', out)
+
+
+EXTENSIONS.append(_generate_parser)
+
+
+def _evaluate_parser(subs):
+    e = subs.add_parser('evaluate', help=STAGES['evaluate'][1])
+    e.add_argument('--model', required=True, help='name for the report (need not be in factuality.toml)')
+    e.add_argument('--summaries', required=True, help='JSONL: {"case_id", "prediction", "model_input"?}')
+    e.add_argument('--counterfactual-summaries', help='JSONL summaries of the edited dialogues')
+    e.add_argument('--no-judge', action='store_true', help='rules, validity and counterfactuals only (no judge calls)')
+    e.add_argument('--exe', default='claude')
+    e.add_argument('--accept-judge-drift', action='store_true',
+                   help='judge even if the judge configuration differs from the published freeze (reliability omitted)')
+    e.add_argument('--out', default=None, help='default: <published>/models/<model>.json')
+
+
+@stage('evaluate', "Score a model's benchmark summaries: validity, rules, counterfactuals and the frozen judge")
+def cmd_evaluate(args):
+    from functools import partial
+    from .claude_code_backend import CALL_CAP, CallLedger, call, cli_version
+    from .evaluate import evaluate_model, judge_preflight
+    from .rebuild import load_bundle
+    bundle = load_bundle(CONFIG.benchmark)
+    published = json.loads((CONFIG.published / 'metrics.json').read_text())['heldout']['claude']
+    reliability = {t: {k: published[t][k] for k in ('precision', 'recall', 'ci95')} for t in ('unsupported_claim', 'omission')}
+    caller = ledger = version = None
+    if not args.no_judge:
+        version = cli_version(args.exe)
+        try:
+            judge_preflight(bundle, _read_manifest(), version, exe=args.exe, accept_judge_drift=args.accept_judge_drift)
+        except ValueError as error:
+            raise SystemExit(f'cannot run the judge: {error}')
+        ledger = CallLedger(CONFIG.work / 'eval_ledger.json', cap=CALL_CAP)
+        caller = partial(lambda payload, job, exe: call(payload, exe=exe, ledger=ledger, job_id=job), exe=args.exe)
+    report = evaluate_model(args.model, read_jsonl(args.summaries), bundle, caller=caller, ledger=ledger,
+                            work_dir=CONFIG.work, reliability=reliability, cli_version_now=version,
+                            accept_judge_drift=args.accept_judge_drift,
+                            cf_summaries=read_jsonl(args.counterfactual_summaries) if args.counterfactual_summaries else None)
+    out = Path(args.out) if args.out else CONFIG.published / 'models' / f'{args.model}.json'
+    dump(out, report)
+    print(json.dumps({k: report[k] for k in ('coverage', 'validity')}), '->', out)
+
+
+EXTENSIONS.append(_evaluate_parser)
 
 
 def main(argv=None):

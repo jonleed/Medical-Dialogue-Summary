@@ -10,7 +10,7 @@ from pathlib import Path
 
 from .claude_code_backend import MODEL, CallLedger, build_command
 from .io import digest
-from .judge_v3 import (OUTPUT_SCHEMA, JudgeOutputError, build_payload, rubric_hash, rubric_text, schema_hash,
+from .judge import (OUTPUT_SCHEMA, JudgeOutputError, build_payload, rubric_hash, rubric_text, schema_hash,
                        validate_judge_output)
 
 STOP_STATUSES = ('usage_limited', 'auth_failed')
@@ -45,12 +45,17 @@ def _check_freeze(freeze_manifest, cli_version_now=None):
                          'held-out trials must not mix configurations')
 
 
+def freeze_flags():
+    """The judge's CLI flags as recorded in a freeze (prompt and schema values omitted)."""
+    return [a for a in build_command('claude', '', {})[1:] if a not in ('', '{}')]
+
+
 def freeze_judge(manifest_path):
     manifest = _load_json(manifest_path, {})
     probe = manifest.get('probe') or {}
     if not probe.get('passed'):
         raise ValueError('isolation probe must pass before freezing')
-    flags = [a for a in build_command('claude', '', {})[1:] if a not in ('', '{}')]
+    flags = freeze_flags()
     manifest['freeze'] = {'model': MODEL, 'cli_version': probe.get('cli_version'), 'flags': flags,
                           'rubric_hash': rubric_hash(), 'schema_hash': schema_hash(),
                           'probe_hash': probe.get('init_event_hash'),

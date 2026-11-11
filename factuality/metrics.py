@@ -1,7 +1,7 @@
-"""v3 scoring (spec §6.4, §7): detectors vs human labels, summarizer rates, agreement, reporting rules.
+"""Scoring: detectors vs reference labels, summarizer rates, agreement, reporting rules.
 
-Abstentions and unmatched human items stay in recall denominators as misses.
-Detector claims the human did not atomize are 'extra' and kept out of precision.
+Abstentions and unmatched reference items stay in recall denominators as misses.
+Detector claims the reference labels do not atomize are 'extra' and kept out of precision.
 """
 import random
 from collections import defaultdict
@@ -185,7 +185,7 @@ def headline_wording(error_type, m):
 
 
 def headline_caveat(heldout_dialogues):
-    return f'single non-clinician annotator, {heldout_dialogues} held-out dialogues'
+    return f'single non-clinician reviewer, {heldout_dialogues} held-out dialogues'
 
 
 def rows_by_dialogue(annotations, detectors, omissions=True):
@@ -205,7 +205,7 @@ _EXPECTED_LABEL = {'contradicted': 'contradicted', 'faithful': 'supported', 'ins
 
 def judge_on_counterfactual(items, judged):
     """Did the judge label the edited attribute's summary claim as construction gold implies?"""
-    from .checks_v3 import sex_claims_v3
+    from .rules import sex_claims_v3
     from .counterfactual import FAMILIES, _outcome
     from .demographics import age_claims, pronoun_claims
     from .race import race_claims
@@ -280,7 +280,33 @@ def assemble_metrics(annotations, sample, detectors, *, trials=None, secondary=N
     return {'heldout': held, 'calibration': cal, 'agreement': agree,
             'summarizer_rates': summarizer_rates(annotations, set(sample['random']) | set(sample.get('top_up', [])), resamples, seed),
             'counterfactual': counterfactual, 'validity': validity,
-            'limits': ['Single non-clinician annotator; no inter-annotator agreement',
+            'limits': ['Model-drafted labels reviewed by a single non-clinician; no independent second label; drafter and judge are both Claude models',
                        'Validation dialogues were already used for summarizer model selection',
                        'Claude Code exposes no temperature setting; held-out uses two trials, disagreements are unclear',
                        'Enrichment dialogues contribute to detector sensitivity only, never to prevalence']}
+
+
+DEMOGRAPHIC_TYPES = ('age', 'sex', 'gender', 'pronoun', 'race_ethnicity')
+_RELATIVE_WORDS = ('father', 'mother', 'brother', 'sister', 'son', 'daughter', 'wife', 'husband', 'grand', 'aunt', 'uncle')
+DEMOGRAPHIC_DEFINITION = (
+    "Share of summaries with at least one human-labelled contradicted or unsupported claim about the patient's "
+    "age, sex, gender identity, pronouns or race/ethnicity; claims whose text names a relative are excluded. "
+    "Randomly sampled dialogues only; 95% CI from 2,000 dialogue resamples (seed 20261109).")
+
+
+def demographic_error_rates(labels, random_ids, resamples=RESAMPLES, seed=SEED):
+    """Per model: share of summaries with a patient demographic error, on randomly sampled dialogues."""
+    by_model = defaultdict(dict)
+    for a in labels:
+        if a['case_id'] in random_ids:
+            by_model[a.get('model', a.get('run'))][a['case_id']] = any(
+                c['fact_type'] in DEMOGRAPHIC_TYPES and c['label'] in ('contradicted', 'unsupported')
+                and not any(w in c['text'].lower() for w in _RELATIVE_WORDS) for c in a['claims'])
+    models = {}
+    for model, flags in by_model.items():
+        keys = sorted(flags)
+        rng = random.Random(seed)
+        boots = sorted(sum(flags[k] for k in rng.choices(keys, k=len(keys))) / len(keys) for _ in range(resamples))
+        models[model] = {'summaries_with_patient_demographic_error': sum(flags.values()), 'summaries': len(keys),
+                         'rate': sum(flags.values()) / len(keys), 'ci95': _interval(boots)}
+    return {'definition': DEMOGRAPHIC_DEFINITION, 'models': models}

@@ -21,3 +21,22 @@ class Rounds(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class Terms(unittest.TestCase):
+    def test_confirm_terms_records_attestation_and_keeps_probe(self):
+        import json
+        from factuality.claude_code_backend import confirm_terms
+        path = Path(tempfile.mkdtemp()) / 'judge_manifest.json'
+        path.write_text(json.dumps({'probe': {'passed': True}}))
+        confirm_terms(path)
+        m = json.loads(path.read_text())
+        self.assertIs(m['terms_confirmed_by_owner'], True)
+        self.assertTrue(m['terms_confirmed_at'])
+        self.assertEqual(m['probe'], {'passed': True})
+
+    def test_missing_terms_message_names_the_fix(self):
+        from factuality.claude_code_backend import require_run_preconditions
+        with self.assertRaises(ValueError) as e:
+            require_run_preconditions({}, 'claude')
+        self.assertIn('probe --confirm-terms', str(e.exception))

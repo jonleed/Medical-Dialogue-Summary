@@ -1,4 +1,4 @@
-"""v3 factuality pipeline stages: python -m factuality.cli <stage> --help."""
+"""Factuality evaluation stages: python -m factuality.cli <stage> --help."""
 import argparse
 import json
 from pathlib import Path
@@ -61,11 +61,11 @@ EXTENSIONS = []  # later stages append parser-builders here
 
 def _screen_parser(subs):
     sp = subs.add_parser('screen', help=STAGES['screen'][1])
-    sp.add_argument('--out', required=True, help='public aggregate path, e.g. results/factuality/v3-<date>/screening.json')
+    sp.add_argument('--out', required=True, help='public aggregate path, e.g. results/factuality/screening.json')
     sp.add_argument('--local-out', default=str(V3 / 'screen_per_case.jsonl'))
 
 
-@stage('screen', 'Validity-gated v3 rule screening of the saved runs')
+@stage('screen', 'Validity-gated rule screening of the saved runs')
 def cmd_screen(args):
     from .io import write_jsonl
     from .screening import per_case_local, screen_runs
@@ -242,6 +242,8 @@ def _read_manifest():
 def _probe_parser(subs):
     pr = subs.add_parser('probe', help=STAGES['probe'][1])
     pr.add_argument('--exe', default='claude')
+    pr.add_argument('--confirm-terms', action='store_true',
+                    help='also record that you checked your Claude plan allows personal batch evaluation')
 
 
 @stage('probe', 'Isolation probe for the headless Claude Code judge (one canary call)')
@@ -251,6 +253,10 @@ def cmd_probe(args):
     manifest = _read_manifest()
     manifest['probe'] = result
     dump(JUDGE_MANIFEST, manifest)
+    if args.confirm_terms:
+        from .claude_code_backend import confirm_terms
+        confirm_terms(JUDGE_MANIFEST)
+        print('terms confirmation recorded in', JUDGE_MANIFEST)
     print(json.dumps({k: result[k] for k in ('passed', 'failures', 'cli_version')}, indent=1))
 
 
@@ -354,7 +360,7 @@ EXTENSIONS.append(_judge_parsers)
 
 def _score_parser(subs):
     sc = subs.add_parser('score', help=STAGES['score'][1])
-    sc.add_argument('--out', required=True, help='public metrics path, e.g. results/factuality/v3-<date>/metrics.json')
+    sc.add_argument('--out', required=True, help='public metrics path, e.g. results/factuality/metrics.json')
     sc.add_argument('--annotations', default=str(V3 / 'annotations.jsonl'))
     sc.add_argument('--sample', default=str(V3 / 'sample.json'))
 
@@ -453,6 +459,48 @@ def cmd_generate(args):
 
 
 EXTENSIONS.append(_generate_parser)
+
+
+def _evaluate_parser(subs):
+    e = subs.add_parser('evaluate', help=STAGES['evaluate'][1])
+    e.add_argument('--model', required=True, help='name for the report (need not be in factuality.toml)')
+    e.add_argument('--summaries', required=True, help='JSONL: {"case_id", "prediction", "model_input"?}')
+    e.add_argument('--counterfactual-summaries', help='JSONL summaries of the edited dialogues')
+    e.add_argument('--no-judge', action='store_true', help='rules, validity and counterfactuals only (no judge calls)')
+    e.add_argument('--exe', default='claude')
+    e.add_argument('--accept-judge-drift', action='store_true',
+                   help='judge even if the judge configuration differs from the published freeze (reliability omitted)')
+    e.add_argument('--out', default=None, help='default: <published>/models/<model>.json')
+
+
+@stage('evaluate', "Score a model's benchmark summaries: validity, rules, counterfactuals and the frozen judge")
+def cmd_evaluate(args):
+    from functools import partial
+    from .claude_code_backend import CALL_CAP, CallLedger, call, cli_version
+    from .evaluate import evaluate_model, judge_preflight
+    from .rebuild import load_bundle
+    bundle = load_bundle(CONFIG.benchmark)
+    published = json.loads((CONFIG.published / 'metrics.json').read_text())['heldout']['claude']
+    reliability = {t: {k: published[t][k] for k in ('precision', 'recall', 'ci95')} for t in ('unsupported_claim', 'omission')}
+    caller = ledger = version = None
+    if not args.no_judge:
+        version = cli_version(args.exe)
+        try:
+            judge_preflight(bundle, _read_manifest(), version, exe=args.exe, accept_judge_drift=args.accept_judge_drift)
+        except ValueError as error:
+            raise SystemExit(f'cannot run the judge: {error}')
+        ledger = CallLedger(CONFIG.work / 'eval_ledger.json', cap=CALL_CAP)
+        caller = partial(lambda payload, job, exe: call(payload, exe=exe, ledger=ledger, job_id=job), exe=args.exe)
+    report = evaluate_model(args.model, read_jsonl(args.summaries), bundle, caller=caller, ledger=ledger,
+                            work_dir=CONFIG.work, reliability=reliability, cli_version_now=version,
+                            accept_judge_drift=args.accept_judge_drift,
+                            cf_summaries=read_jsonl(args.counterfactual_summaries) if args.counterfactual_summaries else None)
+    out = Path(args.out) if args.out else CONFIG.published / 'models' / f'{args.model}.json'
+    dump(out, report)
+    print(json.dumps({k: report[k] for k in ('coverage', 'validity')}), '->', out)
+
+
+EXTENSIONS.append(_evaluate_parser)
 
 
 def main(argv=None):

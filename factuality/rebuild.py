@@ -31,6 +31,7 @@ class Bundle:
     splits: dict
     judge: dict = field(default_factory=dict)
     judge_trials: dict = field(default_factory=dict)
+    judge_config: dict = field(default_factory=dict)
 
 
 def _join(cases_by_id, rows):
@@ -59,7 +60,8 @@ def load_bundle(path):
     return Bundle(cases=cases, summaries=_join(cases, read_jsonl(path / 'summaries.jsonl')), cf_cases=cf_cases,
                   cf_summaries=_join({c['case_id']: c for c in cf_cases}, read_jsonl(path / 'counterfactual_summaries.jsonl')),
                   plans=read_jsonl(path / 'plans.jsonl'), labels=read_jsonl(path / 'labels.jsonl'),
-                  splits=json.loads((path / 'splits.json').read_text()), judge=dict(judge), judge_trials=dict(trials))
+                  splits=json.loads((path / 'splits.json').read_text()), judge=dict(judge), judge_trials=dict(trials),
+                  judge_config=json.loads((path / 'judge_config.json').read_text()))
 
 
 def _latest(judge, split):

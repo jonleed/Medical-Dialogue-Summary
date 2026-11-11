@@ -232,9 +232,20 @@ def isolation_probe(exe, timeout=120):
             'checked_at': time.time()}
 
 
+def confirm_terms(manifest_path):
+    """Record the user's own attestation that their Claude plan allows personal batch evaluation."""
+    path = Path(manifest_path)
+    manifest = json.loads(path.read_text()) if path.exists() else {}
+    manifest.update(terms_confirmed_by_owner=True, terms_confirmed_at=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    _save(path, manifest)
+    return manifest
+
+
 def require_run_preconditions(manifest, exe):
     if manifest.get('terms_confirmed_by_owner') is not True:
-        raise ValueError('owner has not confirmed subscription terms for batch evaluation')
+        raise ValueError('subscription terms for batch evaluation are not confirmed; after checking your plan allows '
+                         'it, run: python -m factuality.cli probe --confirm-terms')
     probe = manifest.get('probe') or {}
     if not probe.get('passed'):
         raise ValueError('isolation probe has not passed')

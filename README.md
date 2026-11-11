@@ -67,10 +67,10 @@ The evaluation output is checked in at [`results/eval-biobart-large-2026-08.json
 
 Using the same validation split, seed, prompt construction, token limits, deterministic decoding, and ROUGE scorer:
 
-| Model | ROUGE-1 | ROUGE-2 | ROUGE-L | ROUGE-Lsum |
-|---|---:|---:|---:|---:|
-| BART-base, no adapter | 0.2195 | 0.0746 | 0.1673 | 0.1671 |
-| BART-base with LoRA | 0.4987 | 0.2858 | 0.4342 | 0.4336 |
+| Model                   |    ROUGE-1 |    ROUGE-2 |    ROUGE-L | ROUGE-Lsum |
+| ----------------------- | ---------: | ---------: | ---------: | ---------: |
+| BART-base, no adapter   |     0.2195 |     0.0746 |     0.1673 |     0.1671 |
+| BART-base with LoRA     |     0.4987 |     0.2858 |     0.4342 |     0.4336 |
 | BioBART-large with LoRA | **0.5589** | **0.3334** | **0.4803** | **0.4803** |
 
 The complete study record is [`results/model-study-2026-08.json`](results/model-study-2026-08.json). The results show the value of the original LoRA fine-tuning approach and support BioBART-large as the project's selected backbone.
@@ -101,10 +101,10 @@ The BART models I worked with kept getting patient demographics wrong. They cont
 - **Race was never invented.** Across all 200 summaries, race only appeared when the dialogue stated it. When I added a race statement to 97 dialogues, both models usually left it out.
 - **Omissions are the biggest error overall.** Both models leave out about 30% of the facts a section should contain.
 
-| Summarizer | Patient demographic error | Contradicted claims | Unsupported claims | Expected facts omitted |
-|---|---:|---:|---:|---:|
-| BioBART-large + LoRA | 11% of summaries | 8% | 4% | 29% |
-| BART-base + LoRA | 28% of summaries | 13% | 8% | 31% |
+| Summarizer           | Patient demographic error | Contradicted claims | Unsupported claims | Expected facts omitted |
+| -------------------- | ------------------------: | ------------------: | -----------------: | ---------------------: |
+| BioBART-large + LoRA |          11% of summaries |                  8% |                 4% |                    29% |
+| BART-base + LoRA     |          28% of summaries |                 13% |                 8% |                    31% |
 
 Claim and fact rates are per labelled claim or planned fact, on the same 46 dialogues (intervals in the report). Without fine-tuning, BART-base only echoes its prompt, so it has no factuality row.
 
@@ -118,19 +118,12 @@ Claim and fact rates are per labelled claim or planned fact, on the same 46 dial
 
 **How well the automatic judge works**
 
-| Error type | Judge precision | Judge recall |
-|---|---:|---:|
-| Omitted facts (46 held-out) | 0.93 | 0.87 |
-| Unsupported claims (16 held-out) | 0.82 | 0.56 |
+| Error type                       | Judge precision | Judge recall |
+| -------------------------------- | --------------: | -----------: |
+| Omitted facts (46 held-out)      |            0.93 |         0.87 |
+| Unsupported claims (16 held-out) |            0.82 |         0.56 |
 
-On the edited dialogues, the judge labelled the summary's demographic claim correctly in 100 of 101 cases. Held-out data has too few real demographic errors to estimate the judge's recall for them.
-
-**What I learned building it**
-
-- **An LLM judge can look accurate for the wrong reason.** In an early pilot, the judge was shown the rule checker's suggestions and simply copied them. Isolating the judge is what made its scores meaningful.
-- **Deciding what counts as one claim is half the work.** The first judge rubric bundled facts that the reference labels keep separate. Spelling out what a single claim is, along with two other rubric fixes, cut the claims the judge failed to match from 45 to 32 on calibration.
-- **Rare errors need constructed tests.** Real dialogues contained only 3 race statements, so editing dialogues was the only way to test race handling at all.
-- **Writing the answer key before reading outputs matters.** Omission rates depend on it, and it's easy to bias without noticing.
+On the edited dialogues, the judge labelled the summary's demographic claim correctly in 100 of 101 cases.
 
 Reference labels are AI-drafted and human-reviewed: Claude Sonnet drafted them from the blind labeling sheets, and the author, a non-clinician, checked every item. The reviewer saw the drafts, so this is not an independent second label. Dialogues are from the MTS-Dialog validation split. [Metrics](results/factuality/v3-2026-11-09/metrics.json)
 

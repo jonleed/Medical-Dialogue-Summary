@@ -5,15 +5,15 @@ from pathlib import Path
 
 from .io import read_jsonl
 
-ROOT = Path(__file__).resolve().parents[1]
-LOCAL = ROOT / 'results' / 'factuality' / 'local'
-V3 = LOCAL / 'v3'
-RUNS = [
-    ('biobart-flask-2026-10-17', 'BioBART-large with LoRA'),
-    ('bart-lora-flask-2026-10-17', 'BART-base with LoRA'),
-    ('bart-base-flask-2026-10-17', 'BART-base, no adapter'),
-]
-FINE_TUNED = RUNS[:2]
+from .config import ROOT, load_config
+
+CONFIG = load_config()
+LOCAL = CONFIG.work
+V3 = CONFIG.study
+# (saved run folder, display label) for every configured model with a saved run.
+RUNS = [(m.run_dir, m.label) for m in CONFIG.models.values() if m.run_dir]
+# The labelled study covers the fine-tuned (adapter) models.
+FINE_TUNED = [(m.run_dir, m.label) for m in CONFIG.models.values() if m.run_dir and m.adapter]
 STAGES = {}
 
 
@@ -87,7 +87,8 @@ def cmd_screen(args):
 EXTENSIONS.append(_screen_parser)
 
 
-TOKENIZERS = ('GanjinZero/biobart-large', 'facebook/bart-base')  # app.py loads the tokenizer from the base model
+# app.py loads the tokenizer from the base model; edits must fit every configured model's window.
+TOKENIZERS = tuple(dict.fromkeys(m.base_model for m in CONFIG.models.values() if m.base_model))
 
 
 def _cf_parsers(subs):
@@ -257,10 +258,9 @@ EXTENSIONS.append(_probe_parser)
 
 
 JUDGE_LEDGER = V3 / 'judge_ledger.json'
-CF_RUNS = ('cf-biobart', 'cf-bart-lora')
-# v2 packet = v1 minus 3 pronoun swaps whose gold was unsound; surviving cases are byte-identical,
-# so v1 generations are reused, filtered to this packet by case ID and dialogue hash.
-CF_PACKET = V3 / 'cf_cases_v2.jsonl'
+CF_RUNS = tuple(m.counterfactual_run_dir for m in CONFIG.models.values() if m.counterfactual_run_dir)
+# Saved counterfactual generations are filtered to this packet by case ID and dialogue hash.
+CF_PACKET = CONFIG.counterfactual_packet
 
 
 def in_packet(cases, packet=CF_PACKET):

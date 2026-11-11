@@ -1,0 +1,35 @@
+# Summarizers under evaluation and where the factuality tooling reads and writes.
+# Paths are relative to this file. Add a model here to generate and evaluate its summaries.
+
+[paths]
+benchmark = "data/factuality_benchmark"          # published evaluation set (source of truth for `rebuild`)
+work = "results/factuality/local"               # git-ignored scratch for new runs
+published = "results/factuality"                # committed aggregates
+study = "results/factuality/local/v3"           # labelled-study working files (local only)
+counterfactual_packet = "results/factuality/local/v3/cf_cases_v2.jsonl"
+
+[models.biobart-large-lora]
+label = "BioBART-large with LoRA"
+generator = "flask"
+base_model = "GanjinZero/biobart-large"
+base_revision = "47c968d3aba260d5737fda6f5b2ad3aa35ce75e8"
+adapter = "./biobart-large-lora"
+run_dir = "biobart-flask-2026-10-17"
+counterfactual_run_dir = "cf-biobart"
+
+[models.bart-base-lora]
+label = "BART-base with LoRA"
+generator = "flask"
+base_model = "facebook/bart-base"
+base_revision = "aadd2ab0ae0c8268c7c9693540e9904811f36177"
+adapter = "jonleed/clinical-note-bart-lora"
+adapter_revision = "8a61695044124b479ba73da5134f064b5e36ae53"
+run_dir = "bart-lora-flask-2026-10-17"
+counterfactual_run_dir = "cf-bart-lora"
+
+[models.bart-base]
+label = "BART-base, no adapter"
+generator = "flask"
+base_model = "facebook/bart-base"
+base_revision = "aadd2ab0ae0c8268c7c9693540e9904811f36177"
+run_dir = "bart-base-flask-2026-10-17"

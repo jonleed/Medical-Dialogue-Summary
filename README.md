@@ -130,6 +130,8 @@ Reference labels are AI-drafted and human-reviewed: Claude Sonnet drafted them f
 
 **Reproduce it, or use it on your own model**
 
+The benchmark is at version 1.1. The reviewer labels were revised once after review, to apply one gender-reference rule consistently (8 edits). The LLM judge has not been rerun under the revised rubric, so its outputs are the original ones. [Label revisions](docs/label_revisions.md) lists every edit and each number that moved, and version 1 is the git tag `benchmark-v1`.
+
 The full benchmark is published in [`data/factuality_benchmark/`](data/factuality_benchmark/): dialogues, summaries, expected-fact plans, labels and judge outputs, under MTS-Dialog's CC BY 4.0 license. Every number above rebuilds from it offline, and CI checks that they match:
 
 ```bash

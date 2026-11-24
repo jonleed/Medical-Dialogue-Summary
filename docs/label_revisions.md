@@ -16,3 +16,19 @@ The judge outputs in the benchmark came from the original judge rubric (`factual
 | held-out | val:83 | biobart-large-lora | c8 Patient is male (he) | (missing) | supported |
 | held-out | val:94 | bart-base-lora | c1 Patient is male (his) | supported (span: "Mister Jay") | supported (span: "I reviewed his past medical history") |
 | calibration | val:62 | biobart-large-lora | c17 Patient is female (she/her) | (missing) | supported |
+
+## What moved
+
+Rebuilding the published results from the revised labels changed these numbers. The headline rates not listed, including the patient demographic error rates (11% of BioBART-large summaries and 28% of BART-base summaries), are unchanged at the precision the README reports, though some confidence intervals shifted by a point.
+
+| Result | Version 1 | Version 1.1 |
+|---|---|---|
+| BioBART-large + LoRA, expected facts omitted | 40 / 139 = 29% | 39 / 137 = 28% |
+| BioBART-large + LoRA, labelled claims | 226 | 228 |
+| BART-base + LoRA, labelled claims | 232 | 231 |
+| Held-out facts the reviewer marks omitted | 46 | 45 |
+| Judge omission precision and recall | 0.93 and 0.87 | 0.98 and 0.89 |
+| Gender-reference rows in the detector table | sex-reference inconsistency (4 positives), sex contradiction (1), pronoun contradiction (0) | gender-reference contradiction (1 positive); the judge and the rule checker each found it |
+| Judge-reviewer agreement | 0.992 raw over 1,746 claim-type pairs, kappa 0.88 | 0.995 raw over 1,293 pairs, no kappa |
+
+The old "sex-reference inconsistency" type existed only because sex terms and pronouns were treated as separate dimensions. With one dimension it is the same thing as a gender-reference contradiction, so the claim types fell from seven to five. That is why the pair counts are smaller. Kappa is reported only when every cell of the agreement table has at least 5 pairs, and the merged type no longer meets that, so the file now reports raw agreement alone.

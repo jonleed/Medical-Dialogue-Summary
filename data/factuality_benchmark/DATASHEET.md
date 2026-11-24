@@ -2,6 +2,10 @@
 
 Data for rebuilding this repository's factuality results and for scoring other summarizers on the same task.
 
+## Version
+
+This is version 1.1. Version 1 is the bundle as first published (git tag `benchmark-v1`). Version 1.1 revises 8 reviewer labels and plan spans so that one gender-reference rule is applied throughout; `docs/label_revisions.md` lists each edit and what it changed. The judge outputs are unchanged. They have not been rerun under the revised rubric.
+
 ## Contents
 
 | File | What it holds |

@@ -66,10 +66,19 @@ class Matching(unittest.TestCase):
                                                      [det('unsupported', ft='race_ethnicity', issue='race_inserted')]))
         self.assertEqual((r['human_positive'], r['detector_positive']), (True, True))
 
-    def test_cross_dimension_flag_counts_for_sex_reference_error(self):
-        [r] = rows_for('cross_dimension_inconsistency', match_claims(
-            [human('contradicted', ft='sex')], [det('unclear', ft='sex', issue='cross_dimension_inconsistency')]))
-        self.assertEqual(r['detector_positive'], True)
+    def test_sex_and_pronoun_are_one_dimension(self):
+        [r] = rows_for('gender_reference_contradiction', match_claims(
+            [human('contradicted', ft='sex')], [det('contradicted', ft='pronoun')]))
+        self.assertEqual((r['human_positive'], r['detector_positive'], r['type_convention_match']), (True, True, True))
+
+    def test_gender_identity_is_not_gender_reference(self):
+        [r] = rows_for('gender_reference_contradiction', match_claims([human('contradicted', ft='gender')], [det('contradicted', ft='gender')]))
+        self.assertEqual(r['human_positive'], False)
+
+    def test_pronoun_and_sex_claims_each_count(self):
+        for ft in ('sex', 'pronoun'):
+            [r] = rows_for('gender_reference_contradiction', match_claims([human('contradicted', ft=ft)], [det('unclear', ft=ft)]))
+            self.assertEqual((r['human_positive'], r['detector_positive']), (True, None), ft)
 
     def test_all_error_types_emitted(self):
         types = {r['error_type'] for r in match_claims([human('supported')], [det('supported')])}

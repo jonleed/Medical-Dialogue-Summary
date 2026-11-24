@@ -8,9 +8,8 @@ SEEN = frozenset({'val:9', 'val:14', 'val:24', 'val:37', 'val:39', 'val:43', 'va
 
 
 def enrichment_eligible(rows, runs):
-    """Dialogues with a contradiction, any race suggestion, or a cross-dimension flag in the given runs."""
-    hit = lambda s: (s['proposed_label'] == 'contradicted' or s['fact_type'] == 'race_ethnicity'
-                     or s['issue'] == 'cross_dimension_inconsistency')
+    """Dialogues with a contradiction or any race suggestion in the given runs."""
+    hit = lambda s: s['proposed_label'] == 'contradicted' or s['fact_type'] == 'race_ethnicity'
     return {r['case_id'] for r in rows if r['run'] in runs and any(hit(s) for s in r['suggestions'])}
 
 

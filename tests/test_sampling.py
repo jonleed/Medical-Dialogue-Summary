@@ -52,11 +52,11 @@ class Eligibility(unittest.TestCase):
         rows = [
             {'run': 'a', 'case_id': 'val:1', 'suggestions': [{'fact_type': 'age', 'proposed_label': 'contradicted', 'issue': 'x'}]},
             {'run': 'a', 'case_id': 'val:2', 'suggestions': [{'fact_type': 'race_ethnicity', 'proposed_label': 'supported', 'issue': 'x'}]},
-            {'run': 'b', 'case_id': 'val:3', 'suggestions': [{'fact_type': 'sex', 'proposed_label': 'unclear', 'issue': 'cross_dimension_inconsistency'}]},
+            {'run': 'b', 'case_id': 'val:3', 'suggestions': [{'fact_type': 'sex', 'proposed_label': 'unclear', 'issue': 'gender_reference_not_established'}]},
             {'run': 'a', 'case_id': 'val:4', 'suggestions': [{'fact_type': 'pronoun', 'proposed_label': 'unclear', 'issue': 'pronoun_not_established'}]},
             {'run': 'c', 'case_id': 'val:5', 'suggestions': [{'fact_type': 'age', 'proposed_label': 'contradicted', 'issue': 'x'}]},
         ]
-        self.assertEqual(enrichment_eligible(rows, runs={'a', 'b'}), {'val:1', 'val:2', 'val:3'})
+        self.assertEqual(enrichment_eligible(rows, runs={'a', 'b'}), {'val:1', 'val:2'})
 
 
 

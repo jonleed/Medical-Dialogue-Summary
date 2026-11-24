@@ -1,4 +1,4 @@
-"""Rule checker v3: race labels, descriptor-interleaved sex claims, cross-dimension flags."""
+"""Rule checker v3.1: race labels, descriptor-interleaved sex claims, sex and pronouns as one gender-reference dimension."""
 import unittest
 
 from factuality.checks import demographic_suggestions
@@ -46,17 +46,26 @@ class Race(unittest.TestCase):
         self.assertEqual(s['method'], CHECKER_VERSION)
 
 
-class SexAndCrossDimension(unittest.TestCase):
+class SexAndGenderReference(unittest.TestCase):
     def test_sex_claim_after_race_descriptor(self):
         [s] = of(case('Doctor: The patient is female.', 'This is a 58-year-old white male with knee pain.'), 'sex')
         self.assertEqual(s['proposed_label'], 'contradicted')
 
-    def test_pronoun_conflict_is_cross_dimension_not_contradiction(self):
+    def test_sex_term_conflicting_with_patient_pronoun_is_contradicted(self):
         c = case('Doctor: The patient is here today. She has knee pain.', 'This is a 58-year-old white male.')
-        sex = of(c, 'sex')
-        self.assertEqual([s['issue'] for s in sex], ['cross_dimension_inconsistency'])
-        self.assertEqual(sex[0]['proposed_label'], 'unclear')
-        self.assertFalse(any(s['proposed_label'] == 'contradicted' for s in suggestions_v3(c)))
+        [s] = of(c, 'sex')
+        self.assertEqual((s['proposed_label'], s['issue']), ('contradicted', 'demographic_comparison'))
+        self.assertEqual(s['evidence_bases'], ['patient_pronoun_context'])
+
+    def test_sex_term_matching_honorific_is_supported(self):
+        c = case("Doctor: Hello, ma'am. What brings you in?\nPatient: I have knee pain.", 'This is a 58-year-old female.')
+        [s] = of(c, 'sex')
+        self.assertEqual(s['proposed_label'], 'supported')
+
+    def test_cues_that_disagree_are_unclear(self):
+        c = case('Doctor: Hello, sir.\nDoctor: The patient is here today. She has knee pain.', 'This is a 58-year-old male.')
+        [s] = of(c, 'sex')
+        self.assertEqual((s['proposed_label'], s['issue']), ('unclear', 'conflicting_or_uncertain_source'))
 
     def test_relative_age_not_patient_contradiction(self):
         c = case('Patient: I am 24 years old. My father is 67.', 'Father is 67 years old.')
@@ -67,14 +76,14 @@ class Summary(unittest.TestCase):
     def test_counts(self):
         sugs = suggestions_v3(case('Patient: I have a cough.', 'This is a 40-year-old white male with cough.'))
         a = automatic_summary_v3(sugs)
-        self.assertEqual(a['checker_version'], 'patient_demographics_v3')
+        self.assertEqual(a['checker_version'], 'patient_demographics_v3.1')
         self.assertEqual(a['race_inserted'], 1)
         self.assertEqual(a['unsupported_suggestions'], 1)
-        self.assertIn('cross_dimension_inconsistencies', a)
+        self.assertNotIn('cross_dimension_inconsistencies', a)
 
 
-class V2Frozen(unittest.TestCase):
-    def test_v2_labels_unchanged(self):
+class V2Checker(unittest.TestCase):
+    def test_v2_labels(self):
         fixtures = [
             (case("Patient: I'm fifty seven years old.", 'The patient is a 67-year-old.'), 'age', ['contradicted']),
             (case('Doctor: The patient is female.', 'The patient is male.'), 'sex', ['contradicted']),
@@ -83,7 +92,7 @@ class V2Frozen(unittest.TestCase):
         for c, typ, expected in fixtures:
             got = [s['proposed_label'] for s in demographic_suggestions(c) if s['fact_type'] == typ]
             self.assertEqual(got, expected)
-            self.assertTrue(all(s['method'] == 'patient_demographics_v2' for s in demographic_suggestions(c)))
+            self.assertTrue(all(s['method'] == 'patient_demographics_v2.1' for s in demographic_suggestions(c)))
 
 
 if __name__ == '__main__':

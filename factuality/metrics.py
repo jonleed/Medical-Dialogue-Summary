@@ -6,22 +6,22 @@ Detector claims the reference labels do not atomize are 'extra' and kept out of 
 import random
 from collections import defaultdict
 
+from .demographics import GENDER_REFERENCE
+
 SEED, RESAMPLES = 20261109, 2000
-CLAIM_TYPES = ('age_contradiction', 'sex_contradiction', 'pronoun_contradiction', 'race_contradiction',
-               'race_inserted', 'cross_dimension_inconsistency', 'unsupported_claim')
+CLAIM_TYPES = ('age_contradiction', 'gender_reference_contradiction', 'race_contradiction',
+               'race_inserted', 'unsupported_claim')
 ERROR_TYPES = CLAIM_TYPES + ('omission',)
-_CONTRADICTION = {'age_contradiction': 'age', 'sex_contradiction': 'sex', 'pronoun_contradiction': 'pronoun',
-                  'race_contradiction': 'race_ethnicity'}
+# Sex terms and pronouns are one dimension (the patient's gender reference); gender identity stays separate.
+_CONTRADICTION = {'age_contradiction': {'age'}, 'gender_reference_contradiction': GENDER_REFERENCE,
+                  'race_contradiction': {'race_ethnicity'}}
 
 
-def _positive(error_type, fact_type, label, issue=None, detector=False):
+def _positive(error_type, fact_type, label):
     if error_type in _CONTRADICTION:
-        return fact_type == _CONTRADICTION[error_type] and label == 'contradicted'
+        return fact_type in _CONTRADICTION[error_type] and label == 'contradicted'
     if error_type == 'race_inserted':
         return fact_type == 'race_ethnicity' and label == 'unsupported'
-    if error_type == 'cross_dimension_inconsistency':
-        return (fact_type == 'sex' and label in ('contradicted', 'unsupported')
-                or (detector and issue == 'cross_dimension_inconsistency'))
     return label == 'unsupported'  # unsupported_claim
 
 
@@ -29,12 +29,17 @@ def _label(claim):
     return claim.get('label', claim.get('proposed_label'))
 
 
+def _same_type(a, b):
+    """Sex terms and pronouns are one dimension, so they never count as a type mismatch."""
+    return a == b or {a, b} <= GENDER_REFERENCE
+
+
 def _overlap(a, b):
     return bool(a and b) and a['start'] < b['end'] and b['start'] < a['end']
 
 
 def _detector_value(error_type, fact_type, claim):
-    if _positive(error_type, fact_type, _label(claim), claim.get('issue'), detector=True):
+    if _positive(error_type, fact_type, _label(claim)):
         return True
     return None if _label(claim) == 'unclear' else False
 
@@ -46,20 +51,20 @@ def match_claims(human_claims, detector_claims):
         # same span is a labelling-convention difference (tallied separately), not a different claim.
         candidates = [d for d in unused if _overlap(d.get('generated_span'), h.get('generated_span'))]
         candidates.sort(key=lambda d: (d.get('subject', 'patient') != h.get('subject', 'patient'),
-                                       d['fact_type'] != h['fact_type']))
+                                       not _same_type(d['fact_type'], h['fact_type'])))
         match = candidates[0] if candidates else None
         if match is not None:
             unused.remove(match)
         # Judge the detector under the human's fact type only for the same type or the known
         # relative-age convention (age vs quantity); otherwise its own type applies.
-        compatible = match is not None and (match['fact_type'] == h['fact_type']
+        compatible = match is not None and (_same_type(match['fact_type'], h['fact_type'])
                                             or {match['fact_type'], h['fact_type']} == {'age', 'quantity'})
         eval_type = h['fact_type'] if compatible else (match['fact_type'] if match else None)
         for t in CLAIM_TYPES:
             rows.append({'error_type': t, 'human_positive': _positive(t, h['fact_type'], h['label']),
                          'detector_positive': _detector_value(t, eval_type, match) if match else None,
                          'label_correct': bool(match) and _label(match) == h['label'],
-                         'type_convention_match': bool(match) and match['fact_type'] == h['fact_type'],
+                         'type_convention_match': bool(match) and _same_type(match['fact_type'], h['fact_type']),
                          'subject_convention_match': bool(match) and match.get('subject', 'patient') == h.get('subject', 'patient'),
                          'matched': match is not None, 'extra': False})
     for d in unused:
@@ -290,7 +295,7 @@ DEMOGRAPHIC_TYPES = ('age', 'sex', 'gender', 'pronoun', 'race_ethnicity')
 _RELATIVE_WORDS = ('father', 'mother', 'brother', 'sister', 'son', 'daughter', 'wife', 'husband', 'grand', 'aunt', 'uncle')
 DEMOGRAPHIC_DEFINITION = (
     "Share of summaries with at least one reference-labelled contradicted or unsupported claim about the patient's "
-    "age, sex, gender identity, pronouns or race/ethnicity; claims whose text names a relative are excluded. "
+    "age, gender reference (sex or pronouns), gender identity or race/ethnicity; claims whose text names a relative are excluded. "
     "Randomly sampled dialogues only; 95% CI from 2,000 dialogue resamples (seed 20261109).")
 
 

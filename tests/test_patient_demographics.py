@@ -89,11 +89,31 @@ class PronounV2Diagnostics(unittest.TestCase):
           'Doctor: She feels well.']:
             self.assertFalse(errors(case(source,'The patient says he has pain.'),'pronoun'),source)
 
-    def test_honorific_mismatch_only_unclear(self):
-        c=case('Doctor: Hello, miss.\nPatient: I have a rash.','He has a rash.')
+    def test_honorific_is_gender_reference_evidence(self):
+        for source,out,label in [('Doctor: Hello, miss.\nPatient: I have a rash.','He has a rash.','contradicted'),
+                                 ('Doctor: Hello, miss.\nPatient: I have a rash.','She has a rash.','supported'),
+                                 ("Doctor: Good afternoon, ma'am.\nPatient: I have a rash.",'The patient says he has a rash.','contradicted'),
+                                 ('Doctor: Hi sir.\nPatient: I have a rash.','He has a rash.','supported')]:
+            s=items(case(source,out),'pronoun')[0]
+            self.assertEqual(s['proposed_label'],label,(source,out))
+            self.assertEqual(s['evidence_bases'],['gendered_address'])
+
+    def test_casual_address_and_names_are_not_evidence(self):
+        for source in ['Doctor: Hey, bud. What brings you in?\nPatient: I have a rash.',
+                       'Doctor: Hello Marcus, what brings you in?\nPatient: I have a rash.']:
+            s=items(case(source,'He has a rash.'),'pronoun')[0]
+            self.assertEqual((s['proposed_label'],s['issue']),('unclear','gender_reference_not_established'),source)
+
+    def test_address_conflicting_with_pronoun_is_unclear(self):
+        c=case('Doctor: Hello, sir.\nDoctor: The patient is here today. She has a rash.','He has a rash.')
         s=items(c,'pronoun')[0]
-        self.assertEqual(s['proposed_label'],'unclear')
-        self.assertEqual(s['issue'],'gendered_address_inconsistency')
+        self.assertEqual((s['proposed_label'],s['issue']),('unclear','conflicting_or_uncertain_source'))
+
+    def test_sex_term_is_checked_against_pronouns_and_address(self):
+        s=items(case('Doctor: Hello, ma\'am.\nPatient: I have a rash.','The patient is male.'),'sex')[0]
+        self.assertEqual(s['proposed_label'],'contradicted')
+        s=items(case('Doctor: The patient is here today. She has a rash.','The patient is female.'),'sex')[0]
+        self.assertEqual(s['proposed_label'],'supported')
 
     def test_conflicting_patient_pronouns_are_unclear(self):
         c=case('Doctor: The patient is here. She has pain.\nDoctor: The patient says he has pain.','He has pain.')
@@ -185,7 +205,7 @@ class SavedOutputRegressions(unittest.TestCase):
         s=errors(rows['val:37'],'pronoun')
         self.assertEqual(len(s),1)
         self.assertEqual(s[0]['visibility'],'truncated')
-        self.assertEqual(items(rows['val:66'],'pronoun')[0]['issue'],'gendered_address_inconsistency')
+        self.assertEqual(items(rows['val:66'],'pronoun')[0]['proposed_label'],'contradicted')
 
 
 if __name__=='__main__':unittest.main()

@@ -1,5 +1,5 @@
 {
-  "checker_version": "patient_demographics_v3",
+  "checker_version": "patient_demographics_v3.1",
   "limits": [
     "Automatic rule suggestions, not annotated error rates",
     "Checker precision/recall are measured separately against reference labels (see metrics.json)",
@@ -10,25 +10,25 @@
       "automatic": {
         "checker_precision": null,
         "checker_recall": null,
-        "checker_version": "patient_demographics_v3",
-        "contradiction_flagged_cases": 3,
-        "contradiction_suggestions": 3,
-        "cross_dimension_inconsistencies": 0,
-        "flagged_cases": 27,
-        "model_visible_contradictions": 2,
+        "checker_version": "patient_demographics_v3.1",
+        "contradiction_flagged_cases": 4,
+        "contradiction_suggestions": 4,
+        "flagged_cases": 14,
+        "model_visible_contradictions": 3,
         "race_inserted": 0,
         "status": "unreviewed suggestions, excluded from annotated rates",
         "suggestions": 61,
-        "supported_suggestions": 23,
+        "supported_suggestions": 46,
         "truncated_source_contradictions": 1,
-        "unclear_suggestions": 35,
+        "unclear_suggestions": 11,
         "unsupported_suggestions": 0
       },
       "by_section": {
         "allergies": {
-          "review_required": 2,
+          "contradicted": 1,
+          "review_required": 1,
           "suggestions": 2,
-          "unclear": 2
+          "supported": 1
         },
         "assessment": {
           "review_required": 0,
@@ -49,10 +49,10 @@
         },
         "history of present illness": {
           "contradicted": 3,
-          "review_required": 28,
+          "review_required": 7,
           "suggestions": 47,
-          "supported": 19,
-          "unclear": 25
+          "supported": 40,
+          "unclear": 4
         },
         "labs": {
           "review_required": 0,
@@ -90,10 +90,10 @@
           "unclear": 4
         },
         "social history": {
-          "review_required": 4,
+          "review_required": 3,
           "suggestions": 5,
-          "supported": 1,
-          "unclear": 4
+          "supported": 2,
+          "unclear": 3
         }
       },
       "by_type": {
@@ -104,11 +104,11 @@
           "supported": 11
         },
         "pronoun": {
-          "contradicted": 1,
-          "review_required": 24,
+          "contradicted": 2,
+          "review_required": 11,
           "suggestions": 33,
-          "supported": 9,
-          "unclear": 23
+          "supported": 22,
+          "unclear": 9
         },
         "race_ethnicity": {
           "review_required": 0,
@@ -116,9 +116,10 @@
           "supported": 3
         },
         "sex": {
-          "review_required": 12,
+          "review_required": 2,
           "suggestions": 12,
-          "unclear": 12
+          "supported": 10,
+          "unclear": 2
         }
       },
       "cases": 100,
@@ -136,25 +137,24 @@
       "automatic": {
         "checker_precision": null,
         "checker_recall": null,
-        "checker_version": "patient_demographics_v3",
-        "contradiction_flagged_cases": 4,
-        "contradiction_suggestions": 4,
-        "cross_dimension_inconsistencies": 0,
-        "flagged_cases": 38,
-        "model_visible_contradictions": 4,
+        "checker_version": "patient_demographics_v3.1",
+        "contradiction_flagged_cases": 9,
+        "contradiction_suggestions": 13,
+        "flagged_cases": 30,
+        "model_visible_contradictions": 13,
         "race_inserted": 0,
         "status": "unreviewed suggestions, excluded from annotated rates",
         "suggestions": 78,
-        "supported_suggestions": 20,
+        "supported_suggestions": 38,
         "truncated_source_contradictions": 0,
-        "unclear_suggestions": 54,
+        "unclear_suggestions": 27,
         "unsupported_suggestions": 0
       },
       "by_section": {
         "allergies": {
-          "review_required": 2,
+          "review_required": 0,
           "suggestions": 2,
-          "unclear": 2
+          "supported": 2
         },
         "assessment": {
           "review_required": 2,
@@ -175,11 +175,11 @@
           "suggestions": 0
         },
         "history of present illness": {
-          "contradicted": 4,
-          "review_required": 37,
+          "contradicted": 12,
+          "review_required": 22,
           "suggestions": 55,
-          "supported": 18,
-          "unclear": 33
+          "supported": 33,
+          "unclear": 10
         },
         "labs": {
           "review_required": 1,
@@ -218,10 +218,11 @@
           "unclear": 4
         },
         "social history": {
-          "review_required": 10,
+          "contradicted": 1,
+          "review_required": 9,
           "suggestions": 11,
-          "supported": 1,
-          "unclear": 10
+          "supported": 2,
+          "unclear": 8
         }
       },
       "by_type": {
@@ -233,10 +234,11 @@
           "unclear": 4
         },
         "pronoun": {
-          "review_required": 34,
+          "contradicted": 6,
+          "review_required": 24,
           "suggestions": 42,
-          "supported": 8,
-          "unclear": 34
+          "supported": 18,
+          "unclear": 18
         },
         "race_ethnicity": {
           "review_required": 0,
@@ -244,9 +246,11 @@
           "supported": 3
         },
         "sex": {
-          "review_required": 16,
+          "contradicted": 3,
+          "review_required": 8,
           "suggestions": 16,
-          "unclear": 16
+          "supported": 8,
+          "unclear": 5
         }
       },
       "cases": 100,
@@ -264,10 +268,9 @@
       "automatic": {
         "checker_precision": null,
         "checker_recall": null,
-        "checker_version": "patient_demographics_v3",
+        "checker_version": "patient_demographics_v3.1",
         "contradiction_flagged_cases": 0,
         "contradiction_suggestions": 0,
-        "cross_dimension_inconsistencies": 0,
         "flagged_cases": 0,
         "model_visible_contradictions": 0,
         "race_inserted": 0,

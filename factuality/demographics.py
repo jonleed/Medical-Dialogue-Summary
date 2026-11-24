@@ -3,7 +3,13 @@
 These rules establish candidates and evidence, not exhaustive clinical truth.
 Ages require an age construction or a patient-directed age question. Pronouns
 require a patient anchor/care context; patient turns about relatives/providers
-never supply third-person patient identity. Honorifics are weaker address cues.
+never supply third-person patient identity.
+
+Sex terms (male, female) and pronouns (he, she) are one dimension, the patient's
+*gender reference*. Its evidence is an explicit statement about the patient, a
+third-person pronoun that refers to the patient, or a gendered form of address
+directed at the patient (sir, ma'am, miss, mister). Names and casual address
+("bud") are not evidence. Gender identity is a separate dimension.
 """
 import re
 
@@ -26,7 +32,7 @@ ROLE = re.compile(r'(?<!\w)(Doctor|Patient|Guest_family|Guest_clinician)\s*:', r
 PRONOUN = re.compile(r'\b(he|him|his|she|her|hers)\b', re.I)
 OTHER_PERSON = re.compile(r"\b(?:mother|father|mom|dad|son|daughter|brother|sister|nephew|niece|wife|husband|partner|parents|friend|cousin|aunt|uncle|grandmother|grandfather|neighbor|doctor|physician|nurse|therapist|specialist|clinician|psychologist|paramedic|caregiver|another patient|psychiatrist|surgeon|assistant|case manager|corpsman)\b|\b(?:my|her|his|your|their)\s+doctor\b|\bDr\.", re.I)
 CARE_CONTEXT = re.compile(r'\b(?:birth history|born|incubator|immunizations?|public school|special education|past medical history|medical history|surger\w*|review of (?:his|her) systems|(?:his|her) symptoms)\b', re.I)
-HONORIFIC = re.compile(r"\b(sir|ma'am|ma’am|miss|mister|mr\.?|mrs\.?|ms\.?)\b", re.I)
+HONORIFIC = re.compile(r"\b(sir|ma'am|ma’am|miss|mister|mr\.?|mrs\.?|ms\.?|young man|young woman|young lady)\b", re.I)
 
 
 def number_value(text):
@@ -238,6 +244,25 @@ def identity_claims(text, dimension):
     return [_fact(text,normalized_identity(m.group(1)),m.start(1),m.end(1),'summary_patient_'+dimension) for m in pattern.finditer(text)]
 
 
+GENDER_REFERENCE = frozenset({'sex', 'pronoun'})  # fact types scored as one dimension
+_SEX_CLASS = {'male': 'masculine', 'female': 'feminine'}
+
+
+def gender_class(value):
+    """Normalise a sex term (male/female) or pronoun class to masculine/feminine."""
+    return _SEX_CLASS.get(value, value)
+
+
+def gender_reference_evidence(text):
+    """Every cue about the patient's gender reference, as masculine/feminine facts.
+
+    Explicit statements, patient-referring pronouns and gendered address all count. Cues that
+    disagree make the source conflicted, which callers report as unclear rather than guessing.
+    """
+    facts = [dict(f, value=gender_class(f['value'])) for f in identity_evidence(text, 'sex')]
+    return facts + pronoun_evidence(text) + address_evidence(text)
+
+
 def address_evidence(text):
     result=[]
     for turn in turns(text):
@@ -246,6 +271,6 @@ def address_evidence(text):
         if OTHER_PERSON.search(turn['body']):continue
         for m in HONORIFIC.finditer(turn['body']):
             word=m.group(1).lower().rstrip('.')
-            value='masculine' if word in {'sir','mister','mr'} else 'feminine'
-            result.append(_fact(text,value,turn['start'],turn['body_start']+m.end(),'gendered_address_only'))
+            value='masculine' if word in {'sir','mister','mr','young man'} else 'feminine'
+            result.append(_fact(text,value,turn['start'],turn['body_start']+m.end(),'gendered_address'))
     return _unique(result)

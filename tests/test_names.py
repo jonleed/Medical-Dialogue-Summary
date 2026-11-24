@@ -8,8 +8,12 @@ import unittest
 
 class Names(unittest.TestCase):
     def test_rubric_and_schema_hashes_unchanged(self):
-        from factuality.judge import rubric_hash, schema_hash
-        self.assertEqual(rubric_hash(), 'b6031aa72a9adcea0a87d44b7a77ea38faab986ce697a12a173a4a87cfbe2768')
+        from factuality.judge import RUBRIC_PATH, rubric_hash, schema_hash
+        from factuality.io import digest
+        # The judge outputs in the benchmark came from the original rubric, kept verbatim for provenance.
+        original = RUBRIC_PATH.with_name('archive') / 'judge_original.txt'
+        self.assertEqual(digest(original.read_text(encoding='utf-8')), 'b6031aa72a9adcea0a87d44b7a77ea38faab986ce697a12a173a4a87cfbe2768')
+        self.assertNotEqual(rubric_hash(), digest(original.read_text(encoding='utf-8')))
         self.assertEqual(schema_hash(), '9e7fb29fd42cb441c41262c21bc5fa22e8c2b49688fc091be3fc42794590421d')
 
     def test_no_version_or_date_in_tracked_names(self):

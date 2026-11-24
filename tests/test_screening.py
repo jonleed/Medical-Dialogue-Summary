@@ -43,7 +43,7 @@ class Screen(unittest.TestCase):
 
     def test_counts_reach_aggregate(self):
         auto = self.report['models'][0]['automatic']
-        self.assertEqual(auto['checker_version'], 'patient_demographics_v3')
+        self.assertEqual(auto['checker_version'], 'patient_demographics_v3.1')
         self.assertEqual(auto['race_inserted'], 1)
         self.assertEqual(auto['contradiction_suggestions'], 1)
 

@@ -91,9 +91,8 @@ def _view(annotations, visible):
         subset = [i for i in claims if i['fact_type'] in types]
         return _metric(sum(i['label']=='contradicted' for i in subset),len(subset))
     return {'assessable_claims':len(claims), 'age_contradictions':contradictions({'age'}),
-        'gender_reference_contradictions':contradictions({'sex','gender','pronoun'}),
-        'sex_contradictions':contradictions({'sex'}), 'gender_identity_contradictions':contradictions({'gender'}),
-        'pronoun_contradictions':contradictions({'pronoun'}),
+        'gender_reference_contradictions':contradictions({'sex','pronoun'}),
+        'gender_identity_contradictions':contradictions({'gender'}),
         'contradicted_claims':_metric(sum(i['label']=='contradicted' for i in claims),len(claims)),
         'unsupported_claims':_metric(sum(i['label']=='unsupported' for i in claims),len(claims)),
         'expected_fact_omissions':_metric(sum(i['label']=='omitted' for i in facts),len(facts)),

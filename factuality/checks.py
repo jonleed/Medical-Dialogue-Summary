@@ -1,8 +1,8 @@
 """Versioned demographic suggestions. Automatic output is always pending review."""
-from .demographics import (age_evidence, age_claims, pronoun_evidence, pronoun_claims,
-    identity_evidence, identity_claims, address_evidence)
+from .demographics import (age_evidence, age_claims, pronoun_claims, identity_evidence, identity_claims,
+    gender_class, gender_reference_evidence)
 
-CHECKER_VERSION = 'patient_demographics_v2'
+CHECKER_VERSION = 'patient_demographics_v2.1'
 
 
 def _visible_spans(facts, visible):
@@ -15,7 +15,7 @@ def _visible_spans(facts, visible):
     return spans
 
 
-def _suggest(case, typ, claim, facts, visible_facts, addresses):
+def _suggest(case, typ, claim, facts, visible_facts):
     visible=(case.get('model_input') or {}).get('text','')
     values={f['value'] for f in facts}
     uncertain=any(f['uncertain'] for f in facts)
@@ -29,14 +29,6 @@ def _suggest(case, typ, claim, facts, visible_facts, addresses):
     else:
         label='unclear';issue=typ+'_not_established'
         rationale='No reliable same-dimension patient evidence was extracted. This is a review candidate, not proof of an unsupported claim or of a correct identity.'
-    # Honorifics are address consistency cues, never biological sex, identity or
-    # preferred-pronoun ground truth. Retain unclear even when they disagree.
-    if not values and typ in {'pronoun','sex'}:
-        expected={'male':'masculine','female':'feminine'}.get(claim['value'],claim['value'])
-        cues={f['value'] for f in addresses}
-        if len(cues)==1 and expected not in cues:
-            facts=addresses;issue='gendered_address_inconsistency'
-            rationale='Generated gendered language conflicts with an address cue. Honorifics alone do not establish sex, gender identity or pronouns; review is required.'
     spans=_visible_spans(facts,visible)
     same_visible={f['value'] for f in visible_facts}
     if spans:
@@ -59,18 +51,33 @@ def _suggest(case, typ, claim, facts, visible_facts, addresses):
       'evidence_bases':sorted({f['basis'] for f in facts})}
 
 
+def gender_reference_suggestion(case, typ, claim):
+    """Compare a summary's sex term or pronoun with every gender-reference cue in the dialogue.
+
+    Sex and pronouns are one dimension: a summary saying "male" or "he" is checked against explicit
+    statements, patient-referring pronouns and gendered address alike. A claim that matches the cues
+    is supported, one that conflicts is contradicted, and cues that disagree with each other (or no
+    cue at all) are unclear: absence of a cue is a review candidate, not proof of an unsupported claim.
+    """
+    visible=(case.get('model_input') or {}).get('text','')
+    s=_suggest(case,typ,dict(claim,value=gender_class(claim['value'])),
+               gender_reference_evidence(case['dialogue']),gender_reference_evidence(visible))
+    if s['issue']==typ+'_not_established':
+        s['issue']='gender_reference_not_established'
+    s['generated_value']=claim['value']
+    return s
+
+
 def demographic_suggestions(case):
     source=case['dialogue'];output=case.get('prediction') or ''
     visible=(case.get('model_input') or {}).get('text','')
-    addresses=address_evidence(source)
-    dimensions=[('age',age_evidence,age_claims),('pronoun',pronoun_evidence,pronoun_claims),
-      ('sex',lambda t:identity_evidence(t,'sex'),lambda t:identity_claims(t,'sex')),
-      ('gender',lambda t:identity_evidence(t,'gender'),lambda t:identity_claims(t,'gender'))]
     suggestions=[]
-    for typ,extract,claims in dimensions:
+    for typ,extract,claims in [('age',age_evidence,age_claims),('gender',lambda t:identity_evidence(t,'gender'),lambda t:identity_claims(t,'gender'))]:
         facts=extract(source);visible_facts=extract(visible)
         for claim in claims(output):
-            suggestions.append(_suggest(case,typ,claim,facts,visible_facts,addresses))
+            suggestions.append(_suggest(case,typ,claim,facts,visible_facts))
+    suggestions+=[gender_reference_suggestion(case,'pronoun',c) for c in pronoun_claims(output)]
+    suggestions+=[gender_reference_suggestion(case,'sex',c) for c in identity_claims(output,'sex')]
     return suggestions
 
 

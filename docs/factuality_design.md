@@ -1,7 +1,7 @@
 # Factuality evaluation: how it works
 
 The framework measures factual errors in clinical note summaries:
-- contradicted or unsupported claims about the patient's age, sex, gender identity, pronouns and race/ethnicity;
+- contradicted or unsupported claims about the patient's age, gender reference (sex terms and pronouns), gender identity and race/ethnicity;
 - unsupported claims in general;
 - omissions of facts the requested note section should contain.
 
@@ -32,11 +32,11 @@ Only `summary` outputs are scored for factuality, and the validity counts are re
 
 ### Rule checker (`factuality/rules.py`, `demographics.py`, `race.py`)
 
-The checker extracts patient-attributed age, sex, pronoun, gender-identity and race/ethnicity claims from a summary and compares them with explicit evidence in the dialogue. Each claim gets a proposed label: supported, contradicted, unsupported or unclear.
+The checker extracts patient-attributed age, sex-term, pronoun, gender-identity and race/ethnicity claims from a summary and compares them with explicit evidence in the dialogue. Each claim gets a proposed label: supported, contradicted, unsupported or unclear.
 
 - **Race evidence.** Race comes only from explicit statements about the patient, from the patient or the clinician, or from a confirmed question. Clinical terms such as "white blood cell" or "black stools" are excluded. Names, language, nationality and location are never treated as race evidence.
 - **Inserted race.** A race claim is `unsupported` (`race_inserted`) when no race term or proxy cue appears anywhere in the dialogue.
-- **Sex-reference conflicts.** A sex claim that conflicts with the patient's pronouns in the dialogue is flagged as a sex-reference inconsistency, separate from sex contradictions. Honorifics alone stay `unclear`.
+- **Gender reference.** Sex terms ("male", "female") and pronouns ("he", "she") are one dimension, the patient's gender reference, because a summarizer working from the dialogue alone has to choose a pronoun and that choice says the same thing as a sex term. Evidence is an explicit statement about the patient, a third-person pronoun that refers to the patient (not a relative or provider), or a gendered form of address directed at the patient (sir, ma'am, miss, mister, young man). A matching claim is supported and a conflicting one is contradicted. Cues that disagree with each other leave the claim `unclear`. The checker never labels this dimension `unsupported`, since a missing cue is a review candidate, not proof; the reviewer labels a claim with no cue at all `unsupported`. Names and casual address ("bud") are not evidence. Gender identity is a separate dimension that needs an explicit statement. A summary that follows an address term the dialogue gives is not an error, and one that contradicts it is. The cost is that address terms are conventions, so this measures consistency with the text, not the patient's actual sex or identity.
 - **Visibility.** Every label has a full-source view and a model-visible view, so errors whose evidence was cut off by the summarizer's 512-token input window are reported as `truncated`.
 
 ### Edited dialogues (`factuality/counterfactual.py`)
@@ -48,11 +48,11 @@ Real demographic errors are rare, so the framework makes them on purpose. Each e
 | Race added | A race question and answer at the start of the dialogue | Copy the race, or leave it out |
 | Race removed | The race statement deleted | State no race |
 | Age shift | Patient age + 7 years | Follow the new age |
-| Pronoun swap | Patient pronouns and honorifics masculine → feminine | Follow the swap (rejected if any masculine reference survives) |
+| Pronoun swap | Patient pronouns and gendered address masculine → feminine | Follow the swap (rejected if any masculine reference survives) |
 
 ### Reference labels (`factuality/sampling.py`, `annotate.py`)
 
-- **Sample.** Seeded selection (seed `20261109`): 40 random dialogues, plus up to 10 flagged by the rule checker, plus random top-ups so that 35 dialogues are held out. Both models' summaries of a dialogue stay in the same split, and dialogues the reviewer saw before labelling are kept in calibration.
+- **Sample.** Seeded selection (seed `20261109`): 40 random dialogues, plus up to 10 flagged by the rule checker, plus random top-ups so that 35 dialogues are held out. The draw used an earlier version of the checker and is not redrawn when the checker changes. Both models' summaries of a dialogue stay in the same split, and dialogues the reviewer saw before labelling are kept in calibration.
 - **Plans.** A source-only page lists each dialogue and its requested section. Claude Sonnet drafts expected facts with exact source spans in an isolated session that sees only this page, and the plans are frozen before any summary is shown. The human reviewer checks every plan.
 - **Labels.** A second page shows the summaries in shuffled order with no model identity, rule output or judge output. The same drafter labels every atomic claim and marks each planned fact present, omitted or unclear, and the human reviewer checks every item against the dialogue. The import step validates every span against the text it quotes.
 
@@ -61,12 +61,12 @@ Real demographic errors are rare, so the framework makes them on purpose. Each e
 - **Payload.** An explicit allowlist: opaque ID, dialogue, model-visible input, truncation flag, requested section and summary.
 - **Output.** A claim inventory and a section-fact inventory, with exact quotes. Quotes that don't occur verbatim fail validation and are recorded as failed assessments.
 - **Isolation.** Each call is one headless Claude Code process in an empty directory: no tools beyond structured output, no MCP servers, no slash commands, and only project settings. An isolation probe runs a canary call and fails on any tool, plugin, skill, hook event or extra context.
-- **Trials and freezing.** The rubric is calibrated on the calibration split and frozen (rubric hash, schema hash, model, CLI version, flags). Held-out summaries are judged twice, and disagreement between trials makes a claim `unclear`.
+- **Trials and freezing.** The rubric is calibrated on the calibration split and frozen (rubric hash, schema hash, model, CLI version, flags). Held-out summaries are judged twice, and disagreement between trials makes a claim `unclear`. The published judge outputs came from the original rubric (`factuality/prompts/archive/judge_original.txt`), which treated honorifics as non-evidence; `judge.txt` now carries the gender-reference rule above, and a rerun under it needs a new freeze.
 - **Budget.** A file-locked ledger caps the calls at 1,000 and never re-sends a completed job. Calls stopped by a usage limit or sign-in failure can be re-sent after `judge-unblock`.
 
 ### Scoring (`factuality/metrics.py`)
 
-- **Matching.** Detector claims are matched to reference claims on overlapping summary spans. Differences in subject or fact-type labels on the same span count as convention differences, not errors.
+- **Matching.** Detector claims are matched to reference claims on overlapping summary spans. Differences in subject or fact-type labels on the same span count as convention differences, not errors; a sex term and a pronoun are the same dimension and never differ in type.
 - **Denominators.** Abstentions and unmatched reference claims count as misses. Detector claims the reference labels don't split out are reported separately and kept out of precision.
 - **Intervals.** 95% intervals come from 2,000 bootstrap resamples of whole dialogues.
 - **Reporting rules,** fixed before held-out scoring:

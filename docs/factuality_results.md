@@ -8,8 +8,8 @@ Reference labels are AI-drafted and human-reviewed: Claude Sonnet drafted them f
 
 Two summarizers, BioBART-large + LoRA and BART-base + LoRA, each summarize 100 validation dialogues. Two detectors look for factual errors in the summaries:
 
-- **Rule checker.** A deterministic checker for the patient's age, sex, pronouns, gender identity and race/ethnicity. A race claim with no race statement anywhere in the dialogue is flagged as a possible insertion.
-- **LLM judge.** Claude Sonnet 5.5 (`claude-sonnet-5-5`) runs in headless Claude Code with no tools beyond structured output, and no plugins, hooks or memory; an isolation probe checks this before every run. The judge sees only the dialogue, the text the summarizer could see, the requested section and the summary. It never sees rule output, the expected-fact plans, the model's identity or the construction labels.
+- **Rule checker.** A deterministic checker for the patient's age, gender reference (sex terms and pronouns), gender identity and race/ethnicity. A race claim with no race statement anywhere in the dialogue is flagged as a possible insertion.
+- **LLM judge.** Claude Sonnet 5.5 (`claude-sonnet-5-5`) runs in headless Claude Code with no tools beyond structured output, and no plugins, hooks or memory; an isolation probe checks this before every run. The judge sees only the dialogue, the text the summarizer could see, the requested section and the summary. It never sees rule output, the expected-fact plans, the model's identity or the construction labels. Its published outputs came from the original rubric, which didn't count gendered address as evidence for a sex term or pronoun; the current rubric does ([label revisions](label_revisions.md)).
 
 Both detectors are scored against the reference labels, built in three steps:
 
@@ -25,12 +25,10 @@ The status column follows reporting rules fixed before the held-out run. "Detect
 
 | Error type | Labelled positives | Judge precision (95% CI) | Judge recall (95% CI) | Rule checker recall | Status |
 |---|---:|---|---|---|---|
-| Expected fact omitted | 46 | 0.93 (0.81–1.00) | 0.87 (0.72–1.00) | not applicable | **judge detects omissions** |
+| Expected fact omitted | 45 | 0.98 (0.92–1.00) | 0.89 (0.74–1.00) | not applicable | **judge detects omissions** |
 | Unsupported claim | 16 | 0.82 (0.50–1.00) | 0.56 (0.32–0.91) | 0.00 | **judge screens for unsupported claims** |
 | Age contradiction | 3 | 3 of 3 found, 0 false | — | 0 of 3 | too few positives |
-| Sex-reference inconsistency | 4 | 3 of 4 found, 1 false | — | 0 of 4 | too few positives |
-| Sex contradiction | 1 | 0 of 1 | — | 0 of 1 | too few positives |
-| Pronoun contradiction | 0 | 1 false flag | — | — | no positives |
+| Gender-reference contradiction (sex term or pronoun) | 1 | 1 of 1 found, 0 false | — | 1 of 1 | too few positives |
 | Race contradiction or inserted race | 0 | none flagged | — | none flagged | no positives |
 
 - **The 3 held-out age contradictions are all relatives' ages**, such as a parent's age at death. The rule checker looks only at the patient's own age, so it can't catch them.
@@ -48,10 +46,12 @@ These rates use the 46 randomly sampled dialogues. The 4 dialogues added because
 
 | Summarizer | Patient demographic error | Contradicted claims | Unsupported claims | Expected facts omitted |
 |---|---|---|---|---|
-| BioBART-large + LoRA | 5 / 46 summaries = 11% (2–20%) | 18 / 226 = 8% (4–13%) | 8 / 226 = 4% (1–6%) | 40 / 139 = 29% (18–39%) |
-| BART-base + LoRA | 13 / 46 summaries = 28% (15–41%) | 30 / 232 = 13% (8–19%) | 19 / 232 = 8% (4–12%) | 46 / 148 = 31% (23–40%) |
+| BioBART-large + LoRA | 5 / 46 summaries = 11% (2–20%) | 18 / 228 = 8% (4–13%) | 8 / 228 = 4% (1–6%) | 39 / 137 = 28% (18–39%) |
+| BART-base + LoRA | 13 / 46 summaries = 28% (15–41%) | 30 / 231 = 13% (8–19%) | 19 / 231 = 8% (5–12%) | 46 / 148 = 31% (23–40%) |
 
-A patient demographic error is a contradicted or unsupported claim about the patient's age, sex, gender identity, pronouns or race/ethnicity. Claims about relatives aren't counted.
+A patient demographic error is a contradicted or unsupported claim about the patient's age, gender reference (sex term or pronoun), gender identity or race/ethnicity. Claims about relatives aren't counted.
+
+**Gender reference.** The summarizer sees only the dialogue, so a sex term or pronoun in its summary is checked against what the dialogue gives: an explicit statement, a pronoun that refers to the patient, or gendered address (sir, ma'am, miss, mister). A summary that follows that evidence is supported, one that conflicts with it is contradicted, and one that asserts a gender with no evidence at all is unsupported. Names and casual address ("bud") are not evidence, and cues that disagree leave the claim unclear. This measures consistency with the text, not the patient's actual sex or identity. The rule is applied the same way to every label ([label revisions](label_revisions.md)).
 
 **Output validity.** All 200 fine-tuned outputs are real summaries. Without an adapter, BART-base echoes its prompt and the dialogue in all 100 outputs, so it's reported as invalid output rather than scored for factuality.
 
@@ -81,7 +81,7 @@ Few dialogues meet the eligibility rules for the age and pronoun edits, so these
 
 ## Scope
 
-- **Labels.** Plans and labels are AI-drafted and human-reviewed. Claude Sonnet drafted them in a separate isolated session that sees only the labeling sheets, and one non-clinician human reviewer checked every item. The reviewer saw the drafts, so there is no independent second label, and the drafter and the LLM judge are both Claude models. The published files keep the reviewed labels, not the drafter's first output, so the rate of reviewer corrections is not reported. Relevance and claim-splitting decisions follow the [annotation guide](factuality_annotation_guide.md).
+- **Labels.** Plans and labels are AI-drafted and human-reviewed. Claude Sonnet drafted them in a separate isolated session that sees only the labeling sheets, and one non-clinician human reviewer checked every item. The reviewer saw the drafts, so there is no independent second label, and the drafter and the LLM judge are both Claude models. The published files keep the reviewed labels, not the drafter's first output, so the rate of reviewer corrections is not reported. Relevance and claim-splitting decisions follow the [annotation guide](factuality_annotation_guide.md). The labels were revised once, after review, to apply the gender-reference rule consistently: 8 revisions, and the demographic error rates did not move ([label revisions](label_revisions.md)).
 - **Calibration.** The judge rubric is revised once on the 30 calibration summaries, so calibration figures aren't independent estimates.
 - **Matching.** Two matching rules were settled while the held-out set was first scored: claims on the same span match across subject labels, and edited-dialogue summaries without the edited attribute aren't scored as judge misses. Without the first rule, age contradictions would read 0 of 3 and unsupported-claim recall 0.50.
 - **One judge family.** No second judge model family is run.

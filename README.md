@@ -100,10 +100,11 @@ The BART models I worked with kept getting patient demographics wrong. They cont
 - **Changing a patient's age exposes it directly.** When the dialogue's age was edited, BioBART-large followed the new age in 9 of 10 cases; BART-base + LoRA followed it in only 3.
 - **Race was never invented.** Across all 200 summaries, race only appeared when the dialogue stated it. When I added a race statement to 97 dialogues, both models usually left it out.
 - **Omissions are the biggest error overall.** Both models leave out about 30% of the facts a section should contain.
+- **Sex terms and pronouns are one dimension.** The summarizer sees only the dialogue, so "she" after the doctor says "ma'am" is consistent, and "he" is a contradiction. Gendered address, patient pronouns and explicit statements count as evidence; names and casual address don't. This measures consistency with the text, not the patient's actual sex or identity.
 
 | Summarizer           | Patient demographic error | Contradicted claims | Unsupported claims | Expected facts omitted |
 | -------------------- | ------------------------: | ------------------: | -----------------: | ---------------------: |
-| BioBART-large + LoRA |          11% of summaries |                  8% |                 4% |                    29% |
+| BioBART-large + LoRA |          11% of summaries |                  8% |                 4% |                    28% |
 | BART-base + LoRA     |          28% of summaries |                 13% |                 8% |                    31% |
 
 Claim and fact rates are per labelled claim or planned fact, on the same 46 dialogues ([intervals in the report](docs/factuality_results.md#summarizer-error-rates)). Without fine-tuning, BART-base only echoes its prompt, so it has no factuality row.
@@ -112,7 +113,7 @@ Claim and fact rates are per labelled claim or planned fact, on the same 46 dial
 
 1. **Write the answer key first.** For each dialogue, the facts its requested note section should contain are listed before any summary is seen. This defines what counts as an omission ([plan guide](docs/factuality_annotation_guide.md)).
 2. **Label every claim.** Each claim in 100 summaries is labelled supported, contradicted, unsupported or unclear, with the source model hidden. Claude Sonnet drafted the labels from the blind labeling sheets, and I (a non-clinician) checked every item against the dialogue.
-3. **Run two automatic detectors.** One is a rule checker for patient age, sex, pronouns and race. The other is an LLM judge (Claude Sonnet 5.5), isolated so it never sees the rule checker's answers, the reference labels or which model wrote the summary.
+3. **Run two automatic detectors.** One is a rule checker for patient age, gender reference (sex terms and pronouns) and race. The other is an LLM judge (Claude Sonnet 5.5), isolated so it never sees the rule checker's answers, the reference labels or which model wrote the summary.
 4. **Score the detectors against the reference labels.** Headline numbers use 35 held-out dialogues the judge was never tuned on, with confidence intervals from resampling whole dialogues.
 5. **Edit dialogues to create rare errors on purpose.** Demographic errors are too rare in real data to measure reliably, so I changed ages, swapped pronouns, and added or removed race statements, then checked whether the summaries followed.
 
@@ -120,7 +121,7 @@ Claim and fact rates are per labelled claim or planned fact, on the same 46 dial
 
 | Error type                       | Judge precision | Judge recall |
 | -------------------------------- | --------------: | -----------: |
-| Omitted facts (46 held-out)      |            0.93 |         0.87 |
+| Omitted facts (45 held-out)      |            0.98 |         0.89 |
 | Unsupported claims (16 held-out) |            0.82 |         0.56 |
 
 On the edited dialogues, the judge labelled the summary's demographic claim correctly in 100 of 101 cases.
